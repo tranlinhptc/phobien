@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xuất Biên bản Công tác Tự động</title>
-    <!-- Thư viện xử lý file Word trực tiếp trên trình duyệt -->
+    <!-- Thư viện xử lý file Word trực tiếp trên trình duyệt (Dùng bản chuẩn ổn định) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.4/pizzip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.2/docxtemplater.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -143,7 +143,7 @@
     <h2>Hệ thống Xuất Biên bản Công tác Tự động</h2>
     
     <div class="status-box">
-        ✅ Đang tải 
+        ✅ Đang tải template tự động từ GitHub (`template_bb1.docx` & `template_bb2.docx`)
     </div>
 
     <form id="bienBanForm">
@@ -421,13 +421,8 @@
             if (!response.ok) throw new Error(`Không tìm thấy file: ${templateUrl}. Hãy chắc chắn bạn đã tải file này lên GitHub!`);
             let content = await response.arrayBuffer();
 
-            // Tự động nhận diện biến PizZip hoặc PZip từ thư viện CDN
-            let ZipLib = window.PizZip || window.PZip;
-            if (!ZipLib) {
-                throw new Error("Thư viện nén PizZip chưa được tải thành công từ CDN!");
-            }
-
-            let zip = new ZipLib(content);
+            // Sử dụng PizZip trực tiếp không cần câu lệnh kiểm tra trung gian
+            let zip = new PizZip(content);
             let doc = new window.docxtemplater(zip, {
                 paragraphLoop: true,
                 linebreaks: true,
@@ -442,7 +437,7 @@
             saveAs(out, outputFilename);
         } catch (error) {
             console.error(error);
-            alert("Lỗi: " + error.message);
+            alert("Lỗi xử lý file Word: " + error.message);
         }
     }
 </script>
