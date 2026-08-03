@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xuất Biên bản Công tác Tự động</title>
-    <!-- Thư viện xử lý file Word trực tiếp trên trình duyệt (Dùng bản chuẩn ổn định) -->
+    <title>Xuất Biên bản Công tác - Tải Template từ máy</title>
+    <!-- Thư viện xử lý file Word trực tiếp trên trình duyệt -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.4/pizzip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.2/docxtemplater.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -40,6 +40,7 @@
         }
         input[type="text"],
         input[type="datetime-local"],
+        input[type="file"],
         select,
         textarea {
             width: 100%;
@@ -53,16 +54,12 @@
             resize: vertical;
             height: 80px;
         }
-        .status-box {
-            background: #e8f5e9;
-            border: 1px dashed #4caf50;
-            padding: 12px;
+        .template-box {
+            background: #fff8e1;
+            border: 1px dashed #ffa000;
+            padding: 15px;
             border-radius: 4px;
             margin-bottom: 20px;
-            color: #2e7d32;
-            font-size: 14px;
-            text-align: center;
-            font-weight: bold;
         }
         .group-container {
             display: flex;
@@ -140,10 +137,19 @@
 <body>
 
 <div class="container">
-    <h2>Hệ thống Xuất Biên bản Công tác Tự động</h2>
+    <h2>Hệ thống Xuất Biên bản Công tác</h2>
     
-    <div class="status-box">
-        ✅ Đang tải template tự động từ GitHub (`template_bb1.docx` & `template_bb2.docx`)
+    <!-- Khung tải file template từ máy -->
+    <div class="template-box">
+        <h4 style="margin-top:0; color:#d35400;">Chọn file Template Word từ máy của bạn (.docx)</h4>
+        <div class="form-group">
+            <label for="fileBB1">Chọn Template Biên bản 1:</label>
+            <input type="file" id="fileBB1" accept=".docx">
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+            <label for="fileBB2">Chọn Template Biên bản 2:</label>
+            <input type="file" id="fileBB2" accept=".docx">
+        </div>
     </div>
 
     <form id="bienBanForm">
@@ -329,55 +335,19 @@
     setupAutoTime('startBB1', 'endBB1', 30);
     setupAutoTime('startBB2', 'endBB2', 10);
 
-    async function xuatFileWord() {
+    function xuatFileWord() {
         const choice = document.getElementById('loaiBienBan').value;
         const noiDung = document.getElementById('noiDung').value;
         const diaDiem = document.getElementById('diaDiem').value;
-        const mode = document.getElementById('soLuongNhom').value;
 
         if (!noiDung || !diaDiem) {
             alert('Vui lòng nhập Nội dung và Địa điểm công tác!');
             return;
         }
 
-        let chiHuyChinh = "";
-        let danhSachThanhVien = [];
-
-        if (mode === '1') {
-            chiHuyChinh = document.getElementById('chiHuyChung').value;
-            if (!chiHuyChinh) { alert('Vui lòng chọn Chỉ huy!'); return; }
-            danhSachThanhVien.push({ stt: 1, ho_ten: chiHuyChinh, nhiem_vu: noiDung });
-            
-            let i = 2;
-            document.querySelectorAll('input[name="nhanVienChung"]:checked').forEach(cb => {
-                danhSachThanhVien.push({ stt: i++, ho_ten: cb.value, nhiem_vu: noiDung });
-            });
-        } else {
-            let ch1 = document.getElementById('chiHuy1').value;
-            let ch2 = document.getElementById('chiHuy2').value;
-            chiHuyChinh = ch1 || ch2;
-            if (!ch1 && !ch2) { alert('Vui lòng chọn ít nhất một Chỉ huy nhóm!'); return; }
-
-            let i = 1;
-            if (ch1) danhSachThanhVien.push({ stt: i++, ho_ten: ch1, nhiem_vu: noiDung });
-            document.querySelectorAll('input[name="nhanVien1"]:checked').forEach(cb => {
-                danhSachThanhVien.push({ stt: i++, ho_ten: cb.value, nhiem_vu: noiDung });
-            });
-            if (ch2) danhSachThanhVien.push({ stt: i++, ho_ten: ch2, nhiem_vu: noiDung });
-            document.querySelectorAll('input[name="nhanVien2"]:checked').forEach(cb => {
-                danhSachThanhVien.push({ stt: i++, ho_ten: cb.value, nhiem_vu: noiDung });
-            });
-        }
-
-        let tongSo = danhSachThanhVien.length;
-
         const dataContext = {
-            nguoi_chu_tri: chiHuyChinh,
-            tong_so_tham_gia: `${tongSo}/${tongSo}`,
-            tong_so_vang: "Vắng 00",
             noi_dung_cong_tac: noiDung,
-            pham_vi_lam_viec: diaDiem,
-            danh_sach_nhan_vien: danhSachThanhVien
+            dia_diem_cong_tac: diaDiem
         };
 
         // Xử lý Biên bản 1
@@ -389,7 +359,7 @@
             dataContext.thoi_gian_bat_dau = formatDateTime(start);
             dataContext.thoi_gian_ket_thuc = formatDateTime(end);
 
-            await fetchAndProcessDocx('template_bb1.docx', dataContext, 'Bien_Ban_1_Hoan_Chinh.docx');
+            processDocxFromFileInput('fileBB1', dataContext, 'Bien_Ban_1_Hoan_Chinh.docx');
         }
 
         // Xử lý Biên bản 2
@@ -401,7 +371,7 @@
             dataContext.thoi_gian_bat_dau = formatDateTime(start);
             dataContext.thoi_gian_ket_thuc = formatDateTime(end);
 
-            await fetchAndProcessDocx('template_bb2.docx', dataContext, 'Bien_Ban_2_Hoan_Chinh.docx');
+            processDocxFromFileInput('fileBB2', dataContext, 'Bien_Ban_2_Hoan_Chinh.docx');
         }
     }
 
@@ -415,30 +385,36 @@
         return `Vào lúc ${hh} giờ ${min} ngày ${dd}/${mm}/${yyyy}`;
     }
 
-    async function fetchAndProcessDocx(templateUrl, data, outputFilename) {
-        try {
-            let response = await fetch(templateUrl + '?v=' + new Date().getTime());
-            if (!response.ok) throw new Error(`Không tìm thấy file: ${templateUrl}. Hãy chắc chắn bạn đã tải file này lên GitHub!`);
-            let content = await response.arrayBuffer();
-
-            // Sử dụng PizZip trực tiếp không cần câu lệnh kiểm tra trung gian
-            let zip = new PizZip(content);
-            let doc = new window.docxtemplater(zip, {
-                paragraphLoop: true,
-                linebreaks: true,
-            });
-
-            doc.render(data);
-
-            let out = doc.getZip().generate({
-                type: "blob",
-                mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            });
-            saveAs(out, outputFilename);
-        } catch (error) {
-            console.error(error);
-            alert("Lỗi xử lý file Word: " + error.message);
+    function processDocxFromFileInput(fileInputId, data, outputFilename) {
+        const fileInput = document.getElementById(fileInputId);
+        if (!fileInput.files || fileInput.files.length === 0) {
+            alert(`Vui lòng chọn file template cho ${fileInputId === 'fileBB1' ? 'Biên bản 1' : 'Biên bản 2'}!`);
+            return;
         }
+
+        const reader = new FileReader();
+        reader.readAsBinaryString(fileInput.files[0]);
+        reader.onload = function(evt) {
+            try {
+                let content = evt.target.result;
+                let zip = new PizZip(content);
+                let doc = new window.docxtemplater(zip, {
+                    paragraphLoop: true,
+                    linebreaks: true,
+                });
+
+                doc.render(data);
+
+                let out = doc.getZip().generate({
+                    type: "blob",
+                    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                });
+                saveAs(out, outputFilename);
+            } catch (error) {
+                console.error(error);
+                alert("Lỗi xử lý file Word: " + error.message);
+            }
+        };
     }
 </script>
 
