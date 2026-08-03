@@ -142,6 +142,10 @@
 <div class="container">
     <h2>Hệ thống Xuất Biên bản Công tác Tự động</h2>
     
+    <div class="status-box">
+        ✅ Đang tải template tự động từ GitHub (`template_bb1.docx` & `template_bb2.docx`)
+    </div>
+
     <form id="bienBanForm">
         
         <!-- Chọn loại biên bản muốn xuất -->
@@ -325,7 +329,6 @@
     setupAutoTime('startBB1', 'endBB1', 30);
     setupAutoTime('startBB2', 'endBB2', 10);
 
-    // Hàm tải file template tự động từ GitHub và điền dữ liệu
     async function xuatFileWord() {
         const choice = document.getElementById('loaiBienBan').value;
         const noiDung = document.getElementById('noiDung').value;
@@ -414,11 +417,12 @@
 
     async function fetchAndProcessDocx(templateUrl, data, outputFilename) {
         try {
-            let response = await fetch(templateUrl);
-            if (!response.ok) throw new Error(`Không tìm thấy file template: ${templateUrl}`);
+            let response = await fetch(templateUrl + '?v=' + new Date().getTime());
+            if (!response.ok) throw new Error(`Không tìm thấy file: ${templateUrl}. Hãy chắc chắn bạn đã tải file này lên GitHub!`);
             let content = await response.arrayBuffer();
 
-            let zip = new PZip(content);
+            // Sửa lại dùng đúng tên biến chuẩn PizZip (chữ z thường)
+            let zip = new PizZip(content);
             let doc = new window.docxtemplater(zip, {
                 paragraphLoop: true,
                 linebreaks: true,
@@ -433,7 +437,7 @@
             saveAs(out, outputFilename);
         } catch (error) {
             console.error(error);
-            alert("Lỗi: " + error.message + "\nHãy đảm bảo bạn đã đặt file template cùng thư mục trên GitHub!");
+            alert("Lỗi: " + error.message);
         }
     }
 </script>
