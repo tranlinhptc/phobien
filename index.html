@@ -143,7 +143,7 @@
     <h2>Hệ thống Xuất Biên bản Công tác Tự động</h2>
     
     <div class="status-box">
-        ✅ Đang tải template tự động từ
+        ✅ Đang tải 
     </div>
 
     <form id="bienBanForm">
@@ -421,8 +421,13 @@
             if (!response.ok) throw new Error(`Không tìm thấy file: ${templateUrl}. Hãy chắc chắn bạn đã tải file này lên GitHub!`);
             let content = await response.arrayBuffer();
 
-            // Sửa lại dùng đúng tên biến chuẩn PizZip (chữ z thường)
-            let zip = new PizZip(content);
+            // Tự động nhận diện biến PizZip hoặc PZip từ thư viện CDN
+            let ZipLib = window.PizZip || window.PZip;
+            if (!ZipLib) {
+                throw new Error("Thư viện nén PizZip chưa được tải thành công từ CDN!");
+            }
+
+            let zip = new ZipLib(content);
             let doc = new window.docxtemplater(zip, {
                 paragraphLoop: true,
                 linebreaks: true,
