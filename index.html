@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý và Xuất Biên bản Công tác</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 750px;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin: auto;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        input[type="text"],
+        input[type="datetime-local"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        textarea {
+            resize: vertical;
+            height: 80px;
+        }
+        .group-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        .group-box {
+            flex: 1;
+            border: 1px solid #ccc;
+            padding: 12px;
+            border-radius: 4px;
+            background: #fafafa;
+            display: none; /* Mặc định ẩn nhóm 2 */
+        }
+        .group-box.active {
+            display: block;
+        }
+        .group-box h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #007bff;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .checkbox-group {
+            max-height: 140px;
+            overflow-y: auto;
+        }
+        .checkbox-item {
+            margin-bottom: 6px;
+        }
+        .checkbox-item label {
+            font-weight: normal;
+            display: inline;
+            margin-left: 6px;
+            cursor: pointer;
+        }
+        .stats-box {
+            background: #eef9ff;
+            border: 1px dashed #007bff;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #0056b3;
+            font-weight: bold;
+        }
+        .time-box {
+            background: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            margin-bottom: 15px;
+            border-radius: 0 4px 4px 0;
+            display: none;
+        }
+        .time-box.active {
+            display: block;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Hệ thống Xuất Biên bản Công tác</h2>
+    <form id="bienBanForm">
+        
+        <!-- Chọn loại biên bản muốn xuất -->
+        <div class="form-group">
+            <label for="loaiBienBan">Chọn loại biên bản cần thao tác:</label>
+            <select id="loaiBienBan" onchange="toggleBienBanSections()" required>
+                <option value="both">Xuất cả Biên bản 1 và Biên bản 2</option>
+                <option value="bb1">Chỉ xuất Biên bản 1</option>
+                <option value="bb2">Chỉ xuất Biên bản 2</option>
+            </select>
+        </div>
+
+        <!-- Chọn số lượng nhóm -->
+        <div class="form-group">
+            <label for="soLuongNhom">Phân chia nhóm công tác:</label>
+            <select id="soLuongNhom" onchange="toggleGroupMode()" required>
+                <option value="1">01 Nhóm chung</option>
+                <option value="2">02 Nhóm riêng biệt</option>
+            </select>
+        </div>
+
+        <!-- KHU VỰC 1 NHÓM -->
+        <div id="singleGroupSection">
+            <div class="form-group">
+                <label for="chiHuyChung">Chọn Chỉ huy (Chỉ chọn 01):</label>
+                <select id="chiHuyChung" onchange="updateMemberCount()">
+                    <option value="">-- Chọn ông chỉ huy --</option>
+                    <option value="Nguyễn Văn A">Nguyễn Văn A</option>
+                    <option value="Trần Văn B">Trần Văn B</option>
+                    <option value="Lê Văn C">Lê Văn C</option>
+                    <option value="Phạm Văn D">Phạm Văn D</option>
+                    <option value="Hoàng Văn E">Hoàng Văn E</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Chọn Nhân viên tham gia (10 nhân viên):</label>
+                <div class="checkbox-group" style="border: 1px solid #ccc; padding: 10px; border-radius: 4px; background: #fafafa;">
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Nhân viên 1" onchange="updateMemberCount()"> <label>Nhân viên 1</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Nhân viên 2" onchange="updateMemberCount()"> <label>Nhân viên 2</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Nhân viên 3" onchange="updateMemberCount()"> <label>Nhân viên 3</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Nhân viên 4" onchange="updateMemberCount()"> <label>Nhân viên 4</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Nhân viên 5" onchange="updateMemberCount()"> <label>Nhân viên 5</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Nhân viên 6" onchange="updateMemberCount()"> <label>Nhân viên 6</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Nhân viên 7" onchange="updateMemberCount()"> <label>Nhân viên 7</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Nhân viên 8" onchange="updateMemberCount()"> <label>Nhân viên 8</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Nhân viên 9" onchange="updateMemberCount()"> <label>Nhân viên 9</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Nhân viên 10" onchange="updateMemberCount()"> <label>Nhân viên 10</label></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KHU VỰC 2 NHÓM -->
+        <div id="dualGroupSection" style="display: none;">
+            <div class="group-container">
+                <!-- Nhóm 1 -->
+                <div class="group-box active" style="display: block;">
+                    <h4>Nhóm 1</h4>
+                    <div class="form-group" style="margin-bottom: 10px;">
+                        <label for="chiHuy1" style="font-size: 13px;">Chỉ huy Nhóm 1:</label>
+                        <select id="chiHuy1" onchange="updateMemberCount()">
+                            <option value="">-- Chọn chỉ huy 1 --</option>
+                            <option value="Nguyễn Văn A">Nguyễn Văn A</option>
+                            <option value="Trần Văn B">Trần Văn B</option>
+                            <option value="Lê Văn C">Lê Văn C</option>
+                            <option value="Phạm Văn D">Phạm Văn D</option>
+                            <option value="Hoàng Văn E">Hoàng Văn E</option>
+                        </select>
+                    </div>
+                    <label style="font-size: 13px;">Nhân viên Nhóm 1:</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 1" onchange="updateMemberCount()"> <label>Nhân viên 1</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 2" onchange="updateMemberCount()"> <label>Nhân viên 2</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 3" onchange="updateMemberCount()"> <label>Nhân viên 3</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 4" onchange="updateMemberCount()"> <label>Nhân viên 4</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 5" onchange="updateMemberCount()"> <label>Nhân viên 5</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 6" onchange="updateMemberCount()"> <label>Nhân viên 6</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 7" onchange="updateMemberCount()"> <label>Nhân viên 7</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 8" onchange="updateMemberCount()"> <label>Nhân viên 8</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 9" onchange="updateMemberCount()"> <label>Nhân viên 9</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 10" onchange="updateMemberCount()"> <label>Nhân viên 10</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 11" onchange="updateMemberCount()"> <label>Nhân viên 11</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 12" onchange="updateMemberCount()"> <label>Nhân viên 12</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 13" onchange="updateMemberCount()"> <label>Nhân viên 13</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 14" onchange="updateMemberCount()"> <label>Nhân viên 14</label></div>
+
+                    </div>
+                </div>
+                <!-- Nhóm 2 -->
+                <div class="group-box active" style="display: block;">
+                    <h4>Nhóm 2</h4>
+                    <div class="form-group" style="margin-bottom: 10px;">
+                        <label for="chiHuy2" style="font-size: 13px;">Chỉ huy Nhóm 2:</label>
+                        <select id="chiHuy2" onchange="updateMemberCount()">
+                            <option value="">-- Chọn chỉ huy 2 --</option>
+                            <option value="Nguyễn Văn A">Nguyễn Văn A</option>
+                            <option value="Trần Văn B">Trần Văn B</option>
+                            <option value="Lê Văn C">Lê Văn C</option>
+                            <option value="Phạm Văn D">Phạm Văn D</option>
+                            <option value="Hoàng Văn E">Hoàng Văn E</option>
+                        </select>
+                    </div>
+                    <label style="font-size: 13px;">Nhân viên Nhóm 2:</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 1" onchange="updateMemberCount()"> <label>Nhân viên 1</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 2" onchange="updateMemberCount()"> <label>Nhân viên 2</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 3" onchange="updateMemberCount()"> <label>Nhân viên 3</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 4" onchange="updateMemberCount()"> <label>Nhân viên 4</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 5" onchange="updateMemberCount()"> <label>Nhân viên 5</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 6" onchange="updateMemberCount()"> <label>Nhân viên 6</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 7" onchange="updateMemberCount()"> <label>Nhân viên 7</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 8" onchange="updateMemberCount()"> <label>Nhân viên 8</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 9" onchange="updateMemberCount()"> <label>Nhân viên 9</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 10" onchange="updateMemberCount()"> <label>Nhân viên 10</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 11" onchange="updateMemberCount()"> <label>Nhân viên 11</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 12" onchange="updateMemberCount()"> <label>Nhân viên 12</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 13" onchange="updateMemberCount()"> <label>Nhân viên 13</label></div>
+                        <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nhân viên 14" onchange="updateMemberCount()"> <label>Nhân viên 14</label></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thống kê tổng số người -->
+        <div class="stats-box" id="statsBox">
+            Tổng số thành viên tham gia: 0 người
+        </div>
+
+        <!-- Biên bản 1 -->
+        <div id="sectionBB1" class="time-box active">
+            <label><strong>Biên bản 1 (+30 phút)</strong></label>
+            <div class="form-group" style="margin-top: 10px;">
+                <label for="startBB1">Ngày bắt đầu Biên bản 1:</label>
+                <input type="datetime-local" id="startBB1">
+            </div>
+            <div class="form-group">
+                <label for="endBB1">Ngày kết thúc Biên bản 1 (Tự động +30 phút):</label>
+                <input type="datetime-local" id="endBB1" readonly style="background-color: #e9ecef;">
+            </div>
+        </div>
+
+        <!-- Biên bản 2 -->
+        <div id="sectionBB2" class="time-box active" style="border-left-color: #28a745;">
+            <label><strong>Biên bản 2 (+10 phút)</strong></label>
+            <div class="form-group" style="margin-top: 10px;">
+                <label for="startBB2">Ngày bắt đầu Biên bản 2:</label>
+                <input type="datetime-local" id="startBB2">
+            </div>
+            <div class="form-group">
+                <label for="endBB2">Ngày kết thúc Biên bản 2 (Tự động +10 phút):</label>
+                <input type="datetime-local" id="endBB2" readonly style="background-color: #e9ecef;">
+            </div>
+        </div>
+
+        <!-- Nội dung và Địa điểm -->
+        <div class="form-group">
+            <label for="noiDung">Nội dung công tác:</label>
+            <textarea id="noiDung" required placeholder="Nhập nội dung công tác..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="diaDiem">Địa điểm công tác:</label>
+            <input type="text" id="diaDiem" required placeholder="Nhập địa điểm công tác...">
+        </div>
+
+        <button type="button" onclick="xuatDuLieu()">Tiến hành Xuất Dữ Liệu</button>
+    </form>
+</div>
+
+<script>
+    // Chuyển đổi giao diện giữa 1 nhóm và 2 nhóm
+    function toggleGroupMode() {
+        const mode = document.getElementById('soLuongNhom').value;
+        const singleSec = document.getElementById('singleGroupSection');
+        const dualSec = document.getElementById('dualGroupSection');
+
+        if (mode === '1') {
+            singleSec.style.display = 'block';
+            dualSec.style.display = 'none';
+        } else {
+            singleSec.style.display = 'none';
+            dualSec.style.display = 'block';
+        }
+        updateMemberCount();
+    }
+
+    // Cập nhật đếm số lượng thành viên
+    function updateMemberCount() {
+        const mode = document.getElementById('soLuongNhom').value;
+        let total = 0;
+        let details = "";
+
+        if (mode === '1') {
+            const chiHuy = document.getElementById('chiHuyChung').value;
+            const checkboxes = document.querySelectorAll('input[name="nhanVienChung"]:checked');
+            let cH = chiHuy ? 1 : 0;
+            let cNV = checkboxes.length;
+            total = cH + cNV;
+            details = `${total} người (${cH} Chỉ huy + ${cNV} Nhân viên)`;
+        } else {
+            const chiHuy1 = document.getElementById('chiHuy1').value;
+            const chiHuy2 = document.getElementById('chiHuy2').value;
+            const cb1 = document.querySelectorAll('input[name="nhanVien1"]:checked');
+            const cb2 = document.querySelectorAll('input[name="nhanVien2"]:checked');
+            
+            let cH = (chiHuy1 ? 1 : 0) + (chiHuy2 ? 1 : 0);
+            let cNV = cb1.length + cb2.length;
+            total = cH + cNV;
+            details = `${total} người (${cH} Chỉ huy + ${cNV} Nhân viên)`;
+        }
+
+        document.getElementById('statsBox').innerText = `Tổng số thành viên tham gia: ${details}`;
+    }
+
+    // Ẩn hiện khung thời gian biên bản
+    function toggleBienBanSections() {
+        const choice = document.getElementById('loaiBienBan').value;
+        const sec1 = document.getElementById('sectionBB1');
+        const sec2 = document.getElementById('sectionBB2');
+        const startBB1 = document.getElementById('startBB1');
+        const startBB2 = document.getElementById('startBB2');
+
+        if (choice === 'both') {
+            sec1.classList.add('active');
+            sec2.classList.add('active');
+            startBB1.required = true;
+            startBB2.required = true;
+        } else if (choice === 'bb1') {
+            sec1.classList.add('active');
+            sec2.classList.remove('active');
+            startBB1.required = true;
+            startBB2.required = false;
+        } else if (choice === 'bb2') {
+            sec1.classList.remove('active');
+            sec2.classList.add('active');
+            startBB1.required = false;
+            startBB2.required = true;
+        }
+    }
+
+    // Tự động cộng phút thời gian kết thúc
+    function setupAutoTime(startId, endId, minutesToAdd) {
+        const startInput = document.getElementById(startId);
+        const endInput = document.getElementById(endId);
+
+        startInput.addEventListener('change', function() {
+            if (startInput.value) {
+                let startDate = new Date(startInput.value);
+                startDate.setMinutes(startDate.getMinutes() + minutesToAdd);
+                
+                let year = startDate.getFullYear();
+                let month = String(startDate.getMonth() + 1).padStart(2, '0');
+                let day = String(startDate.getDate()).padStart(2, '0');
+                let hours = String(startDate.getHours()).padStart(2, '0');
+                let minutes = String(startDate.getMinutes()).padStart(2, '0');
+
+                endInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+            } else {
+                endInput.value = '';
+            }
+        });
+    }
+
+    setupAutoTime('startBB1', 'endBB1', 30);
+    setupAutoTime('startBB2', 'endBB2', 10);
+
+    // Xuất dữ liệu
+    function xuatDuLieu() {
+        const choice = document.getElementById('loaiBienBan').value;
+        const mode = document.getElementById('soLuongNhom').value;
+        const noiDung = document.getElementById('noiDung').value;
+        const diaDiem = document.getElementById('diaDiem').value;
+        
+        if (!noiDung || !diaDiem) {
+            alert('Vui lòng điền đầy đủ Nội dung và Địa điểm!');
+            return;
+        }
+
+        let ketQuaText = `--- KẾT QUẢ XUẤT DỮ LIỆU ---\n`;
+        ketQuaText += `- Loại biên bản: ${document.getElementById('loaiBienBan').options[document.getElementById('loaiBienBan').selectedIndex].text}\n`;
+        ketQuaText += `- Mô hình: ${mode === '1' ? '01 Nhóm chung' : '02 Nhóm riêng biệt'}\n`;
+
+        let totalMembers = 0;
+        let dsKyTen = [];
+
+        if (mode === '1') {
+            const chiHuy = document.getElementById('chiHuyChung').value;
+            const checkboxes = document.querySelectorAll('input[name="nhanVienChung"]:checked');
+            let danhSachNhanVien = [];
+            checkboxes.forEach(cb => danhSachNhanVien.push(cb.value));
+
+            if (!chiHuy) { alert('Vui lòng chọn Chỉ huy!'); return; }
+            
+            totalMembers = 1 + danhSachNhanVien.length;
+            ketQuaText += `- Chỉ huy: ${chiHuy}\n`;
+            ketQuaText += `- Nhân viên tham gia: ${danhSachNhanVien.length > 0 ? danhSachNhanVien.join(', ') : 'Không có'}\n`;
+            
+            dsKyTen.push(`  + Ký tên ................ (Chỉ huy: ${chiHuy})`);
+            danhSachNhanVien.forEach(nv => {
+                dsKyTen.push(`  + Ký tên ................ (Nhân viên: ${nv})`);
+            });
+        } else {
+            const chiHuy1 = document.getElementById('chiHuy1').value;
+            const chiHuy2 = document.getElementById('chiHuy2').value;
+            const cb1 = document.querySelectorAll('input[name="nhanVien1"]:checked');
+            const cb2 = document.querySelectorAll('input[name="nhanVien2"]:checked');
+            
+            let dsNV1 = [], dsNV2 = [];
+            cb1.forEach(cb => dsNV1.push(cb.value));
+            cb2.forEach(cb => dsNV2.push(cb.value));
+
+            if (!chiHuy1 && !chiHuy2) { alert('Vui lòng chọn ít nhất một Chỉ huy cho nhóm!'); return; }
+
+            let countCH = (chiHuy1 ? 1 : 0) + (chiHuy2 ? 1 : 0);
+            totalMembers = countCH + dsNV1.length + dsNV2.length;
+
+            ketQuaText += `[NHÓM 1]\n  - Chỉ huy 1: ${chiHuy1 || 'Không có'}\n  - Nhân viên 1: ${dsNV1.length > 0 ? dsNV1.join(', ') : 'Không có'}\n`;
+            ketQuaText += `[NHÓM 2]\n  - Chỉ huy 2: ${chiHuy2 || 'Không có'}\n  - Nhân viên 2: ${dsNV2.length > 0 ? dsNV2.join(', ') : 'Không có'}\n`;
+
+            if (chiHuy1) dsKyTen.push(`  + Ký tên ................ (Chỉ huy Nhóm 1: ${chiHuy1})`);
+            dsNV1.forEach(nv => dsKyTen.push(`  + Ký tên ................ (Nhân viên Nhóm 1: ${nv})`));
+            
+            if (chiHuy2) dsKyTen.push(`  + Ký tên ................ (Chỉ huy Nhóm 2: ${chiHuy2})`);
+            dsNV2.forEach(nv => dsKyTen.push(`  + Ký tên ................ (Nhân viên Nhóm 2: ${nv})`));
+        }
+
+        ketQuaText += `- Tổng số thành viên: ${totalMembers} người\n`;
+
+        if (choice === 'both' || choice === 'bb1') {
+            const startBB1 = document.getElementById('startBB1').value;
+            const endBB1 = document.getElementById('endBB1').value;
+            if (!startBB1) { alert('Vui lòng nhập thời gian cho Biên bản 1'); return; }
+            ketQuaText += `\n[BIÊN BẢN 1]\n- Bắt đầu: ${startBB1.replace('T', ' ')}\n- Kết thúc: ${endBB1.replace('T', ' ')}\n`;
+        }
+
+        if (choice === 'both' || choice === 'bb2') {
+            const startBB2 = document.getElementById('startBB2').value;
+            const endBB2 = document.getElementById('endBB2').value;
+            if (!startBB2) { alert('Vui lòng nhập thời gian cho Biên bản 2'); return; }
+            
+            ketQuaText += `\n[BIÊN BẢN 2]\n- Bắt đầu: ${startBB2.replace('T', ' ')}\n- Kết thúc: ${endBB2.replace('T', ' ')}\n`;
+            ketQuaText += `- Danh sách ký tên (${totalMembers} dòng):\n`;
+            ketQuaText += dsKyTen.join('\n') + `\n`;
+        }
+
+        ketQuaText += `\n- Nội dung: ${noiDung}\n- Địa điểm: ${diaDiem}`;
+        
+        alert(ketQuaText);
+        console.log(ketQuaText);
+    }
+</script>
+
+</body>
+</html>
