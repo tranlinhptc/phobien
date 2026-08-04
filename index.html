@@ -255,10 +255,8 @@
                 <label for="startBB1">Ngày bắt đầu Biên bản 1:</label>
                 <input type="datetime-local" id="startBB1">
             </div>
-            <div class="form-group">
-                <label for="endBB1">Ngày kết thúc Biên bản 1:</label>
-                <input type="datetime-local" id="endBB1" readonly style="background-color: #e9ecef;">
-            </div>
+            <!-- Đã đổi thành type="hidden" để ẩn trên giao diện nhưng vẫn chạy ngầm -->
+            <input type="hidden" id="endBB1">
         </div>
 
         <!-- Biên bản 2 -->
@@ -268,10 +266,8 @@
                 <label for="startBB2">Ngày bắt đầu Biên bản 2:</label>
                 <input type="datetime-local" id="startBB2">
             </div>
-            <div class="form-group">
-                <label for="endBB2">Ngày kết thúc Biên bản 2:</label>
-                <input type="datetime-local" id="endBB2" readonly style="background-color: #e9ecef;">
-            </div>
+            <!-- Đã đổi thành type="hidden" để ẩn trên giao diện nhưng vẫn chạy ngầm -->
+            <input type="hidden" id="endBB2">
         </div>
 
         <!-- Nội dung và Địa điểm -->
@@ -393,7 +389,7 @@
             if (!start) { alert('Vui lòng nhập thời gian Biên bản 1'); return; }
             dataContext.thoi_gian_bat_dau = formatDateTime(start);
             dataContext.thoi_gian_ket_thuc = formatDateTime(end);
-            processDocxFromFileInput('fileBB1', dataContext, 'Phobien PATC.docx');
+            processDocxFromFileInput('fileBB1', dataContext, 'Pho bien PATC.docx');
         }
 
         if (choice === 'both' || choice === 'bb2') {
