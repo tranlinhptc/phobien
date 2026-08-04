@@ -132,165 +132,153 @@
 </head>
 <body>
 
-        <!-- Chọn số lượng nhóm -->
+<div class="container">
+    <!-- Chọn số lượng nhóm -->
+    <div class="form-group">
+        <label for="soLuongNhom">Số nhóm công tác</label>
+        <select id="soLuongNhom" onchange="toggleGroupMode()" required>
+            <option value="1">01 Nhóm</option>
+            <option value="2">02 Nhóm</option>
+        </select>
+    </div>
+
+    <!-- KHU VỰC 1 NHÓM -->
+    <div id="singleGroupSection">
         <div class="form-group">
-            <label for="soLuongNhom">Số nhóm công tác</label>
-            <select id="soLuongNhom" onchange="toggleGroupMode()" required>
-                <option value="1">01 Nhóm</option>
-                <option value="2">02 Nhóm</option>
+            <label for="chiHuyChung">Chọn chỉ huy:</label>
+            <select id="chiHuyChung" onchange="updateMemberCount()">
+                <option value="Trần Văn Hoàng">A.Hoàng</option>
+                <option value="Nguyễn Hữu Kính">A.Kính</option>
+                <option value="Kim Văn Quỳnh">A.Quỳnh</option>
+                <option value="Hồ Văn Huy">A.Huy</option>
+                <option value="Hoàng Trần Quản Trọng">A.Trọng</option>
             </select>
         </div>
-
-        <!-- KHU VỰC 1 NHÓM -->
-        <div id="singleGroupSection">
-            <div class="form-group">
-                <label for="chiHuyChung">Chọn chỉ huy:</label>
-                <select id="chiHuyChung" onchange="updateMemberCount()">
-                    <option value="Trần Văn Hoàng">A.Hoàng</option>
-                    <option value="Nguyễn Hữu Kính">A.Kính</option>
-                    <option value="Kim Văn Quỳnh">A.Quỳnh</option>
-                    <option value="Hồ Văn Huy">A.Huy</option>
-                    <option value="Hoàng Trần Quản Trọng">A.Trọng</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Chọn Nhân viên tham gia:</label>
-                <div class="checkbox-group" style="border: 1px solid #ccc; padding: 10px; border-radius: 4px; background: #fafafa;">
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Nguyễn Hữu Kính" onchange="updateMemberCount()"> <label>A.Kính</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Hoàng Trần Quản Trọng" onchange="updateMemberCount()"> <label>A.Trọng</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Trần Văn Hoàng" onchange="updateMemberCount()"> <label>A.Hoàng</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Kim Văn Quỳnh" onchange="updateMemberCount()"> <label>A.Quỳnh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Hồ Văn Huy" onchange="updateMemberCount()"> <label>A.Huy</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Lê Hữu Anh" onchange="updateMemberCount()"> <label>A.Anh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Trần Phúc Linh" onchange="updateMemberCount()"> <label>A.Linh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Tạ Quốc Đạt" onchange="updateMemberCount()"> <label>A.Đạt</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Ngô Văn Quang" onchange="updateMemberCount()"> <label>A.Quang</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Võ Ngọc Sơn" onchange="updateMemberCount()"> <label>A.Sơn</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Nguyễn Xuân Khánh" onchange="updateMemberCount()"> <label>A.Khánh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Đoàn Hoàng Quang Định" onchange="updateMemberCount()"> <label>A.Định</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Võ Văn Sỹ" onchange="updateMemberCount()"> <label>A.Sỹ</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Lưu Đức Minh" onchange="updateMemberCount()"> <label>A.Minh</label></div>
-                </div>
+        <div class="form-group">
+            <label>Chọn Nhân viên tham gia:</label>
+            <div class="checkbox-group" style="border: 1px solid #ccc; padding: 10px; border-radius: 4px; background: #fafafa;">
+                <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Nguyễn Hữu Kính" onchange="updateMemberCount()"> <label>A.Kính</label></div>
+                <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Hoàng Trần Quản Trọng" onchange="updateMemberCount()"> <label>A.Trọng</label></div>
+                <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Trần Văn Hoàng" onchange="updateMemberCount()"> <label>A.Hoàng</label></div>
+                <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Kim Văn Quỳnh" onchange="updateMemberCount()"> <label>A.Quỳnh</label></div>
+                <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Hồ Văn Huy" onchange="updateMemberCount()"> <label>A.Huy</label></div>
+                <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Lê Hữu Anh" onchange="updateMemberCount()"> <label>A.Anh</label></div>
+                <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Trần Phúc Linh" onchange="updateMemberCount()"> <label>A.Linh</label></div>
+                <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Tạ Quốc Đạt" onchange="updateMemberCount()"> <label>A.Đạt</label></div>
+                <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Ngô Văn Quang" onchange="updateMemberCount()"> <label>A.Quang</label></div>
+                <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Võ Ngọc Sơn" onchange="updateMemberCount()"> <label>A.Sơn</label></div>
+                <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Nguyễn Xuân Khánh" onchange="updateMemberCount()"> <label>A.Khánh</label></div>
+                <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Đoàn Hoàng Quang Định" onchange="updateMemberCount()"> <label>A.Định</label></div>
+                <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Võ Văn Sỹ" onchange="updateMemberCount()"> <label>A.Sỹ</label></div>
+                <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Lưu Đức Minh" onchange="updateMemberCount()"> <label>A.Minh</label></div>
             </div>
         </div>
+    </div>
 
-        <!-- KHU VỰC 2 NHÓM -->
-        <div id="dualGroupSection" style="display: none;">
-            <div class="group-container">
-                <!-- Nhóm 1 -->
-                <div class="group-box">
-                    <h4>Nhóm 1</h4>
-                    <div class="form-group" style="margin-bottom: 10px;">
-                        <label for="chiHuy1" style="font-size: 13px;">Chỉ huy Nhóm 1:</label>
-                        <select id="chiHuy1" onchange="updateMemberCount()">
+    <!-- KHU VỰC 2 NHÓM -->
+    <div id="dualGroupSection" style="display: none;">
+        <div class="group-container">
+            <!-- Nhóm 1 -->
+            <div class="group-box">
+                <h4>Nhóm 1</h4>
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <label for="chiHuy1" style="font-size: 13px;">Chỉ huy Nhóm 1:</label>
+                    <select id="chiHuy1" onchange="updateMemberCount()">
                         <option value="Trần Văn Hoàng">A.Hoàng</option>
                         <option value="Nguyễn Hữu Kính">A.Kính</option>
                         <option value="Kim Văn Quỳnh">A.Quỳnh</option>
                         <option value="Hồ Văn Huy">A.Huy</option>
                         <option value="Hoàng Trần Quản Trọng">A.Trọng</option>
-                        </select>
-                    </div>
-                    <label style="font-size: 13px;">Nhân viên Nhóm 1:</label>
-                    <div class="checkbox-group">
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Hoàng Trần Quản Trọng" onchange="updateMemberCount()"> <label>A.Trọng</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Trần Văn Hoàng" onchange="updateMemberCount()"> <label>A.Hoàng</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Kim Văn Quỳnh" onchange="updateMemberCount()"> <label>A.Quỳnh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Hồ Văn Huy" onchange="updateMemberCount()"> <label>A.Huy</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Lê Hữu Anh" onchange="updateMemberCount()"> <label>A.Anh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Trần Phúc Linh" onchange="updateMemberCount()"> <label>A.Linh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Tạ Quốc Đạt" onchange="updateMemberCount()"> <label>A.Đạt</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Ngô Văn Quang" onchange="updateMemberCount()"> <label>A.Quang</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Võ Ngọc Sơn" onchange="updateMemberCount()"> <label>A.Sơn</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Nguyễn Xuân Khánh" onchange="updateMemberCount()"> <label>A.Khánh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Đoàn Hoàng Quang Định" onchange="updateMemberCount()"> <label>A.Định</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Võ Văn Sỹ" onchange="updateMemberCount()"> <label>A.Sỹ</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Lưu Đức Minh" onchange="updateMemberCount()"> <label>A.Minh</label></div>
-                    </div>
+                    </select>
                 </div>
-                <!-- Nhóm 2 -->
-                <div class="group-box">
-                    <h4>Nhóm 2</h4>
-                    <div class="form-group" style="margin-bottom: 10px;">
-                        <label for="chiHuy2" style="font-size: 13px;">Chỉ huy Nhóm 2:</label>
-                        <select id="chiHuy2" onchange="updateMemberCount()">
+                <label style="font-size: 13px;">Nhân viên Nhóm 1:</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Hoàng Trần Quản Trọng" onchange="updateMemberCount()"> <label>A.Trọng</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Trần Văn Hoàng" onchange="updateMemberCount()"> <label>A.Hoàng</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Kim Văn Quỳnh" onchange="updateMemberCount()"> <label>A.Quỳnh</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Hồ Văn Huy" onchange="updateMemberCount()"> <label>A.Huy</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Lê Hữu Anh" onchange="updateMemberCount()"> <label>A.Anh</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Trần Phúc Linh" onchange="updateMemberCount()"> <label>A.Linh</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Tạ Quốc Đạt" onchange="updateMemberCount()"> <label>A.Đạt</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Ngô Văn Quang" onchange="updateMemberCount()"> <label>A.Quang</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Võ Ngọc Sơn" onchange="updateMemberCount()"> <label>A.Sơn</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Nguyễn Xuân Khánh" onchange="updateMemberCount()"> <label>A.Khánh</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Đoàn Hoàng Quang Định" onchange="updateMemberCount()"> <label>A.Định</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Võ Văn Sỹ" onchange="updateMemberCount()"> <label>A.Sỹ</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Lưu Đức Minh" onchange="updateMemberCount()"> <label>A.Minh</label></div>
+                </div>
+            </div>
+            <!-- Nhóm 2 -->
+            <div class="group-box">
+                <h4>Nhóm 2</h4>
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <label for="chiHuy2" style="font-size: 13px;">Chỉ huy Nhóm 2:</label>
+                    <select id="chiHuy2" onchange="updateMemberCount()">
                         <option value="Trần Văn Hoàng">A.Hoàng</option>
                         <option value="Nguyễn Hữu Kính">A.Kính</option>
                         <option value="Kim Văn Quỳnh">A.Quỳnh</option>
                         <option value="Hồ Văn Huy">A.Huy</option>
                         <option value="Hoàng Trần Quản Trọng">A.Trọng</option>
-                        </select>
-                    </div>
-                    <label style="font-size: 13px;">Nhân viên Nhóm 2:</label>
-                    <div class="checkbox-group">
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Hoàng Trần Quản Trọng" onchange="updateMemberCount()"> <label>A.Trọng</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Trần Văn Hoàng" onchange="updateMemberCount()"> <label>A.Hoàng</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Kim Văn Quỳnh" onchange="updateMemberCount()"> <label>A.Quỳnh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Hồ Văn Huy" onchange="updateMemberCount()"> <label>A.Huy</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Lê Hữu Anh" onchange="updateMemberCount()"> <label>A.Anh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Trần Phúc Linh" onchange="updateMemberCount()"> <label>A.Linh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Tạ Quốc Đạt" onchange="updateMemberCount()"> <label>A.Đạt</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Ngô Văn Quang" onchange="updateMemberCount()"> <label>A.Quang</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Võ Ngọc Sơn" onchange="updateMemberCount()"> <label>A.Sơn</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Nguyễn Xuân Khánh" onchange="updateMemberCount()"> <label>A.Khánh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Đoàn Hoàng Quang Định" onchange="updateMemberCount()"> <label>A.Định</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Võ Văn Sỹ" onchange="updateMemberCount()"> <label>A.Sỹ</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Lưu Đức Minh" onchange="updateMemberCount()"> <label>A.Minh</label></div>
-                    </div>
+                    </select>
+                </div>
+                <label style="font-size: 13px;">Nhân viên Nhóm 2:</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien2" value="Hoàng Trần Quản Trọng" onchange="updateMemberCount()"> <label>A.Trọng</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien2" value="Trần Văn Hoàng" onchange="updateMemberCount()"> <label>A.Hoàng</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien2" value="Kim Văn Quỳnh" onchange="updateMemberCount()"> <label>A.Quỳnh</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien2" value="Hồ Văn Huy" onchange="updateMemberCount()"> <label>A.Huy</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien2" value="Lê Hữu Anh" onchange="updateMemberCount()"> <label>A.Anh</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien2" value="Trần Phúc Linh" onchange="updateMemberCount()"> <label>A.Linh</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien2" value="Tạ Quốc Đạt" onchange="updateMemberCount()"> <label>A.Đạt</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien2" value="Ngô Văn Quang" onchange="updateMemberCount()"> <label>A.Quang</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien2" value="Võ Ngọc Sơn" onchange="updateMemberCount()"> <label>A.Sơn</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien2" value="Nguyễn Xuân Khánh" onchange="updateMemberCount()"> <label>A.Khánh</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien2" value="Đoàn Hoàng Quang Định" onchange="updateMemberCount()"> <label>A.Định</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien2" value="Võ Văn Sỹ" onchange="updateMemberCount()"> <label>A.Sỹ</label></div>
+                    <div class="checkbox-item"><input type="checkbox" name="nhanVien2" value="Lưu Đức Minh" onchange="updateMemberCount()"> <label>A.Minh</label></div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Thống kê tổng số người -->
-        <div class="stats-box" id="statsBox">
-            Tổng số thành viên tham gia: 0 người
+    <!-- Thống kê tổng số người -->
+    <div class="stats-box" id="statsBox">
+        Tổng số thành viên tham gia: 0 người
+    </div>
+
+    <!-- Biên bản 1 -->
+    <div id="sectionBB1" class="time-box active">
+        <div class="form-group" style="margin-top: 10px;">
+            <input type="text" id="startBB1" placeholder="Chọn ngày tháng phổ biến PATC" 
+           onfocus="(this.type='datetime-local')" 
+           onblur="if(!this.value)this.type='text'" 
+           class="form-control">
         </div>
+        <input type="hidden" id="endBB1">
+    </div>
 
-        <!-- Biên bản 1 -->
-        <div id="sectionBB1" class="time-box active">
-            <!-- <label><strong>Thời gian Biên bản 1</strong></label> -->
-            <div class="form-group" style="margin-top: 10px;">
-                <!-- <label for="startBB1">Ngày bắt đầu Biên bản 1:</label> -->
-                <input type="text" id="startBB1" placeholder="Chọn ngày tháng phổ biến PATC" 
-               onfocus="(this.type='datetime-local')" 
-               onblur="if(!this.value)this.type='text'" 
-               class="form-control">
-            </div>
-            <input type="hidden" id="endBB1">
+    <!-- Biên bản 2 -->
+    <div id="sectionBB2" class="time-box active" style="border-left-color: #28a745;">
+        <div class="form-group" style="margin-top: 10px;">
+            <input type="text" id="startBB2" placeholder="Chọn ngày tháng hiện trường" 
+           onfocus="(this.type='datetime-local')" 
+           onblur="if(!this.value)this.type='text'" 
+           class="form-control">
         </div>
+        <input type="hidden" id="endBB2">
+    </div>
 
-        <!-- Biên bản 2 -->
-        <div id="sectionBB2" class="time-box active" style="border-left-color: #28a745;">
-            <!-- <label><strong>Thời gian Biên bản 2</strong></label> -->
-            <div class="form-group" style="margin-top: 10px;">
-                <!-- <label for="startBB2">Ngày bắt đầu Biên bản 2:</label> -->
-                <input type="text" id="startBB2" placeholder="Chọn ngày tháng hiện trường" 
-               onfocus="(this.type='datetime-local')" 
-               onblur="if(!this.value)this.type='text'" 
-               class="form-control">
+    <!-- Nội dung và Địa điểm -->
+    <div class="form-group">
+        <textarea id="noiDung" required placeholder="Nhập nội dung công việc..."></textarea>
+    </div>
 
-            </div>
-            <input type="hidden" id="endBB2">
-        </div>
+    <div class="form-group">
+        <input type="text" id="diaDiem" required placeholder="Nhập phạm vi làm việc...">
+    </div>
 
-        <!-- Nội dung và Địa điểm -->
-        <div class="form-group">
-            <!-- <label for="noiDung">Nội dung công tác:</label> -->
-            <textarea id="noiDung" required placeholder="Nhập nội dung công việc..."></textarea>
-        </div>
-
-        <div class="form-group">
-            <!-- <label for="diaDiem">Địa điểm / Phạm vi làm việc:</label> -->
-            <input type="text" id="diaDiem" required placeholder="Nhập phạm vi làm việc...">
-        </div>
-
-
-    
-    <div class="container">
-    <!-- <h2>XUẤT BIÊN BẢN AUTOMATIC</h2> -->
-    
     <!-- Chọn file template từ máy -->
     <div class="template-box">
-        <!-- <h4 style="margin-top:0; color:#d35400;">Chọn biên bản xuất</h4> -->
         <div class="form-group">
             <label for="fileBB1">Chọn mẫu BB PATC</label>
             <input type="file" id="fileBB1" accept=".docx">
@@ -301,10 +289,7 @@
         </div>
     </div>
     
-    
-    
     <form id="bienBanForm">
-        
         <!-- Chọn loại biên bản muốn xuất -->
         <div class="form-group">
             <label for="loaiBienBan">Chọn biên bản</label>
@@ -315,9 +300,6 @@
             </select>
         </div>
 
-
-        
-        
         <button type="button" onclick="xuatFileWord()">Xuất biên bản</button>
     </form>
 </div>
@@ -440,7 +422,8 @@
                 dia_diem_cong_tac: diaDiem,
                 danh_sach_nhan_vien: danhSachThanhVien,
                 thoi_gian_bat_dau1: formatDateTime(start),
-                thoi_gian_ket_thuc1: formatTimeOnly(end)
+                thoi_gian_ket_thuc1: formatTimeOnly(end),
+                ngay_pho_bien: formatDateOnly(start)
             };
             processDocxFromFileInput('fileBB1', dataBB1, 'Bien_Ban_1_Hoan_Chinh.docx');
         }
@@ -476,6 +459,12 @@
         let parts = dtStr.split('T');
         let timeParts = parts[1].split(':');
         return `${timeParts[0]} giờ ${timeParts[1]}`;
+    }
+
+    function formatDateOnly(dtStr) {
+        let parts = dtStr.split('T');
+        let dateParts = parts[0].split('-');
+        return `ngày ${dateParts[2]} tháng ${dateParts[1]} năm ${dateParts[0]}`;
     }
 
     function processDocxFromFileInput(fileInputId, data, outputFilename) {
