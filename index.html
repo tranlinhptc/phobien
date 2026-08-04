@@ -253,23 +253,34 @@
    <!-- <input type="hidden" id="statsBox"> -->
     <!-- </div> -->
     <!-- Biên bản 1 (Cố định kiểu datetime-local để hoạt động hoàn hảo trên iPad) -->
-<div class="bb-container"style="display:flex; gap:10px;>
+<div class="bb-container" style="display:flex; gap:10px;">
+
+    <!-- Biên bản 1 -->
     <div id="sectionBB1" class="time-box active" style="flex:1;">
-        <label for="startBB1" style="font-size: 13px; color: #666; margin-bottom: 4px;">Date phổ biến PATC:</label>
-        <div class="form-group" style="margin-top: 5px;">
+        <label for="startBB1" style="font-size:13px; color:#666; margin-bottom:4px;">
+            Date PATC:
+        </label>
+
+        <div class="form-group" style="margin-top:5px;">
             <input type="datetime-local" id="startBB1" class="form-control">
         </div>
+
         <input type="hidden" id="endBB1">
     </div>
 
     <!-- Biên bản 2 -->
-    <div id="sectionBB2" class="time-box active" style="flex:1;">
-        <label for="startBB2" style="font-size: 13px; color: #666; margin-bottom: 4px;">Date hiện trường:</label>
-        <div class="form-group" style="margin-top: 5px;">
+    <div id="sectionBB2" class="time-box active" style="flex:1; border-left-color:#28a745;">
+        <label for="startBB2" style="font-size:13px; color:#666; margin-bottom:4px;">
+            Date hiện trường:
+        </label>
+
+        <div class="form-group" style="margin-top:5px;">
             <input type="datetime-local" id="startBB2" class="form-control">
         </div>
+
         <input type="hidden" id="endBB2">
     </div>
+
 </div>
 
 
