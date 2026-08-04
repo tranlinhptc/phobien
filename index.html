@@ -255,7 +255,6 @@
                 <label for="startBB1">Ngày bắt đầu Biên bản 1:</label>
                 <input type="datetime-local" id="startBB1">
             </div>
-            <!-- Đã ẩn trường kết thúc đi nhưng vẫn tự động +30 phút ngầm để đưa vào Word -->
             <input type="hidden" id="endBB1">
         </div>
 
@@ -266,7 +265,6 @@
                 <label for="startBB2">Ngày bắt đầu Biên bản 2:</label>
                 <input type="datetime-local" id="startBB2">
             </div>
-            <!-- Đã ẩn trường kết thúc đi nhưng vẫn tự động +10 phút ngầm để đưa vào Word -->
             <input type="hidden" id="endBB2">
         </div>
 
@@ -278,7 +276,7 @@
 
         <div class="form-group">
             <label for="diaDiem">Địa điểm / Phạm vi làm việc:</label>
-            <input type="text" id="diaDiem" required placeholder="Nhập địa điểm công tác...">
+            <input type="text" id="diaDiem" required placeholder="Ví dụ: Ngăn MC 582 TBA 500kV Vĩnh Tân...">
         </div>
 
         <button type="button" onclick="xuatFileWord()">Tạo và Tải File Word Về Máy</button>
@@ -315,10 +313,28 @@
 
     function setupAutoTime(startId, endId, minutesToAdd) {
         document.getElementById(startId).addEventListener('change', function() {
-            if (this.value) {
-                let d = new Date(this.value);
-                d.setMinutes(d.getMinutes() + minutesToAdd);
-                document.getElementById(endId).value = d.toISOString().slice(0, 16);
+            let val = this.value;
+            if (val) {
+                // Tách chuỗi YYYY-MM-DDTHH:mm trực tiếp để không bị lệch múi giờ
+                let parts = val.split('T');
+                let dateParts = parts[0].split('-');
+                let timeParts = parts[1].split(':');
+                
+                let year = parseInt(dateParts[0], 10);
+                let month = parseInt(dateParts[1], 10) - 1;
+                let day = parseInt(dateParts[2], 10);
+                let hour = parseInt(timeParts[0], 10);
+                let minute = parseInt(timeParts[1], 10);
+
+                let d = new Date(year, month, day, hour, minute + minutesToAdd);
+                
+                let yyyy = d.getFullYear();
+                let mm = String(d.getMonth() + 1).padStart(2, '0');
+                let dd = String(d.getDate()).padStart(2, '0');
+                let hh = String(d.getHours()).padStart(2, '0');
+                let min = String(d.getMinutes()).padStart(2, '0');
+
+                document.getElementById(endId).value = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
             } else {
                 document.getElementById(endId).value = '';
             }
@@ -401,20 +417,16 @@
     }
 
     function formatDateTime(dtStr) {
-        let d = new Date(dtStr);
-        let hh = String(d.getHours()).padStart(2, '0');
-        let min = String(d.getMinutes()).padStart(2, '0');
-        let dd = String(d.getDate()).padStart(2, '0');
-        let mm = String(d.getMonth() + 1).padStart(2, '0');
-        let yyyy = d.getFullYear();
-        return `${hh} giờ ${min} ngày ${dd}/${mm}/${yyyy}`;
+        let parts = dtStr.split('T');
+        let dateParts = parts[0].split('-');
+        let timeParts = parts[1].split(':');
+        return `${timeParts[0]} giờ ${timeParts[1]} ngày ${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
     }
 
     function formatTimeOnly(dtStr) {
-        let d = new Date(dtStr);
-        let hh = String(d.getHours()).padStart(2, '0');
-        let min = String(d.getMinutes()).padStart(2, '0');
-        return `${hh} giờ ${min}`;
+        let parts = dtStr.split('T');
+        let timeParts = parts[1].split(':');
+        return `${timeParts[0]} giờ ${timeParts[1]}`;
     }
 
     function processDocxFromFileInput(fileInputId, data, outputFilename) {
