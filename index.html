@@ -137,13 +137,13 @@
     
     <!-- Chọn file template từ máy -->
     <div class="template-box">
-        <h4 style="margin-top:0; color:#d35400;">Chọn file Template Word từ máy của bạn (.docx)</h4>
+        <h4 style="margin-top:0; color:#d35400;">Chọn mẫu biên bàn cần xuất</h4>
         <div class="form-group">
-            <label for="fileBB1">Chọn Template Biên bản 1:</label>
+            <label for="fileBB1">Mẫu PATC</label>
             <input type="file" id="fileBB1" accept=".docx">
         </div>
         <div class="form-group" style="margin-bottom: 0;">
-            <label for="fileBB2">Chọn Template Biên bản 2:</label>
+            <label for="fileBB2">Mẫu hiện trường:</label>
             <input type="file" id="fileBB2" accept=".docx">
         </div>
     </div>
@@ -154,7 +154,7 @@
         <div class="form-group">
             <label for="loaiBienBan">Chọn biên bản:</label>
             <select id="loaiBienBan" onchange="toggleBienBanSections()" required>
-                <option value="both">Xuất cả 2Biên bản 1 và Biên bản 2</option>
+                <!-- <option value="both">Xuất cả 2Biên bản 1 và Biên bản 2</option> -->
                 <option value="bb1">Xuất BB PATC</option>
                 <option value="bb2">Xuất BB hiện trường</option>
             </select>
@@ -164,8 +164,8 @@
         <div class="form-group">
             <label for="soLuongNhom">Số nhóm công tác:</label>
             <select id="soLuongNhom" onchange="toggleGroupMode()" required>
-                <option value="1">Nhóm 1</option>
-                <option value="2">Nhóm 2</option>
+                <option value="1">01 Nhóm</option>
+                <option value="2">02 Nhóm</option>
             </select>
         </div>
 
@@ -174,12 +174,11 @@
             <div class="form-group">
                 <label for="chiHuyChung">Chỉ huy trực tiếp:</label>
                 <select id="chiHuyChung" onchange="updateMemberCount()">
-                    <option value="">-- Chọn ông chỉ huy --</option>
-                    <option value="Trần Văn Hoàng">Trần Văn Hoàng</option>
-                    <option value="Nguyễn Hữu Kính">Nguyễn Hữu Kính</option>
-                    <option value="Lê Hữu Anh">Lê Hữu Anh</option>
-                    <option value="Kim Văn Quỳnh">Kim Văn Quỳnh</option>
-                    <option value="Hồ Văn Huy">Hồ Văn Huy</option>
+                    <option value="Trần Văn Hoàng">A.Hoàng</option>
+                    <option value="Nguyễn Hữu Kính">A.Kính</option>
+                    <option value="Kim Văn Quỳnh">A.Quỳnh</option>
+                    <option value="Hồ Văn Huy">A.Huy</option>
+                    <option value="Hoàng Trần Quản Trọng">A.Trọng</option>
                 </select>
             </div>
             <div class="form-group">
@@ -210,7 +209,7 @@
                 <div class="group-box">
                     <h4>Nhóm 1</h4>
                     <div class="form-group" style="margin-bottom: 10px;">
-                        <label for="chiHuy1" style="font-size: 13px;">Chỉ huy Nhóm 1:</label>
+                        <label for="chiHuy1" style="font-size: 13px;">CHTT Nhóm 1:</label>
                         <select id="chiHuy1" onchange="updateMemberCount()">
                             <option value="Trần Văn Hoàng">Trần Văn Hoàng</option>
                             <option value="Kim Văn Quỳnh">A.Quỳnh</option>
@@ -240,12 +239,13 @@
                 <div class="group-box">
                     <h4>Nhóm 2</h4>
                     <div class="form-group" style="margin-bottom: 10px;">
-                        <label for="chiHuy2" style="font-size: 13px;">Chỉ huy Nhóm 2:</label>
+                        <label for="chiHuy2" style="font-size: 13px;">CHTT nhóm 2:</label>
                         <select id="chiHuy2" onchange="updateMemberCount()">
-                            <option value="Trần Văn Hoàng">Trần Văn Hoàng</option>
-                            <option value="Kim Văn Quỳnh">A.Quỳnh</option>
-                            <option value="Hồ Văn Huy">A.Huy</option>
-                            <option value="Hoàng Trần Quản Trọng">A.Trọng</option>
+                        <option value="Trần Văn Hoàng">A.Hoàng</option>
+                        <option value="Nguyễn Hữu Kính">A.Kính</option>
+                        <option value="Kim Văn Quỳnh">A.Quỳnh</option>
+                        <option value="Hồ Văn Huy">A.Huy</option>
+                        <option value="Hoàng Trần Quản Trọng">A.Trọng</option>
                         </select>
                     </div>
                     <label style="font-size: 13px;">Nhân viên Nhóm 2:</label>
@@ -276,9 +276,9 @@
 
         <!-- Biên bản 1 -->
         <div id="sectionBB1" class="time-box active">
-            <label><strong>Thời gian phổ biến</strong></label>
+            <label><strong>Thời gian phổ biến PATC</strong></label>
             <div class="form-group" style="margin-top: 10px;">
-                <label for="startBB1">Thời gian phổ biến PATC:</label>
+                <!-- <label for="startBB1">Thời gian phổ biến PATC:</label> -->
                 <input type="datetime-local" id="startBB1">
             </div>
             <input type="hidden" id="endBB1">
@@ -286,9 +286,9 @@
 
         <!-- Biên bản 2 -->
         <div id="sectionBB2" class="time-box active" style="border-left-color: #28a745;">
-            <label><strong>Thời gian phổ biến hiện trường</strong></label>
+            <label><strong>Thời gian tại hiện trường</strong></label>
             <div class="form-group" style="margin-top: 10px;">
-                <label for="startBB2">Thời gian tại hiện trường:</label>
+                <!-- <label for="startBB2">Thời gian tại hiện trường:</label> -->
                 <input type="datetime-local" id="startBB2">
             </div>
             <input type="hidden" id="endBB2">
