@@ -198,7 +198,15 @@
                     </select>
                 </div>
                 <label style="font-size: 13px;">Nhân viên Nhóm 1:</label>
-                <div class="checkbox-group">
+                <div class="checkbox-group" style="
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px 20px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 4px;
+    background: #fafafa;
+">                  
                     <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Hoàng Trần Quản Trọng" onchange="updateMemberCount()"> <label>A.Trọng</label></div>
                     <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Trần Văn Hoàng" onchange="updateMemberCount()"> <label>A.Hoàng</label></div>
                     <div class="checkbox-item"><input type="checkbox" name="nhanVien1" value="Kim Văn Quỳnh" onchange="updateMemberCount()"> <label>A.Quỳnh</label></div>
@@ -228,7 +236,16 @@
                     </select>
                 </div>
                 <label style="font-size: 13px;">Nhân viên Nhóm 2:</label>
-                <div class="checkbox-group">
+                <div class="checkbox-group"
+    style="
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px 20px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 4px;
+    background: #fafafa;
+">
                     <div class="checkbox-item"><input type="checkbox" name="nhanVien2" value="Hoàng Trần Quản Trọng" onchange="updateMemberCount()"> <label>A.Trọng</label></div>
                     <div class="checkbox-item"><input type="checkbox" name="nhanVien2" value="Trần Văn Hoàng" onchange="updateMemberCount()"> <label>A.Hoàng</label></div>
                     <div class="checkbox-item"><input type="checkbox" name="nhanVien2" value="Kim Văn Quỳnh" onchange="updateMemberCount()"> <label>A.Quỳnh</label></div>
