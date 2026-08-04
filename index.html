@@ -156,7 +156,13 @@
         </div>
         <div class="form-group">
             <label>Chọn Nhân viên tham gia:</label>
-            <div class="checkbox-group" style="border: 1px solid #ccc; padding: 10px; border-radius: 4px; background: #fafafa;">
+            <div class="checkbox-group" style="
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px 20px; solid #ccc; 
+                padding: 10px; 
+                border-radius: 4px;
+                background: #fafafa;">
                 <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Nguyễn Hữu Kính" onchange="updateMemberCount()"> <label>A.Kính</label></div>
                 <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Hoàng Trần Quản Trọng" onchange="updateMemberCount()"> <label>A.Trọng</label></div>
                 <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Trần Văn Hoàng" onchange="updateMemberCount()"> <label>A.Hoàng</label></div>
