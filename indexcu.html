@@ -420,8 +420,8 @@
             let start = document.getElementById('startBB1').value;
             let end = document.getElementById('endBB1').value;
             if (!start) { alert('Vui lòng nhập thời gian Biên bản 1'); return; }
-            dataContext.thoi_gian_bat_dau1 = formatDateTime(start);
-            dataContext.thoi_gian_ket_thuc1 = formatDateTime(end);
+            dataContext.thoi_gian_bat_dau = formatDateTime(start);
+            dataContext.thoi_gian_ket_thuc = formatDateTime(end);
             processDocxFromFileInput('fileBB1', dataContext, 'Bien ban pho bien PATC.docx');
         }
 
@@ -429,8 +429,8 @@
             let start = document.getElementById('startBB2').value;
             let end = document.getElementById('endBB2').value;
             if (!start) { alert('Vui lòng nhập thời gian Biên bản 2'); return; }
-            dataContext.thoi_gian_bat_dau2 = formatDateTime(start);
-            dataContext.thoi_gian_ket_thuc2 = formatDateTime(end);
+            dataContext.thoi_gian_bat_dau = formatDateTime(start);
+            dataContext.thoi_gian_ket_thuc = formatDateTime(end);
             processDocxFromFileInput('fileBB2', dataContext, 'Bien ban pho bien hien truong.docx');
         }
     }
