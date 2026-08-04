@@ -311,6 +311,17 @@
             <input type="text" id="diaDiem" required placeholder="Nhập phạm vi làm việc...">
         </div>
 
+
+                <!-- Chọn loại biên bản muốn xuất -->
+        <div class="form-group">
+            <label for="loaiBienBan">Chọn biên bản</label>
+            <select id="loaiBienBan" onchange="toggleBienBanSections()" required>
+                <option value="both">Xuất cả Biên bản 1 và Biên bản 2</option>
+                <option value="bb1">Xuất BB PATC</option>
+                <option value="bb2">Xuất BB hiện trường</option>
+            </select>
+        </div>
+        
         <button type="button" onclick="xuatFileWord()">Xuất biên bản</button>
     </form>
 </div>
