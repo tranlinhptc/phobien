@@ -315,7 +315,6 @@
         document.getElementById(startId).addEventListener('change', function() {
             let val = this.value;
             if (val) {
-                // Tách chuỗi YYYY-MM-DDTHH:mm trực tiếp để không bị lệch múi giờ
                 let parts = val.split('T');
                 let dateParts = parts[0].split('-');
                 let timeParts = parts[1].split(':');
@@ -388,31 +387,42 @@
         let tongSoNhanVien = danhSachThanhVien.length;
         let tongSoThanhVien = 1 + tongSoNhanVien;
 
-        const dataContext = {
-            nguoi_chu_tri: chiHuyChinh,
-            tong_so_tham_gia: `${tongSoThanhVien}/${tongSoThanhVien}`,
-            tong_so_vang: "Vắng 00",
-            noi_dung_cong_tac: noiDung,
-            dia_diem_cong_tac: diaDiem,
-            danh_sach_nhan_vien: danhSachThanhVien
-        };
-
+        // Xử lý Biên bản 1
         if (choice === 'both' || choice === 'bb1') {
             let start = document.getElementById('startBB1').value;
             let end = document.getElementById('endBB1').value;
             if (!start) { alert('Vui lòng nhập thời gian bắt đầu Biên bản 1'); return; }
-            dataContext.thoi_gian_bat_dau = formatDateTime(start);
-            dataContext.thoi_gian_ket_thuc = formatTimeOnly(end);
-            processDocxFromFileInput('fileBB1', dataContext, 'Bien_Ban_1_Hoan_Chinh.docx');
+
+            const dataBB1 = {
+                nguoi_chu_tri: chiHuyChinh,
+                tong_so_tham_gia: `${tongSoThanhVien}/${tongSoThanhVien}`,
+                tong_so_vang: "Vắng 00",
+                noi_dung_cong_tac: noiDung,
+                dia_diem_cong_tac: diaDiem,
+                danh_sach_nhan_vien: danhSachThanhVien,
+                thoi_gian_bat_dau1: formatDateTime(start),
+                thoi_gian_ket_thuc1: formatTimeOnly(end)
+            };
+            processDocxFromFileInput('fileBB1', dataBB1, 'Bien_Ban_1_Hoan_Chinh.docx');
         }
 
+        // Xử lý Biên bản 2
         if (choice === 'both' || choice === 'bb2') {
             let start = document.getElementById('startBB2').value;
             let end = document.getElementById('endBB2').value;
             if (!start) { alert('Vui lòng nhập thời gian bắt đầu Biên bản 2'); return; }
-            dataContext.thoi_gian_bat_dau = formatDateTime(start);
-            dataContext.thoi_gian_ket_thuc = formatTimeOnly(end);
-            processDocxFromFileInput('fileBB2', dataContext, 'Bien_Ban_2_Hoan_Chinh.docx');
+
+            const dataBB2 = {
+                nguoi_chu_tri: chiHuyChinh,
+                tong_so_tham_gia: `${tongSoThanhVien}/${tongSoThanhVien}`,
+                tong_so_vang: "Vắng 00",
+                noi_dung_cong_tac: noiDung,
+                dia_diem_cong_tac: diaDiem,
+                danh_sach_nhan_vien: danhSachThanhVien,
+                thoi_gian_bat_dau2: formatDateTime(start),
+                thoi_gian_ket_thuc2: formatTimeOnly(end)
+            };
+            processDocxFromFileInput('fileBB2', dataBB2, 'Bien_Ban_2_Hoan_Chinh.docx');
         }
     }
 
