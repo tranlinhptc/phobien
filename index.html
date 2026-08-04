@@ -255,7 +255,6 @@
                 <label for="startBB1">Ngày bắt đầu Biên bản 1:</label>
                 <input type="datetime-local" id="startBB1">
             </div>
-            <!-- Đã đổi thành type="hidden" để ẩn trên giao diện nhưng vẫn chạy ngầm -->
             <input type="hidden" id="endBB1">
         </div>
 
@@ -266,7 +265,6 @@
                 <label for="startBB2">Ngày bắt đầu Biên bản 2:</label>
                 <input type="datetime-local" id="startBB2">
             </div>
-            <!-- Đã đổi thành type="hidden" để ẩn trên giao diện nhưng vẫn chạy ngầm -->
             <input type="hidden" id="endBB2">
         </div>
 
@@ -349,9 +347,9 @@
         if (mode === '1') {
             chiHuyChinh = document.getElementById('chiHuyChung').value;
             if (!chiHuyChinh) { alert('Vui lòng chọn Chỉ huy!'); return; }
-            danhSachThanhVien.push({ stt: 1, ho_ten: chiHuyChinh, nhiem_vu: noiDung });
             
-            let i = 2;
+            // CHỈ GỒM NHÂN VIÊN (KHÔNG ĐƯA CHỈ HUY VÀO MẢNG NÀY NỮA)
+            let i = 1;
             document.querySelectorAll('input[name="nhanVienChung"]:checked').forEach(cb => {
                 danhSachThanhVien.push({ stt: i++, ho_ten: cb.value, nhiem_vu: noiDung });
             });
@@ -361,22 +359,23 @@
             chiHuyChinh = ch1 || ch2;
             if (!ch1 && !ch2) { alert('Vui lòng chọn ít nhất một Chỉ huy nhóm!'); return; }
 
+            // CHỈ GỒM NHÂN VIÊN CỦA CÁC NHÓM
             let i = 1;
-            if (ch1) danhSachThanhVien.push({ stt: i++, ho_ten: ch1, nhiem_vu: noiDung });
             document.querySelectorAll('input[name="nhanVien1"]:checked').forEach(cb => {
                 danhSachThanhVien.push({ stt: i++, ho_ten: cb.value, nhiem_vu: noiDung });
             });
-            if (ch2) danhSachThanhVien.push({ stt: i++, ho_ten: ch2, nhiem_vu: noiDung });
             document.querySelectorAll('input[name="nhanVien2"]:checked').forEach(cb => {
                 danhSachThanhVien.push({ stt: i++, ho_ten: cb.value, nhiem_vu: noiDung });
             });
         }
 
-        let tongSo = danhSachThanhVien.length;
+        // Tổng số thành viên = 1 Chỉ huy + số lượng nhân viên thực tế
+        let tongSoNhanVien = danhSachThanhVien.length;
+        let tongSoThanhVien = 1 + tongSoNhanVien;
 
         const dataContext = {
             nguoi_chu_tri: chiHuyChinh,
-            tong_so_tham_gia: `${tongSo}/${tongSo}`,
+            tong_so_tham_gia: `${tongSoThanhVien}/${tongSoThanhVien}`,
             tong_so_vang: "Vắng 00",
             noi_dung_cong_tac: noiDung,
             dia_diem_cong_tac: diaDiem,
@@ -389,7 +388,7 @@
             if (!start) { alert('Vui lòng nhập thời gian Biên bản 1'); return; }
             dataContext.thoi_gian_bat_dau = formatDateTime(start);
             dataContext.thoi_gian_ket_thuc = formatDateTime(end);
-            processDocxFromFileInput('fileBB1', dataContext, 'Pho bien PATC.docx');
+            processDocxFromFileInput('fileBB1', dataContext, 'Bien_Ban_1_Hoan_Chinh.docx');
         }
 
         if (choice === 'both' || choice === 'bb2') {
@@ -398,7 +397,7 @@
             if (!start) { alert('Vui lòng nhập thời gian Biên bản 2'); return; }
             dataContext.thoi_gian_bat_dau = formatDateTime(start);
             dataContext.thoi_gian_ket_thuc = formatDateTime(end);
-            processDocxFromFileInput('fileBB2', dataContext, 'Pho bien HT.docx');
+            processDocxFromFileInput('fileBB2', dataContext, 'Bien_Ban_2_Hoan_Chinh.docx');
         }
     }
 
