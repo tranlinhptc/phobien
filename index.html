@@ -62,8 +62,8 @@
         <div class="form-group"><label>Thời gian Hiện trường:</label><input type="datetime-local" id="startBB2"></div>
     </div>
 
-    <button class="btn-submit" style="background: #0056b3;" onclick="xuatFile('bb1')">TẢI BIÊN BẢN PATC</button>
-    <button class="btn-submit" style="background: #28a745;" onclick="xuatFile('bb2')">TẢI BIÊN BẢN HIỆN TRƯỜNG</button>
+    <button class="btn-submit" style="background: #0056b3;" onclick="xuatFile('bb1')">Xuất BB PATC</button>
+    <button class="btn-submit" style="background: #28a745;" onclick="xuatFile('bb2')">Xuất BB H.TRƯỜNG</button>
 </div>
 
 <script>
@@ -73,9 +73,21 @@
 
     const dsNV = ["Hoàng Trần Quản Trọng", "Trần Văn Hoàng", "Kim Văn Quỳnh", "Hồ Văn Huy", "Lê Hữu Anh", "Trần Phúc Linh", "Tạ Quốc Đạt", "Ngô Văn Quang", "Võ Ngọc Sơn", "Nguyễn Xuân Khánh", "Đoàn Hoàng Quang Định", "Võ Văn Sỹ", "Lưu Đức Minh", "Nguyễn Hữu Kính"];
 
-    window.onload = () => {
+    // window.onload = () => {
+    //     let html = '';
+    //     dsNV.forEach((nv, idx) => html += `<div class="chip-item"><input type="checkbox" id="nv${idx}" value="${nv}"><label for="nv${idx}">${nv.replace("A.", "")}</label></div>`);
+    //     document.getElementById('nvContainer').innerHTML = html;
+
+	window.onload = () => {
         let html = '';
-        dsNV.forEach((nv, idx) => html += `<div class="chip-item"><input type="checkbox" id="nv${idx}" value="${nv}"><label for="nv${idx}">${nv.replace("A.", "")}</label></div>`);
+        dsNV.forEach((nv, idx) => {
+            // Logic rút gọn: Lấy chữ cuối cùng của tên và thêm "A."
+            let tenRutGon = "A." + nv.split(' ').pop();
+            html += `<div class="chip-item">
+                        <input type="checkbox" id="nv${idx}" value="${nv}">
+                        <label for="nv${idx}">${tenRutGon}</label>
+                     </div>`;
+        });
         document.getElementById('nvContainer').innerHTML = html;
     }
 
