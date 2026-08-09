@@ -126,7 +126,7 @@
             for(let i=0; i<binary.length; i++) bytes[i] = binary.charCodeAt(i);
             const doc = new window.docxtemplater(new PizZip(bytes.buffer), {paragraphLoop:true, linebreaks:true});
             doc.render(data);
-            saveAs(doc.getZip().generate({type:"blob"}), `${type === 'bb1' ? 'BB_PATC' : 'BB_HienTruong'}_${stt}.docx`);
+            saveAs(doc.getZip().generate({type:"blob"}), `${type === 'bb1' ? 'BB pho bien truoc cong tac so' : 'BB pho bien tai hien truong so'}_${stt}.docx`);
         } catch(e) { alert("Lỗi: " + e.message); }
         document.getElementById('loadingOverlay').style.display = 'none';
     }
