@@ -2,125 +2,80 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XUẤT BIÊN BẢN PATC & HIỆN TRƯỜNG</title>
+    <title>XUẤT BIÊN BẢN</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.11/docxtemplater.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
     <style>
-        :root { --primary: #0056b3; --success: #28a745; --bg-color: #f0f2f5; --card-bg: #ffffff; --text-main: #333333; --border: #dee2e6; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); margin: 0; padding: 15px; color: var(--text-main); }
-        .container { max-width: 600px; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 25px; }
-        .header h2 { color: var(--primary); margin: 0; font-size: 20px; text-transform: uppercase; }
-        .card { background: var(--card-bg); border-radius: 12px; padding: 20px; margin-bottom: 15px; border-top: 4px solid var(--primary); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .card-title { font-size: 15px; font-weight: 600; margin-bottom: 15px; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        body { font-family: Arial; padding: 20px; background: #f4f6f9; }
+        .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; color: #495057; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background-color: #fafbfc; }
-        .chip-group { display: flex; flex-wrap: wrap; gap: 8px; padding: 5px 0; }
-        .chip-item input[type="checkbox"] { display: none; }
-        .chip-item label { display: inline-block; background-color: #e9ecef; color: #495057; padding: 8px 14px; border-radius: 20px; font-size: 13px; cursor: pointer; border: 1px solid transparent; }
-        .chip-item input[type="checkbox"]:checked + label { background-color: #e6f2ff; color: var(--primary); border-color: var(--primary); font-weight: 600; }
-        .btn-submit { color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; width: 100%; margin-bottom: 10px; }
-        #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .chip-item input { display: none; }
+        .chip-item label { padding: 5px 10px; background: #eee; border-radius: 15px; cursor: pointer; font-size: 13px; }
+        .chip-item input:checked + label { background: #007bff; color: white; }
+        button { background: #28a745; color: white; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
     </style>
 </head>
 <body>
-
-<div id="loadingOverlay"><div class="spinner"></div><div id="loadingText">Đang xuất file...</div></div>
-
 <div class="container">
-    <div class="header"><h2>XUẤT BIÊN BẢN</h2></div>
-
-    <div class="card">
-        <div class="card-title">👨‍🔧 Nhóm công tác</div>
-        <div class="form-group">
-            <label>Chỉ huy:</label>
-            <select id="chiHuy">
-                <option value="Trần Văn Hoàng">A.Hoàng</option>
-                <option value="Nguyễn Hữu Kính">A.Kính</option>
-                <option value="Kim Văn Quỳnh">A.Quỳnh</option>
-                <option value="Hồ Văn Huy">A.Huy</option>
-                <option value="Hoàng Trần Quản Trọng">A.Trọng</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Thành viên:</label>
-            <div class="chip-group" id="nvContainer"></div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-title">📝 Chi tiết Công việc</div>
-        <div class="form-group"><input type="number" id="stt" placeholder="Số GĐKCT..."></div>
-        <div class="form-group"><textarea id="noiDung" placeholder="Nội dung công việc..."></textarea></div>
-        <div class="form-group"><input type="text" id="diaDiem" placeholder="Địa điểm..."></div>
-        <div class="form-group"><label>Thời gian PATC:</label><input type="datetime-local" id="startBB1"></div>
-        <div class="form-group"><label>Thời gian Hiện trường:</label><input type="datetime-local" id="startBB2"></div>
-    </div>
-
-    <button class="btn-submit" style="background: #0056b3;" onclick="xuatFile('bb1')">Xuất BB PATC</button>
-    <button class="btn-submit" style="background: #28a745;" onclick="xuatFile('bb2')">Xuất BB H.TRƯỜNG</button>
+    <h2>XUẤT BIÊN BẢN</h2>
+    <div class="form-group"><label>Chỉ huy:</label><select id="chiHuy">
+        <option>Trần Văn Hoàng</option><option>Nguyễn Hữu Kính</option><option>Kim Văn Quỳnh</option><option>Hồ Văn Huy</option><option>Hoàng Trần Quản Trọng</option>
+    </select></div>
+    <div class="form-group"><label>Thành viên:</label><div class="chip-group" id="nvContainer"></div></div>
+    <div class="form-group"><input type="number" id="stt" placeholder="Số GĐKCT..."></div>
+    <div class="form-group"><textarea id="noiDung" placeholder="Nội dung..."></textarea></div>
+    <div class="form-group"><input type="text" id="diaDiem" placeholder="Địa điểm..."></div>
+    <div class="form-group"><label>Time PATC:</label><input type="datetime-local" id="startBB1"></div>
+    <div class="form-group"><label>Time Hiện trường:</label><input type="datetime-local" id="startBB2"></div>
+    <button style="background: #0056b3;" onclick="xuatFile('bb1')">XUẤT BB PATC</button>
+    <button style="background: #28a745;" onclick="xuatFile('bb2')">XUẤT BB H.TRƯỜNG</button>
 </div>
 
 <script>
     const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxlM-814su7_q0yS7Qx1bdwC1j9CB18Km6UOdMcJW4ifZUecl633RmEhvxnsUIwerlE/exec";
     const ID_TEMPLATE_BB1 = "1Gj1PDFAHWeKG_2PCod4dLKHvXxq5xf6u"; 
     const ID_TEMPLATE_BB2 = "1AN9tE1UvR1KV3YNcs5P9RFxmcnsxwkBd";
-
     const dsNV = ["Hoàng Trần Quản Trọng", "Trần Văn Hoàng", "Kim Văn Quỳnh", "Hồ Văn Huy", "Lê Hữu Anh", "Trần Phúc Linh", "Tạ Quốc Đạt", "Ngô Văn Quang", "Võ Ngọc Sơn", "Nguyễn Xuân Khánh", "Đoàn Hoàng Quang Định", "Võ Văn Sỹ", "Lưu Đức Minh", "Nguyễn Hữu Kính"];
 
-    // window.onload = () => {
-    //     let html = '';
-    //     dsNV.forEach((nv, idx) => html += `<div class="chip-item"><input type="checkbox" id="nv${idx}" value="${nv}"><label for="nv${idx}">${nv.replace("A.", "")}</label></div>`);
-    //     document.getElementById('nvContainer').innerHTML = html;
-
-	window.onload = () => {
+    window.onload = () => {
         let html = '';
         dsNV.forEach((nv, idx) => {
-            // Logic rút gọn: Lấy chữ cuối cùng của tên và thêm "A."
             let tenRutGon = "A." + nv.split(' ').pop();
-            html += `<div class="chip-item">
-                        <input type="checkbox" id="nv${idx}" value="${nv}">
-                        <label for="nv${idx}">${tenRutGon}</label>
-                     </div>`;
+            html += `<div class="chip-item"><input type="checkbox" id="nv${idx}" value="${nv}"><label for="nv${idx}">${tenRutGon}</label></div>`;
         });
         document.getElementById('nvContainer').innerHTML = html;
     }
 
     async function xuatFile(type) {
         const noiDung = document.getElementById('noiDung').value;
-        const diaDiem = document.getElementById('diaDiem').value;
+        const start1 = document.getElementById('startBB1').value;
+        const start2 = document.getElementById('startBB2').value;
         const stt = document.getElementById('stt').value;
-        const chiHuy = document.getElementById('chiHuy').value;
-        const start = type === 'bb1' ? document.getElementById('startBB1').value : document.getElementById('startBB2').value;
 
-        if(!noiDung || !chiHuy || !start) { alert("Vui lòng điền đủ thông tin!"); return; }
+        if(!noiDung || !start1 || !start2) { alert("Vui lòng điền đủ thông tin!"); return; }
 
         let tv = [];
         document.querySelectorAll('#nvContainer input:checked').forEach((cb, idx) => tv.push({ stt: idx+1, ho_ten: cb.value, nhiem_vu: noiDung }));
         
         let data = {
-		stt: document.getElementById('stt').value, // <--- THÊM DÒNG NÀY VÀO            
-		nguoi_chu_tri: chiHuy,
+            stt: stt,
+            nguoi_chu_tri: document.getElementById('chiHuy').value,
             tong_so_tham_gia: `${tv.length + 1}/${tv.length + 1}`,
             noi_dung_cong_tac: noiDung,
-            dia_diem_cong_tac: diaDiem,
+            dia_diem_cong_tac: document.getElementById('diaDiem').value,
             danh_sach_nhan_vien: tv,
-            thoi_gian_bat_dau1: type === 'bb1' ? formatDT(start) : "",
-            thoi_gian_ket_thuc1: formatTime(new Date(new Date(start).getTime() + 30*60000)),
-            ngay_pho_bien: formatDate(start),
-            thoi_gian_bat_dau2: type === 'bb2' ? formatDT(start) : "",
-            thoi_gian_ket_thuc2: formatTime(new Date(new Date(start).getTime() + 10*60000))
-    // --- THÊM 2 DÒNG NÀY VÀO ĐỂ NHÉT VÀO BB1 ---
-            thoi_gian_bat_dau2: document.getElementById('startBB2').value ? formatDT(document.getElementById('startBB2').value) : "",
-            thoi_gian_ket_thuc2: document.getElementById('startBB2').value ? formatTime(new Date(new Date(document.getElementById('startBB2').value).getTime() + 10*60000)) : ""
+            // Thời gian cho PATC
+            thoi_gian_bat_dau1: formatDT(start1),
+            thoi_gian_ket_thuc1: formatTime(new Date(new Date(start1).getTime() + 30*60000)),
+            ngay_pho_bien: formatDate(start1),
+            // Nhét thêm thời gian Hiện trường vào đây
+            thoi_gian_bat_dau2: formatDT(start2),
+            thoi_gian_ket_thuc2: formatTime(new Date(new Date(start2).getTime() + 10*60000))
         };
 
-        document.getElementById('loadingOverlay').style.display = 'flex';
         try {
             const res = await fetch(`${GOOGLE_WEB_APP_URL}?action=getTemplate&fileId=${type === 'bb1' ? ID_TEMPLATE_BB1 : ID_TEMPLATE_BB2}`);
             const result = await res.json();
@@ -129,9 +84,8 @@
             for(let i=0; i<binary.length; i++) bytes[i] = binary.charCodeAt(i);
             const doc = new window.docxtemplater(new PizZip(bytes.buffer), {paragraphLoop:true, linebreaks:true});
             doc.render(data);
-            saveAs(doc.getZip().generate({type:"blob"}), `${type === 'bb1' ? 'BB pho bien truoc cong tac so' : 'BB pho bien tai hien truong so'}_${stt}.docx`);
+            saveAs(doc.getZip().generate({type:"blob"}), `${type === 'bb1' ? 'BB_PATC' : 'BB_HienTruong'}_${stt}.docx`);
         } catch(e) { alert("Lỗi: " + e.message); }
-        document.getElementById('loadingOverlay').style.display = 'none';
     }
 
     const formatDT = (s) => { let d = new Date(s); return `${d.getHours()} giờ ${d.getMinutes()} ngày ${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`; };
