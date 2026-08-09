@@ -92,29 +92,27 @@
         } catch(e) { alert("Lỗi: " + e.message); }
     }
 
-    // Sửa hàm formatDT
-    const formatDT = (s) => { 
+const formatDT = (s) => { 
         let d = new Date(s); 
-        let h = String(d.getHours()).padStart(2, '0');
-        let m = String(d.getMinutes()).padStart(2, '0');
-        let day = String(d.getDate()).padStart(2, '0');
-        let month = String(d.getMonth() + 1).padStart(2, '0');
+        // Ép kiểu sang chuỗi rồi mới padStart
+        let h = ('0' + d.getHours()).slice(-2);
+        let m = ('0' + d.getMinutes()).slice(-2);
+        let day = ('0' + d.getDate()).slice(-2);
+        let month = ('0' + (d.getMonth() + 1)).slice(-2);
         let year = d.getFullYear();
         return `${h} giờ ${m} ngày ${day}/${month}/${year}`; 
     };
 
-    // Sửa hàm formatTime
     const formatTime = (d) => {
-        let h = String(d.getHours()).padStart(2, '0');
-        let m = String(d.getMinutes()).padStart(2, '0');
+        let h = ('0' + d.getHours()).slice(-2);
+        let m = ('0' + d.getMinutes()).slice(-2);
         return `${h} giờ ${m}`;
     };
 
-    // Sửa hàm formatDate
     const formatDate = (s) => { 
         let d = new Date(s); 
-        let day = String(d.getDate()).padStart(2, '0');
-        let month = String(d.getMonth() + 1).padStart(2, '0');
+        let day = ('0' + d.getDate()).slice(-2);
+        let month = ('0' + (d.getMonth() + 1)).slice(-2);
         let year = d.getFullYear();
         return `ngày ${day} tháng ${month} năm ${year}`; 
     };
