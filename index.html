@@ -115,9 +115,6 @@
             ngay_pho_bien: formatDate(start),
             thoi_gian_bat_dau2: type === 'bb2' ? formatDT(start) : "",
             thoi_gian_ket_thuc2: formatTime(new Date(new Date(start).getTime() + 10*60000))
-// --- THÊM 2 DÒNG NÀY VÀO ĐỂ NHÉT VÀO BB1 ---
-            thoi_gian_bat_dau2: document.getElementById('startBB2').value ? formatDT(document.getElementById('startBB2').value) : "",
-            thoi_gian_ket_thuc2: document.getElementById('startBB2').value ? formatTime(new Date(new Date(document.getElementById('startBB2').value).getTime() + 10*60000)) : ""
         };
 
         document.getElementById('loadingOverlay').style.display = 'flex';
