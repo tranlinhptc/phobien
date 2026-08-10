@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XUẤT BIÊN BẢN</title>
+    <title>BIÊN BẢN</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.11/docxtemplater.js"></script>
@@ -38,7 +38,7 @@ body {
 <div class="container">
     <h2>XUẤT BIÊN BẢN</h2>
     <div class="form-group"><label>Chỉ huy:</label><select id="chiHuy">
-        <option>Trần Văn Hoàng</option>
+        <option>Trần Văn Hoàng<label>Mr.Hoàng</label></option>
         <option>Nguyễn Hữu Kính</option>
         <option>Kim Văn Quỳnh</option>
         <option>Hồ Văn Huy</option>
@@ -50,8 +50,8 @@ body {
     <div class="form-group"><input type="text" id="diaDiem" placeholder="Địa điểm..."></div>
     <div class="form-group"><label>Time PATC:</label><input type="datetime-local" id="startBB1"></div>
     <div class="form-group"><label>Time Hiện trường:</label><input type="datetime-local" id="startBB2"></div>
-    <button style="background: #0056b3;" onclick="xuatFile('bb1')">XUẤT BB PATC</button>
-    <button style="background: #28a745;" onclick="xuatFile('bb2')">XUẤT BB H.TRƯỜNG</button>
+    <button style="background: #0056b3;" onclick="xuatFile('bb1')">Xuất 02 Biên bản</button>
+    <button style="background: #28a745;" onclick="xuatFile('bb2')">Xuất BB H.Trường</button>
 </div>
 
 <script>
@@ -104,7 +104,9 @@ body {
             for(let i=0; i<binary.length; i++) bytes[i] = binary.charCodeAt(i);
             const doc = new window.docxtemplater(new PizZip(bytes.buffer), {paragraphLoop:true, linebreaks:true});
             doc.render(data);
-            saveAs(doc.getZip().generate({type:"blob"}), `${type === 'bb1' ? 'BB_PATC' : 'BB_HienTruong'}_${stt}.docx`);
+            // saveAs(doc.getZip().generate({type:"blob"}), `${type === 'bb1' ? 'BB_PATC' : 'BB_HienTruong'}_${stt}.docx`);
+            saveAs(doc.getZip().generate({type:"blob"}), `{stt}${type === 'bb1' ? '. Pho bien truoc cong tac' : 'Pho bien tai hien truong'}.docx`);
+
         } catch(e) { alert("Lỗi: " + e.message); }
     }
 
