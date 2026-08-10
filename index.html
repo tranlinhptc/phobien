@@ -32,6 +32,11 @@ body {
         .chip-item label { padding: 5px 10px; background: #eee; border-radius: 15px; cursor: pointer; font-size: 13px; }
         .chip-item input:checked + label { background: #007bff; color: white; }
         button { background: #28a745; color: white; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    /* ================Them d bao hieu load ding 02 dong duoi*/
+#loading {    display: none;    text-align: center;    color: #007bff;    font-weight: bold;    margin: 10px 0;
+}
+
+    
     </style>
 </head>
 <body>
@@ -57,7 +62,8 @@ body {
     <button style="background: #0056b3;" onclick="xuatFile('bb1')">Xuất 02 Biên bản</button>
     <button style="background: #28a745;" onclick="xuatFile('bb2')">Xuất BB H.Trường</button>
 </div>
-
+<!-- ======================================Them d bao hieu load ding 01 dong duoi -->
+    <div id="loading">⏳ Đang gõ, chờ xíu...</div>
 <script>
     const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxlM-814su7_q0yS7Qx1bdwC1j9CB18Km6UOdMcJW4ifZUecl633RmEhvxnsUIwerlE/exec";
     const ID_TEMPLATE_BB1 = "1Gj1PDFAHWeKG_2PCod4dLKHvXxq5xf6u"; 
@@ -74,7 +80,8 @@ body {
     }
 
     async function xuatFile(type) {
-
+// ======================================Them d bao hieu load ding 02 dong duoi
+        document.getElementById("loading").style.display = "block";
         
         const noiDung = document.getElementById('noiDung').value;
         const start1 = document.getElementById('startBB1').value;
@@ -122,10 +129,13 @@ saveAs(
     `${stt}.${type === 'bb1' ? ' Pho bien truoc cong tac' : ' Pho bien tai hien truong'}.docx`
             // ===============================
 );
-
+// ======================================Them d bao hieu load ding 01 dong duoi
+    document.getElementById("loading").style.display = "none";
+            
         } catch(e) { alert("Lỗi: " + e.message); }
     }
 
+    
 const formatDT = (s) => { 
         let d = new Date(s); 
         // Ép kiểu sang chuỗi rồi mới padStart
