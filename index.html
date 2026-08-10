@@ -74,7 +74,7 @@ body {
     }
 
     async function xuatFile(type) {
-
+        showLoading("Đang gõ, chờ xíu!");
         const noiDung = document.getElementById('noiDung').value;
         const start1 = document.getElementById('startBB1').value;
         const start2 = document.getElementById('startBB2').value;
@@ -82,8 +82,6 @@ body {
 
         if(!noiDung || !start1 || !start2) { alert("Vui lòng điền đủ thông tin!"); return; }
     
-
-
         let tv = [];
         document.querySelectorAll('#nvContainer input:checked').forEach((cb, idx) => tv.push({ stt: idx+1, ho_ten: cb.value, nhiem_vu: noiDung }));
         
