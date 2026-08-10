@@ -27,8 +27,13 @@ body {
         }
         .form-group { margin-bottom: 15px; }
         input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px }
-        .chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-        .chip-item input { display: none; }
+        .chip-group {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 cột */
+    gap: 8px;
+    margin-top: 10px;
+        }
+    .chip-item input { display: none; }
         .chip-item label { padding: 5px 10px; background: #eee; border-radius: 15px; cursor: pointer; font-size: 13px; }
         .chip-item input:checked + label { background: #007bff; color: white; }
         button { background: #28a745; color: white; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
