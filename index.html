@@ -105,7 +105,7 @@ body {
             const doc = new window.docxtemplater(new PizZip(bytes.buffer), {paragraphLoop:true, linebreaks:true});
             doc.render(data);
             // saveAs(doc.getZip().generate({type:"blob"}), `${type === 'bb1' ? 'BB_PATC' : 'BB_HienTruong'}_${stt}.docx`);
-            saveAs(doc.getZip().generate({type:"blob"}), `${stt}{type === 'bb1' ? '. Pho bien truoc cong tac' : '. Pho bien tai hien truong'}.docx`);
+            saveAs(doc.getZip().generate({type:"blob"}), `${stt}${type === 'bb1' ? '. Pho bien truoc cong tac' : '. Pho bien tai hien truong'}.docx`);
 
         } catch(e) { alert("Lỗi: " + e.message); }
     }
