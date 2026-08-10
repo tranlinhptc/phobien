@@ -76,7 +76,8 @@ body {
         const stt = document.getElementById('stt').value;
 
         if(!noiDung || !start1 || !start2) { alert("Vui lòng điền đủ thông tin!"); return; }
-
+        
+        showLoading("Đang gõ, chờ xíu!");
         let tv = [];
         document.querySelectorAll('#nvContainer input:checked').forEach((cb, idx) => tv.push({ stt: idx+1, ho_ten: cb.value, nhiem_vu: noiDung }));
         
