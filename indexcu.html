@@ -1,482 +1,162 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XUẤT BIÊN BẢN</title>
-    <!-- Thư viện hỗ trợ xử lý file Word và tải file -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TNĐLĐ</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/pizzip@3.1.4/dist/pizzip.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/docxtemplater@3.37.2/build/docxtemplater.js"></script>
+    <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.11/docxtemplater.js"></script>
+<style>
+body { 
+            font-family: Arial, sans-serif; 
+            background-color: #f4f6f9; 
+            margin: 0; 
+            padding: 10px; /* Giảm padding trên điện thoại cho rộng */
+        }
+        
+        .container { 
+            width: 100%; /* Tràn viền màn hình di động */
+            max-width: 600px; /* Vẫn giữ giới hạn đẹp khi mở trên máy tính / iPad */
+            background: #ffffff; 
+            padding: 15px; /* Thu gọn padding bên trong cho thoáng */
+            border-radius: 12px; 
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); 
+            margin: auto; 
+            box-sizing: border-box; /* Đảm bảo padding không làm tràn viền */
+        }
+        .form-group { margin-bottom: 15px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px }
+        .chip-group {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 cột */
+    gap: 8px;
+    margin-top: 10px;
+        }
+    .chip-item input { display: none; }
+        .chip-item label { padding: 5px 10px; background: #eee; border-radius: 15px; cursor: pointer; font-size: 13px; }
+        .chip-item input:checked + label { background: #007bff; color: white; }
+        button { background: #28a745; color: white; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    /* ================Them d bao hieu load ding 02 dong duoi*/
+#loading {        display: none;    position: fixed;    inset: 0;    z-index: 99999;    background: rgba(255, 255, 255, 0.8);    align-items: center;    justify-content: center;
+    color: #007bff;    font-weight: bold;    font-size: 18px;
+}
+
     
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f9;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 800px;
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            margin: auto;
-        }
-        h2 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 25px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 8px;
-            color: #555;
-        }
-        input[type="text"],
-        input[type="datetime-local"],
-        input[type="file"],
-        select,
-        textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 14px;
-        }
-        textarea {
-            resize: vertical;
-            height: 80px;
-        }
-        .template-box {
-            background: #fff8e1;
-            border: 1px dashed #ffa000;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
-        .group-container {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 10px;
-        }
-        .group-box {
-            flex: 1;
-            border: 1px solid #ccc;
-            padding: 12px;
-            border-radius: 4px;
-            background: #fafafa;
-        }
-        .group-box h4 {
-            margin-top: 0;
-            margin-bottom: 10px;
-            color: #007bff;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 5px;
-        }
-        .checkbox-group {
-            max-height: 140px;
-            overflow-y: auto;
-        }
-        .checkbox-item {
-            margin-bottom: 6px;
-        }
-        .checkbox-item label {
-            font-weight: normal;
-            display: inline;
-            margin-left: 6px;
-            cursor: pointer;
-        }
-        .stats-box {
-            background: #eef9ff;
-            border: 1px dashed #007bff;
-            padding: 10px 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            color: #0056b3;
-            font-weight: bold;
-        }
-        .time-box {
-            background: #f9f9f9;
-            padding: 15px;
-            border-left: 4px solid #007bff;
-            margin-bottom: 15px;
-            border-radius: 0 4px 4px 0;
-            display: none;
-        }
-        .time-box.active {
-            display: block;
-        }
-        button {
-            background-color: #28a745;
-            color: white;
-            padding: 14px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            width: 100%;
-            font-weight: bold;
-        }
-        button:hover {
-            background-color: #218838;
-        }
     </style>
 </head>
 <body>
-
 <div class="container">
-    <h2>XUẤT BIÊN BẢN</h2>
-    
-    <!-- Chọn file template từ máy -->
-    <div class="template-box">
-        <h4 style="margin-top:0; color:#d35400;">Chọn biên bản xuất</h4>
-        <div class="form-group">
-            <label for="fileBB1">Mẫu PATC</label>
-            <input type="file" id="fileBB1" accept=".docx">
-        </div>
-        <div class="form-group" style="margin-bottom: 0;">
-            <label for="fileBB2">Mẫu hiện trường:</label>
-            <input type="file" id="fileBB2" accept=".docx">
-        </div>
-    </div>
-
-    <form id="bienBanForm">
-        
-        <!-- Chọn loại biên bản muốn xuất -->
-        <div class="form-group">
-            <label for="loaiBienBan">Chọn biên bản:</label>
-            <select id="loaiBienBan" onchange="toggleBienBanSections()" required>
-                <!-- <option value="both">Xuất cả 2Biên bản 1 và Biên bản 2</option> -->
-                <option value="bb1">Xuất BB PATC</option>
-                <option value="bb2">Xuất BB hiện trường</option>
-            </select>
-        </div>
-
-        <!-- Chọn số lượng nhóm -->
-        <div class="form-group">
-            <label for="soLuongNhom">Số nhóm công tác:</label>
-            <select id="soLuongNhom" onchange="toggleGroupMode()" required>
-                <option value="1">01 Nhóm</option>
-                <option value="2">02 Nhóm</option>
-            </select>
-        </div>
-
-        <!-- KHU VỰC 1 NHÓM -->
-        <div id="singleGroupSection">
-            <div class="form-group">
-                <label for="chiHuyChung">Chỉ huy trực tiếp:</label>
-                <select id="chiHuyChung" onchange="updateMemberCount()">
-                    <option value="Trần Văn Hoàng">A.Hoàng</option>
-                    <option value="Nguyễn Hữu Kính">A.Kính</option>
-                    <option value="Kim Văn Quỳnh">A.Quỳnh</option>
-                    <option value="Hồ Văn Huy">A.Huy</option>
-                    <option value="Hoàng Trần Quản Trọng">A.Trọng</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Chọn Nhân viên tham gia:</label>
-                <div class="checkbox-group" style="border: 1px solid #ccc; padding: 10px; border-radius: 4px; background: #fafafa;">
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Nguyễn Hữu Kính" onchange="updateMemberCount()"> <label>A.Kính</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Hoàng Trần Quản Trọng" onchange="updateMemberCount()"> <label>A.Trọng</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Trần Văn Hoàng" onchange="updateMemberCount()"> <label>A.Hoàng</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Kim Văn Quỳnh" onchange="updateMemberCount()"> <label>A.Quỳnh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Hồ Văn Huy" onchange="updateMemberCount()"> <label>A.Huy</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Lê Hữu Anh" onchange="updateMemberCount()"> <label>A.Anh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Trần Phúc Linh" onchange="updateMemberCount()"> <label>A.Linh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Tạ Quốc Đạt" onchange="updateMemberCount()"> <label>A.Đạt</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Ngô Văn Quang" onchange="updateMemberCount()"> <label>A.Quang</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Võ Ngọc Sơn" onchange="updateMemberCount()"> <label>A.Sơn</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Nguyễn Xuân Khánh" onchange="updateMemberCount()"> <label>A.Khánh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Đoàn Hoàng Quang Định" onchange="updateMemberCount()"> <label>A.Định</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Võ Văn Sỹ" onchange="updateMemberCount()"> <label>A.Sỹ</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Lưu Đức Minh" onchange="updateMemberCount()"> <label>A.Minh</label></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- KHU VỰC 2 NHÓM -->
-        <div id="dualGroupSection" style="display: none;">
-            <div class="group-container">
-                <!-- Nhóm 1 -->
-                <div class="group-box">
-                    <h4>Nhóm 1</h4>
-                    <div class="form-group" style="margin-bottom: 10px;">
-                        <label for="chiHuy1" style="font-size: 13px;">CHTT Nhóm 1:</label>
-                        <select id="chiHuy1" onchange="updateMemberCount()">
-                        <option value="Trần Văn Hoàng">A.Hoàng</option>
-                        <option value="Nguyễn Hữu Kính">A.Kính</option>
-                        <option value="Kim Văn Quỳnh">A.Quỳnh</option>
-                        <option value="Hồ Văn Huy">A.Huy</option>
-                        <option value="Hoàng Trần Quản Trọng">A.Trọng</option>
-                        </select>
-                    </div>
-                    <label style="font-size: 13px;">Nhân viên Nhóm 1:</label>
-                    <div class="checkbox-group">
-                        <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Nguyễn Hữu Kính" onchange="updateMemberCount()"> <label>A.Kính</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Hoàng Trần Quản Trọng" onchange="updateMemberCount()"> <label>A.Trọng</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Trần Văn Hoàng" onchange="updateMemberCount()"> <label>A.Hoàng</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Kim Văn Quỳnh" onchange="updateMemberCount()"> <label>A.Quỳnh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Hồ Văn Huy" onchange="updateMemberCount()"> <label>A.Huy</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Lê Hữu Anh" onchange="updateMemberCount()"> <label>A.Anh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Trần Phúc Linh" onchange="updateMemberCount()"> <label>A.Linh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Tạ Quốc Đạt" onchange="updateMemberCount()"> <label>A.Đạt</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Ngô Văn Quang" onchange="updateMemberCount()"> <label>A.Quang</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Võ Ngọc Sơn" onchange="updateMemberCount()"> <label>A.Sơn</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Nguyễn Xuân Khánh" onchange="updateMemberCount()"> <label>A.Khánh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Đoàn Hoàng Quang Định" onchange="updateMemberCount()"> <label>A.Định</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Võ Văn Sỹ" onchange="updateMemberCount()"> <label>A.Sỹ</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Lưu Đức Minh" onchange="updateMemberCount()"> <label>A.Minh</label></div>
-                    </div>
-                </div>
-                <!-- Nhóm 2 -->
-                <div class="group-box">
-                    <h4>Nhóm 2</h4>
-                    <div class="form-group" style="margin-bottom: 10px;">
-                        <label for="chiHuy2" style="font-size: 13px;">CHTT nhóm 2:</label>
-                        <select id="chiHuy2" onchange="updateMemberCount()">
-                        <option value="Trần Văn Hoàng">A.Hoàng</option>
-                        <option value="Nguyễn Hữu Kính">A.Kính</option>
-                        <option value="Kim Văn Quỳnh">A.Quỳnh</option>
-                        <option value="Hồ Văn Huy">A.Huy</option>
-                        <option value="Hoàng Trần Quản Trọng">A.Trọng</option>
-                        </select>
-                    </div>
-                    <label style="font-size: 13px;">Nhân viên Nhóm 2:</label>
-                    <div class="checkbox-group">
-                        <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Nguyễn Hữu Kính" onchange="updateMemberCount()"> <label>A.Kính</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Hoàng Trần Quản Trọng" onchange="updateMemberCount()"> <label>A.Trọng</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Trần Văn Hoàng" onchange="updateMemberCount()"> <label>A.Hoàng</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Kim Văn Quỳnh" onchange="updateMemberCount()"> <label>A.Quỳnh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Hồ Văn Huy" onchange="updateMemberCount()"> <label>A.Huy</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Lê Hữu Anh" onchange="updateMemberCount()"> <label>A.Anh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Trần Phúc Linh" onchange="updateMemberCount()"> <label>A.Linh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Tạ Quốc Đạt" onchange="updateMemberCount()"> <label>A.Đạt</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Ngô Văn Quang" onchange="updateMemberCount()"> <label>A.Quang</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Võ Ngọc Sơn" onchange="updateMemberCount()"> <label>A.Sơn</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Nguyễn Xuân Khánh" onchange="updateMemberCount()"> <label>A.Khánh</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Đoàn Hoàng Quang Định" onchange="updateMemberCount()"> <label>A.Định</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Võ Văn Sỹ" onchange="updateMemberCount()"> <label>A.Sỹ</label></div>
-                    <div class="checkbox-item"><input type="checkbox" name="nhanVienChung" value="Lưu Đức Minh" onchange="updateMemberCount()"> <label>A.Minh</label></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Thống kê tổng số người -->
-        <div class="stats-box" id="statsBox">
-            <!-- Tổng số thành viên tham gia: 0 người -->
-        </div>
-
-        <!-- Biên bản 1 -->
-        <div id="sectionBB1" class="time-box active">
-            <!-- <label><strong>Thời gian phổ biến PATC</strong></label> -->
-            <div class="form-group" style="margin-top: 10px;">
-                <!-- <label for="startBB1">Thời gian phổ biến PATC:</label> -->
-                <input type="text" id="startBB1" placeholder="Chọn ngày tháng phổ biến PATC" 
-               onfocus="(this.type='datetime-local')" 
-               onblur="if(!this.value)this.type='text'" 
-               class="form-control">
-            </div>
-            <input type="hidden" id="endBB1">
-        </div>
-
-       
-        <!-- Biên bản 2 -->
-        <div id="sectionBB2" class="time-box active" style="border-left-color: #28a745;">
-            <!-- <label><strong>Thời gian tại hiện trường</strong></label> -->
-            <div class="form-group" style="margin-top: 10px;">
-                <!-- <label for="startBB2">Thời gian tại hiện trường:</label> -->
-                <input type="text" id="startBB2" placeholder="Chọn ngày tháng hiện trường" 
-               onfocus="(this.type='datetime-local')" 
-               onblur="if(!this.value)this.type='text'" 
-               class="form-control">
-            </div>
-            <input type="hidden" id="endBB2">
-        </div>
-
-        <!-- Nội dung và Địa điểm -->
-        <div class="form-group">
-            <!-- <label for="noiDung">Nội dung công việc:</label> -->
-            <textarea id="noiDung" required placeholder="Nhập nội dung công việc..."></textarea>
-        </div>
-
-        <div class="form-group">
-            <!-- <label for="diaDiem">Phạm vi làm việc:</label> -->
-            <input type="text" id="diaDiem" required placeholder="Nhập phạm vi làm việc...">
-        </div>
-
-        <button type="button" onclick="xuatFileWord()">Tạo và Tải File Word Về Máy</button>
-    </form>
+    <h2>BIÊN BẢN</h2>
+    <div class="form-group"><label>Chỉ huy trực tiếp:</label><select id="chiHuy">
+        <option value="Trần Văn Hoàng">Mr Hoang</option>
+        <option value="Nguyễn Hữu Kính">Mr Kinh</option>
+        <option value="Kim Văn Quỳnh">Mr Quynh</option>
+        <option value="Hồ Văn Huy">Mr Huy</option>
+        <option value="Hoàng Trần Quản Trọng">Mr Trong</option>
+        <option value="Ngô Văn Quang">Mr Quang</option>
+        <option value="Võ Ngọc Sơn">Mr Son</option>
+        <option value="Lưu Đức Minh">Mr Minh</option>
+        <option value="Võ Văn Sỹ">Mr Sy</option>
+    </select></div>
+    <div class="form-group"><label>Nhân viên đơn vị công tác:</label><div class="chip-group" id="nvContainer"></div></div>
+    <div class="form-group"><input type="number" id="stt" placeholder="Số GĐKCT..."></div>
+    <div class="form-group"><textarea id="noiDung" placeholder="Nội dung..."></textarea></div>
+    <div class="form-group"><input type="text" id="diaDiem" placeholder="Địa điểm..."></div>
+    <div class="form-group"><label>Time PATC:</label><input type="datetime-local" id="startBB1"></div>
+    <div class="form-group"><label>Time Hiện trường:</label><input type="datetime-local" id="startBB2"></div>
+    <button style="background: #0056b3;" onclick="xuatFile('bb1')">Xuất 02 Biên bản</button>
+    <button style="background: #28a745;" onclick="xuatFile('bb2')">Xuất BB H.Trường</button>
 </div>
-
+<!-- ======================================Them d bao hieu load ding 01 dong duoi -->
+    <div id="loading">⏳ Đang gõ, chờ xíu...</div>
 <script>
-    function toggleGroupMode() {
-        const mode = document.getElementById('soLuongNhom').value;
-        document.getElementById('singleGroupSection').style.display = (mode === '1') ? 'block' : 'none';
-        document.getElementById('dualGroupSection').style.display = (mode === '2') ? 'block' : 'none';
-        updateMemberCount();
-    }
+    const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxlM-814su7_q0yS7Qx1bdwC1j9CB18Km6UOdMcJW4ifZUecl633RmEhvxnsUIwerlE/exec";
+    const ID_TEMPLATE_BB1 = "1Gj1PDFAHWeKG_2PCod4dLKHvXxq5xf6u"; 
+    const ID_TEMPLATE_BB2 = "1AN9tE1UvR1KV3YNcs5P9RFxmcnsxwkBd";
+    const dsNV = ["Hoàng Trần Quản Trọng", "Trần Văn Hoàng", "Kim Văn Quỳnh", "Hồ Văn Huy", "Lê Hữu Anh", "Trần Phúc Linh", "Tạ Quốc Đạt", "Ngô Văn Quang", "Võ Ngọc Sơn", "Nguyễn Xuân Khánh", "Đoàn Hoàng Quang Định", "Võ Văn Sỹ", "Lưu Đức Minh", "Nguyễn Hữu Kính"];
 
-    function updateMemberCount() {
-        const mode = document.getElementById('soLuongNhom').value;
-        let total = 0, cH = 0, cNV = 0;
-        if (mode === '1') {
-            cH = document.getElementById('chiHuyChung').value ? 1 : 0;
-            cNV = document.querySelectorAll('input[name="nhanVienChung"]:checked').length;
-        } else {
-            cH = (document.getElementById('chiHuy1').value ? 1 : 0) + (document.getElementById('chiHuy2').value ? 1 : 0);
-            cNV = document.querySelectorAll('input[name="nhanVien1"]:checked').length + document.querySelectorAll('input[name="nhanVien2"]:checked').length;
-        }
-        total = cH + cNV;
-        document.getElementById('statsBox').innerText = `Tổng số thành viên tham gia: ${total} người (${cH} Chỉ huy + ${cNV} Nhân viên)`;
-    }
-
-    function toggleBienBanSections() {
-        const choice = document.getElementById('loaiBienBan').value;
-        document.getElementById('sectionBB1').classList.toggle('active', choice === 'both' || choice === 'bb1');
-        document.getElementById('sectionBB2').classList.toggle('active', choice === 'both' || choice === 'bb2');
-    }
-
-    function setupAutoTime(startId, endId, minutesToAdd) {
-        document.getElementById(startId).addEventListener('change', function() {
-            if (this.value) {
-                let d = new Date(this.value);
-                d.setMinutes(d.getMinutes() + minutesToAdd);
-                document.getElementById(endId).value = d.toISOString().slice(0, 16);
-            } else {
-                document.getElementById(endId).value = '';
-            }
+    window.onload = () => {
+        let html = '';
+        dsNV.forEach((nv, idx) => {
+            let tenRutGon = "Mr." + nv.split(' ').pop();
+            html += `<div class="chip-item"><input type="checkbox" id="nv${idx}" value="${nv}"><label for="nv${idx}">${tenRutGon}</label></div>`;
         });
+        document.getElementById('nvContainer').innerHTML = html;
+        
+
+    let noiDung = document.getElementById('noiDung');
+    noiDung.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
+    });
+
     }
-    setupAutoTime('startBB1', 'endBB1', 30);
-    setupAutoTime('startBB2', 'endBB2', 10);
 
-    function xuatFileWord() {
-        if (typeof PizZip === 'undefined' || typeof docxtemplater === 'undefined') {
-            alert("Thư viện đang tải hoặc bị chặn. Vui lòng kiểm tra lại mạng hoặc F5 lại trang!");
-            return;
-        }
-
-        const choice = document.getElementById('loaiBienBan').value;
+    async function xuatFile(type) {
+// ======================================Them d bao hieu load ding 02 dong duoi
+        document.getElementById("loading").style.display = "flex";
+        
         const noiDung = document.getElementById('noiDung').value;
-        const diaDiem = document.getElementById('diaDiem').value;
-        const mode = document.getElementById('soLuongNhom').value;
+        const start1 = document.getElementById('startBB1').value;
+        const start2 = document.getElementById('startBB2').value;
+        const stt = document.getElementById('stt').value;
 
-        if (!noiDung || !diaDiem) {
-            alert('Vui lòng nhập Nội dung và Địa điểm công tác!');
-            return;
-        }
-
-        let chiHuyChinh = "";
-        let danhSachThanhVien = [];
-
-        if (mode === '1') {
-            chiHuyChinh = document.getElementById('chiHuyChung').value;
-            if (!chiHuyChinh) { alert('Vui lòng chọn Chỉ huy!'); return; }
-            
-            // CHỈ GỒM NHÂN VIÊN (KHÔNG ĐƯA CHỈ HUY VÀO MẢNG NÀY NỮA)
-            let i = 1;
-            document.querySelectorAll('input[name="nhanVienChung"]:checked').forEach(cb => {
-                danhSachThanhVien.push({ stt: i++, ho_ten: cb.value, nhiem_vu: noiDung });
-            });
-        } else {
-            let ch1 = document.getElementById('chiHuy1').value;
-            let ch2 = document.getElementById('chiHuy2').value;
-            chiHuyChinh = ch1 || ch2;
-            if (!ch1 && !ch2) { alert('Vui lòng chọn ít nhất một Chỉ huy nhóm!'); return; }
-
-            // CHỈ GỒM NHÂN VIÊN CỦA CÁC NHÓM
-            let i = 1;
-            document.querySelectorAll('input[name="nhanVien1"]:checked').forEach(cb => {
-                danhSachThanhVien.push({ stt: i++, ho_ten: cb.value, nhiem_vu: noiDung });
-            });
-            document.querySelectorAll('input[name="nhanVien2"]:checked').forEach(cb => {
-                danhSachThanhVien.push({ stt: i++, ho_ten: cb.value, nhiem_vu: noiDung });
-            });
-        }
-
-        // Tổng số thành viên = 1 Chỉ huy + số lượng nhân viên thực tế
-        let tongSoNhanVien = danhSachThanhVien.length;
-        let tongSoThanhVien = 1 + tongSoNhanVien;
-
-        const dataContext = {
-            nguoi_chu_tri: chiHuyChinh,
-            tong_so_tham_gia: `${tongSoThanhVien}/${tongSoThanhVien}`,
-            tong_so_vang: "Vắng 00",
+        if(!noiDung || !start1 || !start2) { alert("Vui lòng điền đủ thông tin!"); return; }
+    
+        let tv = [];
+        document.querySelectorAll('#nvContainer input:checked').forEach((cb, idx) => tv.push({ stt: idx+1, ho_ten: cb.value, nhiem_vu: noiDung }));
+        
+        let data = {
+            stt: stt,
+            nguoi_chu_tri: document.getElementById('chiHuy').value,
+            tong_so_tham_gia: `${tv.length + 1}/${tv.length + 1}`,
             noi_dung_cong_tac: noiDung,
-            dia_diem_cong_tac: diaDiem,
-            danh_sach_nhan_vien: danhSachThanhVien
+            dia_diem_cong_tac: document.getElementById('diaDiem').value,
+            danh_sach_nhan_vien: tv,
+            // Thời gian cho PATC
+            thoi_gian_bat_dau1: formatDT(start1),
+            thoi_gian_ket_thuc1: formatTime(new Date(new Date(start1).getTime() + 30*60000)),
+            ngay_pho_bien: formatDate(start1),
+            // Nhét thêm thời gian Hiện trường vào đây
+            thoi_gian_bat_dau2: formatDT(start2),
+            thoi_gian_ket_thuc2: formatTime(new Date(new Date(start2).getTime() + 10*60000))
         };
 
-        if (choice === 'both' || choice === 'bb1') {
-            let start = document.getElementById('startBB1').value;
-            let end = document.getElementById('endBB1').value;
-            if (!start) { alert('Vui lòng nhập thời gian Biên bản 1'); return; }
-            dataContext.thoi_gian_bat_dau = formatDateTime(start);
-            dataContext.thoi_gian_ket_thuc = formatDateTime(end);
-            processDocxFromFileInput('fileBB1', dataContext, 'Bien ban pho bien PATC.docx');
-        }
+        try {
+            const res = await fetch(`${GOOGLE_WEB_APP_URL}?action=getTemplate&fileId=${type === 'bb1' ? ID_TEMPLATE_BB1 : ID_TEMPLATE_BB2}`);
+            const result = await res.json();
+            const binary = window.atob(result.base64);
+            const bytes = new Uint8Array(binary.length);
+            for(let i=0; i<binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            const doc = new window.docxtemplater(new PizZip(bytes.buffer), {paragraphLoop:true, linebreaks:true});
+            doc.render(data);
 
-        if (choice === 'both' || choice === 'bb2') {
-            let start = document.getElementById('startBB2').value;
-            let end = document.getElementById('endBB2').value;
-            if (!start) { alert('Vui lòng nhập thời gian Biên bản 2'); return; }
-            dataContext.thoi_gian_bat_dau = formatDateTime(start);
-            dataContext.thoi_gian_ket_thuc = formatDateTime(end);
-            processDocxFromFileInput('fileBB2', dataContext, 'Bien ban pho bien hien truong.docx');
-        }
+            // saveAs(doc.getZip().generate({type:"blob"}), `${stt}.${type === 'bb1' ? ' Pho bien truoc cong tac' : ' Pho bien tai hien truong'}.docx` TAM LUU DAY; cCAI NAY XUAT TREN SSUNG BI ZIP
+            const blob = doc.getZip().generate({
+    type: "blob",
+    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+});
+
+saveAs(
+    blob,
+    `${stt}.${type === 'bb1' ? ' Pho bien truoc cong tac' : ' Pho bien tai hien truong'}.docx`
+            // ===============================
+);
+// ======================================Them d bao hieu load ding 01 dong duoi
+    document.getElementById("loading").style.display = "none";
+            
+        } catch(e) { alert("Lỗi: " + e.message); }
     }
 
-    function formatDateTime(dtStr) {
-        let d = new Date(dtStr);
-        let hh = String(d.getHours()).padStart(2, '0');
-        let min = String(d.getMinutes()).padStart(2, '0');
-        let dd = String(d.getDate()).padStart(2, '0');
-        let mm = String(d.getMonth() + 1).padStart(2, '0');
-        let yyyy = d.getFullYear();
-        return `Vào lúc ${hh} giờ ${min} ngày ${dd}/${mm}/${yyyy}`;
-    }
-
-    function processDocxFromFileInput(fileInputId, data, outputFilename) {
-        const fileInput = document.getElementById(fileInputId);
-        if (!fileInput.files || fileInput.files.length === 0) {
-            alert(`Vui lòng chọn file template cho ${fileInputId === 'fileBB1' ? 'Biên bản 1' : 'Biên bản 2'}!`);
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.readAsBinaryString(fileInput.files[0]);
-        reader.onload = function(evt) {
-            try {
-                let content = evt.target.result;
-                let zip = new PizZip(content);
-                let doc = new docxtemplater(zip, {
-                    paragraphLoop: true,
-                    linebreaks: true,
-                });
-
-                doc.render(data);
-
-                let out = doc.getZip().generate({
-                    type: "blob",
-                    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                });
-                saveAs(out, outputFilename);
-            } catch (error) {
-                console.error(error);
-                alert("Lỗi xử lý file Word: " + error.message);
-            }
-        };
-    }
+    
+const formatDT = (s) => { 
+        let d = new Date(s); 
+        // Ép kiểu sang chuỗi rồi mới padStart
+    let h = ('0' + d.getHours()).slice(-2);let m = ('0' + d.getMinutes()).slice(-2);let day = ('0' + d.getDate()).slice(-2);let month = ('0' + (d.getMonth() + 1)).slice(-2);let year = d.getFullYear();return `${h} giờ ${m} ngày ${day}/${month}/${year}`;};
+    const formatTime = (d) => {let h = ('0' + d.getHours()).slice(-2);let m = ('0' + d.getMinutes()).slice(-2);return `${h} giờ ${m}`};
+    const formatDate = (s) => { let d = new Date(s); let day = ('0' + d.getDate()).slice(-2);let month = ('0' + (d.getMonth() + 1)).slice(-2);let year = d.getFullYear();return `ngày ${day} tháng ${month} năm ${year}`;};
 </script>
-
 </body>
 </html>
