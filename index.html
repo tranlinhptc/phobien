@@ -83,6 +83,15 @@ body {
             html += `<div class="chip-item"><input type="checkbox" id="nv${idx}" value="${nv}"><label for="nv${idx}">${tenRutGon}</label></div>`;
         });
         document.getElementById('nvContainer').innerHTML = html;
+        
+
+    let noiDung = document.getElementById('noiDung');
+    noiDung.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
+    });
+};
+
     }
 
     async function xuatFile(type) {
