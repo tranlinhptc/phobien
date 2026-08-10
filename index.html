@@ -37,15 +37,14 @@ body {
 <body>
 <div class="container">
     <h2>BIÊN BẢN</h2>
-    <div class="form-group"><label>Chỉ huy:</label><select id="chiHuy">
-        <option>Trần Văn Hoàng</option>
-        <option value="Trần Văn Hoàng">A.Hoàng</option>
-        <option value="Nguyễn Hữu Kính">A.Kính</option>
-        <option value="Kim Văn Quỳnh">A.Quỳnh</option>
-        <option value="Hồ Văn Huy">A.Huy</option>
-        <option value="Hoàng Trần Quản Trọng">A.Trọng</option>
+    <div class="form-group"><label>Chỉ huy trực tiếp:</label><select id="chiHuy">
+        <option value="Trần Văn Hoàng">Mr Hoang</option>
+        <option value="Nguyễn Hữu Kính">Mr Kinh</option>
+        <option value="Kim Văn Quỳnh">Mr Quynh</option>
+        <option value="Hồ Văn Huy">Mr Huy</option>
+        <option value="Hoàng Trần Quản Trọng">Mr Trong</option>
     </select></div>
-    <div class="form-group"><label>Thành viên:</label><div class="chip-group" id="nvContainer"></div></div>
+    <div class="form-group"><label>Nhân viên đơn vị công tác:</label><div class="chip-group" id="nvContainer"></div></div>
     <div class="form-group"><input type="number" id="stt" placeholder="Số GĐKCT..."></div>
     <div class="form-group"><textarea id="noiDung" placeholder="Nội dung..."></textarea></div>
     <div class="form-group"><input type="text" id="diaDiem" placeholder="Địa điểm..."></div>
@@ -114,27 +113,9 @@ body {
 const formatDT = (s) => { 
         let d = new Date(s); 
         // Ép kiểu sang chuỗi rồi mới padStart
-        let h = ('0' + d.getHours()).slice(-2);
-        let m = ('0' + d.getMinutes()).slice(-2);
-        let day = ('0' + d.getDate()).slice(-2);
-        let month = ('0' + (d.getMonth() + 1)).slice(-2);
-        let year = d.getFullYear();
-        return `${h} giờ ${m} ngày ${day}/${month}/${year}`; 
-    };
-
-    const formatTime = (d) => {
-        let h = ('0' + d.getHours()).slice(-2);
-        let m = ('0' + d.getMinutes()).slice(-2);
-        return `${h} giờ ${m}`;
-    };
-
-    const formatDate = (s) => { 
-        let d = new Date(s); 
-        let day = ('0' + d.getDate()).slice(-2);
-        let month = ('0' + (d.getMonth() + 1)).slice(-2);
-        let year = d.getFullYear();
-        return `ngày ${day} tháng ${month} năm ${year}`; 
-    };
+    let h = ('0' + d.getHours()).slice(-2);let m = ('0' + d.getMinutes()).slice(-2);let day = ('0' + d.getDate()).slice(-2);let month = ('0' + (d.getMonth() + 1)).slice(-2);let year = d.getFullYear();return `${h} giờ ${m} ngày ${day}/${month}/${year}`;};
+    const formatTime = (d) => {let h = ('0' + d.getHours()).slice(-2);let m = ('0' + d.getMinutes()).slice(-2);return `${h} giờ ${m}`};
+    const formatDate = (s) => { let d = new Date(s); let day = ('0' + d.getDate()).slice(-2);let month = ('0' + (d.getMonth() + 1)).slice(-2);let year = d.getFullYear();return `ngày ${day} tháng ${month} năm ${year}`;};
 </script>
 </body>
 </html>
