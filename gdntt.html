@@ -2,270 +2,204 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Công Tác Phí - Đội Sửa Chữa Thí Nghiệm Điện 3</title>
-    <!-- Thư viện xuất Word và Excel -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.2/docxtemplater.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quản Lý Công Tác Phí - TNĐLĐ</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.11/docxtemplater.js"></script>
     <style>
-        body { font-family: 'Times New Roman', Times, serif; margin: 0; padding: 0; background-color: #f0f2f5; }
-        .container { max-width: 1200px; margin: 20px auto; background: white; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        
-        /* Tabs */
-        .tabs { display: flex; border-bottom: 2px solid #007bff; margin-bottom: 20px; }
-        .tab-btn { padding: 10px 20px; cursor: pointer; background: #e9ecef; border: none; border-radius: 5px 5px 0 0; font-weight: bold; margin-right: 5px; }
-        .tab-btn.active { background: #007bff; color: white; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        /* Form & Table */
-        .form-group { margin-bottom: 15px; }
-        .form-group label { font-weight: bold; display: inline-block; width: 150px; }
-        .form-group input, .form-group select { padding: 5px; border: 1px solid #ccc; border-radius: 4px; width: 300px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #000; padding: 8px; text-align: center; }
-        th { background-color: #e0e0e0; }
-        .btn { padding: 8px 15px; margin: 5px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; color: white; }
-        .btn-primary { background-color: #007bff; }
-        .btn-success { background-color: #28a745; }
-        .btn-danger { background-color: #dc3545; }
-        .btn-warning { background-color: #ffc107; color: black; }
-        .btn-export { background-color: #17a2b8; }
-        .total-row { font-weight: bold; background-color: #f9f9f9; }
-        .input-sm { width: 80px !important; text-align: center; }
-        .input-full { width: 95% !important; }
-        .note { font-size: 12px; color: #666; font-style: italic; margin-top: 5px; }
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 10px; }
+        .container { width: 100%; max-width: 600px; background: #ffffff; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin: auto; box-sizing: border-box; }
+        h2 { text-align: center; color: #0056b3; margin-top: 0; }
+        h3 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 5px; margin-top: 20px; }
+        .form-group { margin-bottom: 12px; }
+        label { font-weight: bold; font-size: 14px; display: block; margin-bottom: 4px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+        .chip-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 5px; }
+        .chip-item input { display: none; }
+        .chip-item label { padding: 6px 4px; background: #eee; border-radius: 15px; cursor: pointer; font-size: 12px; text-align: center; display: block; margin: 0; font-weight: normal; }
+        .chip-item input:checked + label { background: #007bff; color: white; font-weight: bold; }
+        button { background: #28a745; color: white; border: none; padding: 12px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; border-radius: 6px; font-size: 15px; }
+        .btn-blue { background: #007bff; }
+        .btn-orange { background: #fd7e14; }
+        .btn-red { background: #dc3545; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        th, td { border: 1px solid #ccc; padding: 5px; text-align: center; }
+        th { background-color: #e9ecef; }
+        .input-sm { width: 60px; padding: 4px; font-size: 13px; text-align: center; }
+        .input-full { width: 95%; padding: 4px; font-size: 13px; }
+        .money { font-weight: bold; color: #d63384; }
+        .total-row { background-color: #fff3cd; font-weight: bold; }
+        #loading { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(255, 255, 255, 0.9); align-items: center; justify-content: center; color: #007bff; font-weight: bold; font-size: 18px; }
+        .note { font-size: 12px; color: #666; font-style: italic; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1 style="text-align: center;">HỆ THỐNG QUẢN LÝ CÔNG TÁC PHÍ</h1>
-    <p style="text-align: center; font-weight: bold;">Đội Sửa chữa Thí nghiệm Điện 3 - Tổ Thí nghiệm Điện Lâm Đồng</p>
+    <h2>QUẢN LÝ CÔNG TÁC PHÍ</h2>
 
-    <!-- Tabs -->
-    <div class="tabs">
-        <button class="tab-btn active" onclick="openTab('tab1')">1. Đề cương công tác</button>
-        <button class="tab-btn" onclick="openTab('tab2')">2. Lệnh điều xe</button>
-        <button class="tab-btn" onclick="openTab('tab3')">3. Quyết toán</button>
-        <button class="tab-btn" onclick="openTab('tab4')">4. Cài đặt & Mẫu</button>
+    <!-- ================= KHU VỰC 1: ĐỀ CƯƠNG CÔNG TÁC ================= -->
+    <h3>1. Lập Đề cương công tác</h3>
+    <div class="form-group">
+        <label>Chọn nhân sự đi công tác:</label>
+        <div class="chip-group" id="nvDeCuong"></div>
     </div>
-
-    <!-- TAB 1: ĐỀ CƯƠNG CÔNG TÁC -->
-    <div id="tab1" class="tab-content active">
-        <h2>I. Thông tin chung</h2>
-        <div class="form-group"><label>Nội dung công tác:</label><input type="text" id="ndCongTac" value="Thí nghiệm hiệu chỉnh..."></div>
-        <div class="form-group"><label>Địa điểm:</label><input type="text" id="ddCongTac" value="TBA 220kV Tháp Chàm"></div>
-        <div class="form-group"><label>Thời gian:</label>Từ <input type="date" id="tgTu" value="2026-08-11"> Đến <input type="date" id="tgDen" value="2026-08-14"></div>
-
-        <h2>II. Danh sách nhân sự & Phương tiện</h2>
-        <button class="btn btn-success" onclick="addNhanSu()">+ Thêm nhân sự</button>
-        <table id="tblNhanSu">
-            <thead><tr><th>STT</th><th>Họ tên</th><th>Chức vụ</th><th>Số ngày</th><th>Mức CTP</th><th>Thành tiền</th><th>Ghi chú</th><th>Xóa</th></tr></thead>
-            <tbody></tbody>
-        </table>
-
-        <h3>Danh sách xe</h3>
-        <button class="btn btn-success" onclick="addXe()">+ Thêm xe</button>
-        <table id="tblXe">
-            <thead><tr><th>STT</th><th>Biển số</th><th>Lái xe</th><th>Số KM</th><th>Định mức (L/100km)</th><th>Đơn giá xăng</th><th>Dự trù nhiên liệu</th><th>Xóa</th></tr></thead>
-            <tbody></tbody>
-        </table>
-
-        <h2>III. Dự trù kinh phí</h2>
-        <div class="form-group"><label>Tiền phòng nghỉ:</label><input type="number" id="duTruPhong" value="0"></div>
-        <div class="form-group"><label>Tổng CTP dự kiến:</label><span id="tongCTP">0</span> VNĐ</div>
-        <div class="form-group"><label>Tổng dự trù nhiên liệu:</label><span id="tongNhienLieu">0</span> VNĐ</div>
-        
-        <button class="btn btn-primary" onclick="xuatWordDeCuong()">📄 Xuất Đề cương Word</button>
-        <button class="btn btn-export" onclick="luuNhap()">💾 Lưu nháp</button>
+    <div class="form-group">
+        <label>Nội dung công tác:</label>
+        <textarea id="ndDeCuong" rows="2" placeholder="Nhập nội dung..."></textarea>
     </div>
-
-    <!-- TAB 2: LỆNH ĐIỀU XE -->
-    <div id="tab2" class="tab-content">
-        <h2>Lệnh điều xe</h2>
-        <div class="form-group">
-            <label>Chọn xe:</label>
-            <select id="chonXe" onchange="hienThiLenhDieuXe()"></select>
-        </div>
-        <div id="khungLenhDieuXe" style="border: 1px solid #ccc; padding: 20px; margin-top: 20px;">
-            <!-- Nội dung lệnh điều xe sẽ hiển thị ở đây -->
-            <p><strong>Lái xe:</strong> <span id="ldx_Laixe"></span></p>
-            <p><strong>Biển số:</strong> <span id="ldx_BienSo"></span></p>
-            <p><strong>Nội dung:</strong> <span id="ldx_NoiDung"></span></p>
-            <p><strong>Thời gian:</strong> <span id="ldx_ThoiGian"></span></p>
-            <p><strong>Địa điểm:</strong> <span id="ldx_DiaDiem"></span></p>
-        </div>
-        <button class="btn btn-primary" onclick="xuatWordLenhDieuXe()">📄 Xuất Lệnh điều xe Word</button>
+    <div class="form-group">
+        <label>Địa điểm:</label>
+        <input type="text" id="ddDeCuong" placeholder="TBA 220kV...">
     </div>
-
-    <!-- TAB 3: QUYẾT TOÁN -->
-    <div id="tab3" class="tab-content">
-        <h2>3.1 Danh sách vé cầu đường</h2>
-        <button class="btn btn-warning" onclick="document.getElementById('fileXmlInput').click()">📥 Import XML</button>
-        <input type="file" id="fileXmlInput" multiple accept=".xml" style="display: none;" onchange="xuLyFileXML(this)">
-        <p class="note">Chọn một hoặc nhiều file XML hóa đơn (vé cầu đường, xăng dầu...). Tool sẽ tự động bóc tách.</p>
-        <table id="tblCauDuong">
-            <thead><tr><th>STT</th><th>Số xe</th><th>Số hóa đơn</th><th>Ngày</th><th>Số tiền</th><th>Ghi chú</th><th>Xóa</th></tr></thead>
-            <tbody></tbody>
-        </table>
-
-        <h2>3.2 Thống kê nhóm công tác (Thực tế)</h2>
-        <button class="btn btn-success" onclick="addNhanSuThucTe()">+ Thêm người</button>
-        <table id="tblNhanSuThucTe">
-            <thead><tr><th>STT</th><th>Họ tên</th><th>Chức vụ</th><th>Số ngày</th><th>Mức CTP</th><th>Thành tiền</th><th>Ghi chú</th><th>Xóa</th></tr></thead>
-            <tbody></tbody>
-        </table>
-
-        <h2>3.3 Phiếu thanh toán tổng hợp</h2>
-        <table>
-            <tr><td>Nhiên liệu:</td><td id="tt_NhienLieu">0</td></tr>
-            <tr><td>Công tác phí:</td><td id="tt_CTP">0</td></tr>
-            <tr><td>Cầu đường:</td><td id="tt_CauDuong">0</td></tr>
-            <tr><td>Phòng nghỉ:</td><td id="tt_PhongNghi">0</td></tr>
-            <tr class="total-row"><td>TỔNG CỘNG:</td><td id="tt_TongCong">0</td></tr>
-        </table>
-        <button class="btn btn-primary" onclick="xuatWordThanhToan()">📄 Xuất Phiếu thanh toán Word</button>
+    <div class="form-group">
+        <label>Thời gian:</label>
+        Từ <input type="date" id="tgTu" style="width: 48%; display: inline-block;"> 
+        Đến <input type="date" id="tgDen" style="width: 48%; display: inline-block;">
     </div>
-
-    <!-- TAB 4: CÀI ĐẶT & MẪU -->
-    <div id="tab4" class="tab-content">
-        <h2>Danh sách các ID giả (Placeholder) để làm file Word mẫu</h2>
-        <p>Anh/chị hãy copy các ID này vào file Word mẫu của mình. Khi xuất file, tool sẽ tự động thay thế bằng số liệu tương ứng.</p>
-        <ul>
-            <li><code>{{TenDonVi}}</code> - Tên đơn vị</li>
-            <li><code>{{NoiDungCongTac}}</code> - Nội dung công tác</li>
-            <li><code>{{DiaDiem}}</code> - Địa điểm</li>
-            <li><code>{{TuNgay}}</code> - Từ ngày</li>
-            <li><code>{{DenNgay}}</code> - Đến ngày</li>
-            <li><code>{{DanhSachNhanSu}}</code> - Bảng danh sách nhân sự (dạng bảng)</li>
-            <li><code>{{DanhSachXe}}</code> - Bảng danh sách xe (dạng bảng)</li>
-            <li><code>{{TongCTP}}</code> - Tổng tiền công tác phí</li>
-            <li><code>{{TongNhienLieu}}</code> - Tổng tiền nhiên liệu</li>
-            <li><code>{{TongCauDuong}}</code> - Tổng tiền cầu đường</li>
-            <li><code>{{TongPhongNghi}}</code> - Tổng tiền phòng nghỉ</li>
-            <li><code>{{TongCong}}</code> - Tổng cộng tất cả</li>
-        </ul>
-        <p class="note">Lưu ý: Để xuất được file Word, anh/chị cần có sẵn file mẫu `.docx` đã được đặt các ID này. Hiện tại tôi chưa có file mẫu của anh/chị, nên nút "Xuất Word" sẽ tạm thời báo lỗi hoặc xuất file trắng. Chúng ta sẽ hoàn thiện phần này sau khi anh/chị gửi file mẫu.</p>
+    <div class="form-group">
+        <label>Chọn xe & Nhập số KM dự kiến:</label>
+        <div class="chip-group" id="xeDeCuong"></div>
+        <div id="kmInputs" style="margin-top: 10px;"></div>
     </div>
+    <div class="form-group">
+        <label>Dự trù tiền phòng nghỉ (VNĐ):</label>
+        <input type="number" id="duTruPhong" value="0">
+    </div>
+    <button class="btn-blue" onclick="xuatWord('decuong')">📄 Xuất Đề cương Word</button>
+
+    <!-- ================= KHU VỰC 2: LỆNH ĐIỀU XE ================= -->
+    <h3>2. Lệnh điều xe</h3>
+    <div class="form-group">
+        <label>Chọn xe:</label>
+        <select id="chonXeDieuXe" onchange="hienThiLenhDieuXe()">
+            <option value="">-- Chọn xe --</option>
+        </select>
+    </div>
+    <div id="khungLenhDieuXe" style="border: 1px solid #ccc; padding: 10px; margin-top: 10px; background: #f9f9f9;">
+        <p><strong>Lái xe:</strong> <span id="ldx_Laixe">...</span></p>
+        <p><strong>Biển số:</strong> <span id="ldx_BienSo">...</span></p>
+        <p><strong>Nội dung:</strong> <span id="ldx_NoiDung">...</span></p>
+        <p><strong>Thời gian:</strong> <span id="ldx_ThoiGian">...</span></p>
+        <p><strong>Địa điểm:</strong> <span id="ldx_DiaDiem">...</span></p>
+    </div>
+    <button class="btn-orange" onclick="xuatWord('dieuxe')">📄 Xuất Lệnh điều xe Word</button>
+
+    <!-- ================= KHU VỰC 3: QUYẾT TOÁN ================= -->
+    <h3>3. Quyết toán (Sau khi đi về)</h3>
+    
+    <h4>3.1 Import hóa đơn XML</h4>
+    <button class="btn-blue" onclick="document.getElementById('fileXmlInput').click()">📥 Import XML (Xăng dầu, Cầu đường)</button>
+    <input type="file" id="fileXmlInput" multiple accept=".xml" style="display: none;" onchange="xuLyFileXML(this)">
+    <p class="note">Chọn nhiều file XML cùng lúc. Tool sẽ tự bóc tách.</p>
+    
+    <table id="tblHoaDon">
+        <thead><tr><th>STT</th><th>Loại</th><th>Số HĐ</th><th>Ngày</th><th>Số tiền</th><th>Xóa</th></tr></thead>
+        <tbody></tbody>
+    </table>
+
+    <h4>3.2 Thống kê nhóm công tác thực tế</h4>
+    <div class="chip-group" id="nvThucTe"></div>
+    <div id="dsThucTe" style="margin-top: 10px;"></div>
+
+    <h4>3.3 Tổng hợp thanh toán</h4>
+    <table>
+        <tr><td>Nhiên liệu:</td><td id="tt_NhienLieu" class="money">0</td></tr>
+        <tr><td>Công tác phí:</td><td id="tt_CTP" class="money">0</td></tr>
+        <tr><td>Cầu đường:</td><td id="tt_CauDuong" class="money">0</td></tr>
+        <tr><td>Phòng nghỉ:</td><td id="tt_PhongNghi" class="money">0</td></tr>
+        <tr class="total-row"><td>TỔNG CỘNG:</td><td id="tt_TongCong" class="money">0</td></tr>
+    </table>
+    <button class="btn-blue" onclick="xuatWord('thanhtoan')">📄 Xuất Phiếu thanh toán Word</button>
 </div>
 
+<div id="loading">⏳ Đang xử lý, chờ xíu...</div>
+
 <script>
-    // --- QUẢN LÝ TAB ---
-    function openTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        event.target.classList.add('active');
-        if(tabId === 'tab2') capNhatDanhSachXe();
-        if(tabId === 'tab3') capNhatThucTe();
-    }
+    // --- CẤU HÌNH ---
+    const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxlM-814su7_q0yS7Qx1bdwC1j9CB18Km6UOdMcJW4ifZUecl633RmEhvxnsUIwerlE/exec";
+    
+    // ID File Word mẫu trên Google Drive (Anh/chị cần tạo 3 file mẫu và thay ID vào đây)
+    const ID_TEMPLATE_DECUONG = "ID_FILE_MAU_DE_CUONG";
+    const ID_TEMPLATE_DIEUXE = "ID_FILE_MAU_DIEU_XE";
+    const ID_TEMPLATE_THANHTOAN = "ID_FILE_MAU_THANH_TOAN";
 
-    // --- TAB 1: ĐỀ CƯƠNG ---
-    let nhanSuData = [];
-    let xeData = [];
+    // Danh sách nhân viên
+    const dsNV = ["Nguyễn Hữu Kính", "Hoàng Trần Quản Trọng", "Ngô Văn Quang", "Trần Văn Hoàng", "Kim Văn Quỳnh", "Hồ Văn Huy", "Lê Hữu Anh", "Trần Phúc Linh", "Tạ Quốc Đạt", "Võ Ngọc Sơn", "Nguyễn Xuân Khánh", "Đoàn Hoàng Quang Định", "Võ Văn Sỹ", "Lưu Đức Minh"];
 
-    function addNhanSu() {
-        const tbl = document.querySelector('#tblNhanSu tbody');
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td class="stt"></td>
-            <td><input type="text" class="input-full" placeholder="Họ tên"></td>
-            <td><input type="text" class="input-sm" value="Nhân viên"></td>
-            <td><input type="number" class="input-sm days" value="1" onchange="tinhToanTab1()"></td>
-            <td>
-                <select class="input-sm rate" onchange="tinhToanTab1()">
-                    <option value="250000">250.000</option>
-                    <option value="100000">100.000</option>
-                </select>
-            </td>
-            <td class="money">0</td>
-            <td><input type="text" class="input-full" placeholder="Ghi chú"></td>
-            <td><button class="btn btn-danger" onclick="this.closest('tr').remove(); tinhToanTab1();">X</button></td>
-        `;
-        tbl.appendChild(row);
-        updateSTT('tblNhanSu');
-        tinhToanTab1();
-    }
+    // Danh sách xe cố định
+    const dsXe = [
+        { ten: "Transit", bienSo: "79B 33211", laiXe: "Lái xe Transit", dinhMuc: 20 },
+        { ten: "Ford Ranger", bienSo: "79C 038.20", laiXe: "Lái xe Ranger", dinhMuc: 15 },
+        { ten: "Ford Fortuner", bienSo: "79A 866.70", laiXe: "Lái xe Fortuner", dinhMuc: 19 }
+    ];
 
-    function addXe() {
-        const tbl = document.querySelector('#tblXe tbody');
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td class="stt"></td>
-            <td><input type="text" class="input-sm" placeholder="Biển số"></td>
-            <td><input type="text" class="input-full" placeholder="Lái xe"></td>
-            <td><input type="number" class="input-sm km" value="0" onchange="tinhToanTab1()"></td>
-            <td><input type="number" class="input-sm dinhMuc" value="19" onchange="tinhToanTab1()"></td>
-            <td><input type="number" class="input-sm donGia" value="22460" onchange="tinhToanTab1()"></td>
-            <td class="moneyXe">0</td>
-            <td><button class="btn btn-danger" onclick="this.closest('tr').remove(); tinhToanTab1();">X</button></td>
-        `;
-        tbl.appendChild(row);
-        updateSTT('tblXe');
-        tinhToanTab1();
-    }
-
-    function updateSTT(tableId) {
-        const rows = document.querySelectorAll(`#${tableId} tbody tr`);
-        rows.forEach((row, index) => {
-            row.querySelector('.stt').innerText = index + 1;
+    // --- KHỞI TẠO GIAO DIỆN ---
+    window.onload = function() {
+        // Tạo chip nhân viên cho Đề cương
+        let htmlNV = '';
+        dsNV.forEach((nv, idx) => {
+            let tenRutGon = "Mr." + nv.split(' ').pop();
+            htmlNV += `<div class="chip-item"><input type="checkbox" id="dc_nv${idx}" value="${nv}"><label for="dc_nv${idx}">${tenRutGon}</label></div>`;
         });
-    }
+        document.getElementById('nvDeCuong').innerHTML = htmlNV;
 
-    function tinhToanTab1() {
-        // Tính CTP
-        let tongCTP = 0;
-        document.querySelectorAll('#tblNhanSu tbody tr').forEach(row => {
-            const days = parseFloat(row.querySelector('.days').value) || 0;
-            const rate = parseFloat(row.querySelector('.rate').value) || 0;
-            const money = days * rate;
-            row.querySelector('.money').innerText = money.toLocaleString('vi-VN');
-            tongCTP += money;
+        // Tạo chip nhân viên cho Thực tế
+        let htmlNVTT = '';
+        dsNV.forEach((nv, idx) => {
+            let tenRutGon = "Mr." + nv.split(' ').pop();
+            htmlNVTT += `<div class="chip-item"><input type="checkbox" id="tt_nv${idx}" value="${nv}" onchange="capNhatDSThucTe()"><label for="tt_nv${idx}">${tenRutGon}</label></div>`;
         });
-        document.getElementById('tongCTP').innerText = tongCTP.toLocaleString('vi-VN');
+        document.getElementById('nvThucTe').innerHTML = htmlNVTT;
 
-        // Tính nhiên liệu
-        let tongNL = 0;
-        document.querySelectorAll('#tblXe tbody tr').forEach(row => {
-            const km = parseFloat(row.querySelector('.km').value) || 0;
-            const dinhMuc = parseFloat(row.querySelector('.dinhMuc').value) || 0;
-            const donGia = parseFloat(row.querySelector('.donGia').value) || 0;
-            const soLit = (km * dinhMuc) / 100;
-            const money = soLit * donGia;
-            row.querySelector('.moneyXe').innerText = money.toLocaleString('vi-VN');
-            tongNL += money;
+        // Tạo chip xe cho Đề cương
+        let htmlXe = '';
+        dsXe.forEach((xe, idx) => {
+            htmlXe += `<div class="chip-item"><input type="checkbox" id="dc_xe${idx}" value="${xe.bienSo}" onchange="hienThiNhapKM()"><label for="dc_xe${idx}">${xe.ten}</label></div>`;
         });
-        document.getElementById('tongNhienLieu').innerText = tongNL.toLocaleString('vi-VN');
-    }
+        document.getElementById('xeDeCuong').innerHTML = htmlXe;
 
-    // --- TAB 2: LỆNH ĐIỀU XE ---
-    function capNhatDanhSachXe() {
-        const select = document.getElementById('chonXe');
-        select.innerHTML = '<option value="">-- Chọn xe --</option>';
-        document.querySelectorAll('#tblXe tbody tr').forEach((row, index) => {
-            const bienSo = row.querySelector('input[placeholder="Biển số"]').value;
-            const laiXe = row.querySelector('input[placeholder="Lái xe"]').value;
-            if(bienSo) {
-                select.innerHTML += `<option value="${index}">${bienSo} - ${laiXe}</option>`;
+        // Đổ dữ liệu vào dropdown Lệnh điều xe
+        const selectXe = document.getElementById('chonXeDieuXe');
+        dsXe.forEach((xe, idx) => {
+            selectXe.innerHTML += `<option value="${idx}">${xe.ten} - ${xe.bienSo}</option>`;
+        });
+
+        // Lắng nghe sự kiện nhập liệu để tính toán
+        document.getElementById('duTruPhong').addEventListener('input', tinhToanThanhToan);
+    };
+
+    // --- XỬ LÝ ĐỀ CƯƠNG ---
+    function hienThiNhapKM() {
+        const container = document.getElementById('kmInputs');
+        container.innerHTML = '';
+        dsXe.forEach((xe, idx) => {
+            if(document.getElementById(`dc_xe${idx}`).checked) {
+                container.innerHTML += `
+                    <div style="display:flex; align-items:center; margin-bottom:5px;">
+                        <span style="width:120px; font-size:13px;">${xe.ten} (${xe.bienSo})</span>
+                        <input type="number" class="km-input" data-idx="${idx}" placeholder="Số KM" style="width:100px; padding:4px;" onchange="tinhToanThanhToan()">
+                        <span style="margin-left:10px; font-size:12px; color:blue;">ĐM: ${xe.dinhMuc}L/100km</span>
+                    </div>
+                `;
             }
         });
     }
 
+    // --- XỬ LÝ LỆNH ĐIỀU XE ---
     function hienThiLenhDieuXe() {
-        const index = document.getElementById('chonXe').value;
-        if(index === "") return;
-        const row = document.querySelectorAll('#tblXe tbody tr')[index];
-        document.getElementById('ldx_Laixe').innerText = row.querySelector('input[placeholder="Lái xe"]').value;
-        document.getElementById('ldx_BienSo').innerText = row.querySelector('input[placeholder="Biển số"]').value;
-        document.getElementById('ldx_NoiDung').innerText = document.getElementById('ndCongTac').value;
+        const idx = document.getElementById('chonXeDieuXe').value;
+        if(idx === "") return;
+        const xe = dsXe[idx];
+        document.getElementById('ldx_Laixe').innerText = xe.laiXe;
+        document.getElementById('ldx_BienSo').innerText = xe.bienSo;
+        document.getElementById('ldx_NoiDung').innerText = document.getElementById('ndDeCuong').value || "........................................";
         document.getElementById('ldx_ThoiGian').innerText = `Từ ${document.getElementById('tgTu').value} đến ${document.getElementById('tgDen').value}`;
-        document.getElementById('ldx_DiaDiem').innerText = document.getElementById('ddCongTac').value;
+        document.getElementById('ldx_DiaDiem').innerText = document.getElementById('ddDeCuong').value || "........................................";
     }
 
-    // --- TAB 3: QUYẾT TOÁN ---
+    // --- XỬ LÝ QUYẾT TOÁN ---
     function xuLyFileXML(input) {
         const files = input.files;
         if (files.length === 0) return;
@@ -282,137 +216,208 @@
                 const ngayLap = xmlDoc.querySelector("NLap")?.textContent || "N/A";
                 const tongTien = xmlDoc.querySelector("TgTTTBSo")?.textContent || "0";
                 
-                // Thêm vào bảng cầu đường (hoặc bảng nhiên liệu nếu là xăng dầu)
-                // Ở đây tạm thời đưa vào bảng cầu đường, anh/chị có thể phân loại sau
-                const tbl = document.querySelector('#tblCauDuong tbody');
+                // Phân loại dựa vào tên hàng hóa (Xăng/Dầu hay Vé cầu đường)
+                let loai = "Khác";
+                const tenHang = xmlDoc.querySelector("THHDVu")?.textContent || "";
+                if(tenHang.toLowerCase().includes("xăng") || tenHang.toLowerCase().includes("dầu")) {
+                    loai = "Nhiên liệu";
+                } else if(tenHang.toLowerCase().includes("vé") || tenHang.toLowerCase().includes("cầu") || tenHang.toLowerCase().includes("đường")) {
+                    loai = "Cầu đường";
+                }
+
+                const tbl = document.querySelector('#tblHoaDon tbody');
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="stt"></td>
-                    <td><input type="text" class="input-sm" placeholder="Biển số xe"></td>
+                    <td>${loai}</td>
                     <td>${soHoaDon}</td>
                     <td>${ngayLap}</td>
-                    <td class="money-cd">${parseFloat(tongTien).toLocaleString('vi-VN')}</td>
-                    <td><input type="text" class="input-full" placeholder="Ghi chú"></td>
-                    <td><button class="btn btn-danger" onclick="this.closest('tr').remove(); tinhToanTab3();">X</button></td>
+                    <td class="money-hd" data-loai="${loai}">${parseFloat(tongTien).toLocaleString('vi-VN')}</td>
+                    <td><button class="btn-red" style="padding:2px 5px; font-size:10px;" onclick="this.closest('tr').remove(); tinhToanThanhToan();">X</button></td>
                 `;
                 tbl.appendChild(row);
-                updateSTT('tblCauDuong');
-                tinhToanTab3();
+                updateSTT('tblHoaDon');
+                tinhToanThanhToan();
             };
             reader.readAsText(file);
         });
-        input.value = ''; // Reset input
+        input.value = '';
     }
 
-    function addNhanSuThucTe() {
-        const tbl = document.querySelector('#tblNhanSuThucTe tbody');
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td class="stt"></td>
-            <td><input type="text" class="input-full" placeholder="Họ tên"></td>
-            <td><input type="text" class="input-sm" value="Nhân viên"></td>
-            <td><input type="number" class="input-sm days-tt" value="1" onchange="tinhToanTab3()"></td>
-            <td>
-                <select class="input-sm rate-tt" onchange="tinhToanTab3()">
-                    <option value="250000">250.000</option>
-                    <option value="100000">100.000</option>
-                </select>
-            </td>
-            <td class="money-tt">0</td>
-            <td><input type="text" class="input-full" placeholder="Ghi chú"></td>
-            <td><button class="btn btn-danger" onclick="this.closest('tr').remove(); tinhToanTab3();">X</button></td>
-        `;
-        tbl.appendChild(row);
-        updateSTT('tblNhanSuThucTe');
-        tinhToanTab3();
-    }
-
-    function capNhatThucTe() {
-        // Copy từ Tab 1 sang Tab 3.2 nếu Tab 3.2 đang trống
-        const tblThucTe = document.querySelector('#tblNhanSuThucTe tbody');
-        if(tblThucTe.children.length === 0) {
-            document.querySelectorAll('#tblNhanSu tbody tr').forEach(row => {
-                const ten = row.querySelector('input[placeholder="Họ tên"]').value;
-                const chucVu = row.querySelector('input[value="Nhân viên"]').value;
-                const days = row.querySelector('.days').value;
-                const rate = row.querySelector('.rate').value;
-                const ghiChu = row.querySelector('input[placeholder="Ghi chú"]').value;
-                
-                const newRow = document.createElement('tr');
-                newRow.innerHTML = `
-                    <td class="stt"></td>
-                    <td><input type="text" class="input-full" value="${ten}"></td>
-                    <td><input type="text" class="input-sm" value="${chucVu}"></td>
-                    <td><input type="number" class="input-sm days-tt" value="${days}" onchange="tinhToanTab3()"></td>
-                    <td>
-                        <select class="input-sm rate-tt" onchange="tinhToanTab3()">
-                            <option value="250000" ${rate == 250000 ? 'selected' : ''}>250.000</option>
-                            <option value="100000" ${rate == 100000 ? 'selected' : ''}>100.000</option>
-                        </select>
-                    </td>
-                    <td class="money-tt">0</td>
-                    <td><input type="text" class="input-full" value="${ghiChu}"></td>
-                    <td><button class="btn btn-danger" onclick="this.closest('tr').remove(); tinhToanTab3();">X</button></td>
+    function capNhatDSThucTe() {
+        const container = document.getElementById('dsThucTe');
+        container.innerHTML = '';
+        dsNV.forEach((nv, idx) => {
+            if(document.getElementById(`tt_nv${idx}`).checked) {
+                container.innerHTML += `
+                    <div style="display:flex; align-items:center; margin-bottom:5px;">
+                        <span style="width:150px; font-size:13px;">${nv}</span>
+                        <input type="number" class="ngay-tt" data-ten="${nv}" value="1" min="1" style="width:60px; padding:4px;" onchange="tinhToanThanhToan()">
+                        <span style="margin-left:5px; font-size:12px;">ngày</span>
+                    </div>
                 `;
-                tblThucTe.appendChild(newRow);
+            }
+        });
+        tinhToanThanhToan();
+    }
+
+    function updateSTT(tableId) {
+        const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+        rows.forEach((row, index) => row.querySelector('.stt').innerText = index + 1);
+    }
+
+    function tinhToanThanhToan() {
+        // 1. Tính nhiên liệu từ XML
+        let tongNL = 0;
+        document.querySelectorAll('.money-hd').forEach(td => {
+            if(td.getAttribute('data-loai') === 'Nhiên liệu') {
+                tongNL += parseFloat(td.innerText.replace(/\./g, '')) || 0;
+            }
+        });
+        document.getElementById('tt_NhienLieu').innerText = tongNL.toLocaleString('vi-VN');
+
+        // 2. Tính cầu đường từ XML
+        let tongCD = 0;
+        document.querySelectorAll('.money-hd').forEach(td => {
+            if(td.getAttribute('data-loai') === 'Cầu đường') {
+                tongCD += parseFloat(td.innerText.replace(/\./g, '')) || 0;
+            }
+        });
+        document.getElementById('tt_CauDuong').innerText = tongCD.toLocaleString('vi-VN');
+
+        // 3. Tính CTP thực tế (Mặc định 250k/ngày)
+        let tongCTP = 0;
+        document.querySelectorAll('.ngay-tt').forEach(input => {
+            const ngay = parseFloat(input.value) || 0;
+            tongCTP += ngay * 250000;
+        });
+        document.getElementById('tt_CTP').innerText = tongCTP.toLocaleString('vi-VN');
+
+        // 4. Phòng nghỉ
+        const phongNghi = parseFloat(document.getElementById('duTruPhong').value) || 0;
+        document.getElementById('tt_PhongNghi').innerText = phongNghi.toLocaleString('vi-VN');
+
+        // 5. Tổng cộng
+        const tongCong = tongNL + tongCD + tongCTP + phongNghi;
+        document.getElementById('tt_TongCong').innerText = tongCong.toLocaleString('vi-VN');
+    }
+
+    // --- XUẤT FILE WORD ---
+    async function xuatWord(type) {
+        document.getElementById("loading").style.display = "flex";
+        
+        let data = {};
+        let fileId = "";
+        let fileName = "";
+
+        if (type === 'decuong') {
+            fileId = ID_TEMPLATE_DECUONG;
+            fileName = "De_cuong_cong_tac.docx";
+            
+            // Lấy danh sách nhân sự
+            let nhanSu = [];
+            document.querySelectorAll('#nvDeCuong input:checked').forEach((cb, idx) => {
+                nhanSu.push({ stt: idx+1, ho_ten: cb.value, nhiem_vu: "Thí nghiệm" });
             });
-            updateSTT('tblNhanSuThucTe');
-            tinhToanTab3();
+
+            // Lấy danh sách xe và KM
+            let danhSachXe = [];
+            document.querySelectorAll('.km-input').forEach(input => {
+                const idx = input.getAttribute('data-idx');
+                const km = parseFloat(input.value) || 0;
+                const xe = dsXe[idx];
+                const soLit = (km * xe.dinhMuc) / 100;
+                const tien = soLit * 22460; // Tạm tính giá xăng 22.460
+                danhSachXe.push({ 
+                    ten_xe: xe.ten, bien_so: xe.bienSo, lai_xe: xe.laiXe, 
+                    so_km: km, dinh_muc: xe.dinhMuc, so_lit: soLit.toFixed(2), 
+                    don_gia: 22460, thanh_tien: tien.toLocaleString('vi-VN') 
+                });
+            });
+
+            data = {
+                noi_dung: document.getElementById('ndDeCuong').value,
+                dia_diem: document.getElementById('ddDeCuong').value,
+                tu_ngay: document.getElementById('tgTu').value,
+                den_ngay: document.getElementById('tgDen').value,
+                danh_sach_nhan_su: nhanSu,
+                danh_sach_xe: danhSachXe,
+                du_tru_phong: (parseFloat(document.getElementById('duTruPhong').value) || 0).toLocaleString('vi-VN')
+            };
+
+        } else if (type === 'dieuxe') {
+            fileId = ID_TEMPLATE_DIEUXE;
+            const idx = document.getElementById('chonXeDieuXe').value;
+            if(idx === "") { alert("Chọn xe!"); document.getElementById("loading").style.display = "none"; return; }
+            const xe = dsXe[idx];
+            fileName = `Lenh_dieu_xe_${xe.bienSo}.docx`;
+
+            data = {
+                lai_xe: xe.laiXe,
+                bien_so: xe.bienSo,
+                noi_dung: document.getElementById('ndDeCuong').value,
+                thoi_gian: `Từ ${document.getElementById('tgTu').value} đến ${document.getElementById('tgDen').value}`,
+                dia_diem: document.getElementById('ddDeCuong').value
+            };
+
+        } else if (type === 'thanhtoan') {
+            fileId = ID_TEMPLATE_THANHTOAN;
+            fileName = "Phieu_thanh_toan.docx";
+
+            // Lấy danh sách nhân sự thực tế
+            let nhanSuTT = [];
+            document.querySelectorAll('.ngay-tt').forEach(input => {
+                nhanSuTT.push({ 
+                    ho_ten: input.getAttribute('data-ten'), 
+                    so_ngay: input.value, 
+                    thanh_tien: (input.value * 250000).toLocaleString('vi-VN') 
+                });
+            });
+
+            // Lấy hóa đơn XML
+            let hoaDon = [];
+            document.querySelectorAll('#tblHoaDon tbody tr').forEach(row => {
+                hoaDon.push({
+                    loai: row.cells[1].innerText,
+                    so_hd: row.cells[2].innerText,
+                    ngay: row.cells[3].innerText,
+                    so_tien: row.cells[4].innerText
+                });
+            });
+
+            data = {
+                danh_sach_nhan_su: nhanSuTT,
+                danh_sach_hoa_don: hoaDon,
+                tong_nhien_lieu: document.getElementById('tt_NhienLieu').innerText,
+                tong_ctp: document.getElementById('tt_CTP').innerText,
+                tong_cau_duong: document.getElementById('tt_CauDuong').innerText,
+                tong_phong_nghi: document.getElementById('tt_PhongNghi').innerText,
+                tong_cong: document.getElementById('tt_TongCong').innerText
+            };
+        }
+
+        // Gọi API lấy file mẫu và render
+        try {
+            const res = await fetch(`${GOOGLE_WEB_APP_URL}?action=getTemplate&fileId=${fileId}`);
+            const result = await res.json();
+            const binary = window.atob(result.base64);
+            const bytes = new Uint8Array(binary.length);
+            for(let i=0; i<binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            const doc = new window.docxtemplater(new PizZip(bytes.buffer), {paragraphLoop:true, linebreaks:true});
+            doc.render(data);
+
+            const blob = doc.getZip().generate({
+                type: "blob",
+                mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            });
+
+            saveAs(blob, fileName);
+            document.getElementById("loading").style.display = "none";
+        } catch(e) { 
+            alert("Lỗi: " + e.message); 
+            document.getElementById("loading").style.display = "none";
         }
     }
-
-    function tinhToanTab3() {
-        // Tính CTP thực tế
-        let tongCTP = 0;
-        document.querySelectorAll('#tblNhanSuThucTe tbody tr').forEach(row => {
-            const days = parseFloat(row.querySelector('.days-tt').value) || 0;
-            const rate = parseFloat(row.querySelector('.rate-tt').value) || 0;
-            const money = days * rate;
-            row.querySelector('.money-tt').innerText = money.toLocaleString('vi-VN');
-            tongCTP += money;
-        });
-
-        // Tính cầu đường
-        let tongCD = 0;
-        document.querySelectorAll('#tblCauDuong tbody tr').forEach(row => {
-            const moneyText = row.querySelector('.money-cd').innerText.replace(/\./g, '');
-            tongCD += parseFloat(moneyText) || 0;
-        });
-
-        // Lấy nhiên liệu từ Tab 1 (tạm tính)
-        const tongNL = parseFloat(document.getElementById('tongNhienLieu').innerText.replace(/\./g, '')) || 0;
-        const tongPhong = parseFloat(document.getElementById('duTruPhong').value) || 0;
-
-        document.getElementById('tt_NhienLieu').innerText = tongNL.toLocaleString('vi-VN');
-        document.getElementById('tt_CTP').innerText = tongCTP.toLocaleString('vi-VN');
-        document.getElementById('tt_CauDuong').innerText = tongCD.toLocaleString('vi-VN');
-        document.getElementById('tt_PhongNghi').innerText = tongPhong.toLocaleString('vi-VN');
-        document.getElementById('tt_TongCong').innerText = (tongNL + tongCTP + tongCD + tongPhong).toLocaleString('vi-VN');
-    }
-
-    // --- XUẤT WORD (DEMO) ---
-    function xuatWordDeCuong() {
-        alert("Chức năng xuất Word Đề cương đang được phát triển. Cần file mẫu .docx của anh/chị.");
-    }
-    function xuatWordLenhDieuXe() {
-        alert("Chức năng xuất Word Lệnh điều xe đang được phát triển. Cần file mẫu .docx của anh/chị.");
-    }
-    function xuatWordThanhToan() {
-        alert("Chức năng xuất Word Phiếu thanh toán đang được phát triển. Cần file mẫu .docx của anh/chị.");
-    }
-
-    // --- LƯU NHÁP ---
-    function luuNhap() {
-        alert("Đã lưu nháp vào trình duyệt!");
-    }
-
-    // Khởi tạo dữ liệu mẫu
-    window.onload = function() {
-        addNhanSu();
-        addNhanSu();
-        addXe();
-        tinhToanTab1();
-    };
 </script>
 </body>
 </html>
