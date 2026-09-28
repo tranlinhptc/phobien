@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh Toán Công Tác Phí</title>
+    <style>
+        body { font-family: 'Times New Roman', Times, serif; margin: 20px; background-color: #f4f4f4; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1, h2 { text-align: center; text-transform: uppercase; }
+        .header-info { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .header-info div { width: 45%; }
+        .header-info p { margin: 5px 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #000; padding: 8px; text-align: center; }
+        th { background-color: #e0e0e0; font-weight: bold; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { font-weight: bold; margin-right: 10px; }
+        .input-group input, .input-group select { padding: 5px; border: 1px solid #ccc; border-radius: 4px; }
+        .btn { padding: 10px 20px; margin: 5px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; color: white; }
+        .btn-add { background-color: #28a745; }
+        .btn-export { background-color: #007bff; }
+        .btn-print { background-color: #ffc107; color: black; }
+        .btn-delete { background-color: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
+        .btn-save { background-color: #17a2b8; }
+        .total-row { font-weight: bold; background-color: #f9f9f9; }
+        .note-input { width: 90%; border: none; border-bottom: 1px dashed #ccc; text-align: center; }
+        .note-input:focus { outline: none; border-bottom: 1px solid #000; }
+        .money-input { width: 80px; text-align: right; border: none; border-bottom: 1px dashed #ccc; }
+        .money-input:focus { outline: none; border-bottom: 1px solid #000; }
+        @media print {
+            body { background: white; margin: 0; }
+            .container { box-shadow: none; padding: 0; }
+            .no-print { display: none; }
+            th { background-color: #e0e0e0 !important; -webkit-print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="no-print" style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #ccc; padding-bottom: 15px;">
+        <h2>ỨNG DỤNG THANH TOÁN CÔNG TÁC PHÍ</h2>
+        <p>Nhập thông tin bên dưới, sau đó bấm "Xuất Excel" hoặc "In" để hoàn tất.</p>
+    </div>
+
+    <!-- Phần thông tin chung -->
+    <div class="header-info">
+        <div>
+            <p><strong>ĐƠN VỊ:</strong> ĐỘI SỬA CHỮA THÍ NGHIỆM ĐIỆN 3</p>
+            <p><strong>TỔ:</strong> TỔ THÍ NGHIỆM ĐIỆN LÂM ĐỒNG</p>
+            <p><strong>Số:</strong> <input type="text" id="soChungTu" value="755/TNLĐ" style="width: 100px;"></p>
+        </div>
+        <div style="text-align: right;">
+            <p><strong>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</strong></p>
+            <p><strong>Độc lập - Tự do - Hạnh phúc</strong></p>
+            <p><em>Khánh Hòa, ngày <input type="text" id="ngay" value="20" style="width: 30px;"> tháng <input type="text" id="thang" value="08" style="width: 30px;"> năm <input type="text" id="nam" value="2026" style="width: 50px;"></em></p>
+        </div>
+    </div>
+
+    <h2 style="margin-top: 30px;">BẢNG THANH TOÁN TIỀN CÔNG TÁC PHÍ</h2>
+    <p style="text-align: center;"><strong>Nội dung:</strong> <input type="text" id="noiDung" value="Chi phí phục vụ công tác tại TBA 220kV Tháp Chàm và TBA 220kV Phan Thiết" style="width: 80%; text-align: center; border: none; border-bottom: 1px dashed #ccc;"></p>
+
+    <!-- Bảng nhập liệu -->
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th style="width: 40px;">STT</th>
+                <th>Họ và tên</th>
+                <th style="width: 100px;">Chức vụ</th>
+                <th style="width: 80px;">Số ngày</th>
+                <th style="width: 120px;">Mức phụ cấp (đ/ngày)</th>
+                <th style="width: 120px;">Thành tiền (đ)</th>
+                <th>Ghi chú</th>
+                <th class="no-print" style="width: 50px;">Xóa</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- Dữ liệu sẽ được thêm bằng JS -->
+        </tbody>
+        <tfoot>
+            <tr class="total-row">
+                <td colspan="5" style="text-align: right;">TỔNG CỘNG:</td>
+                <td id="totalMoney">0</td>
+                <td colspan="2"></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <!-- Nút điều khiển -->
+    <div class="no-print" style="margin-top: 20px; text-align: center;">
+        <button class="btn btn-add" onclick="addRow()">+ Thêm người</button>
+        <button class="btn btn-export" onclick="exportToExcel()">📥 Xuất Excel</button>
+        <button class="btn btn-print" onclick="window.print()">🖨️ In / Lưu PDF</button>
+        <button class="btn btn-save" onclick="saveData()">💾 Lưu nháp (Local)</button>
+    </div>
+
+    <!-- Phần chữ ký -->
+    <div style="display: flex; justify-content: space-between; margin-top: 50px; text-align: center;">
+        <div>
+            <p><strong>Đội Trưởng</strong></p>
+            <p style="margin-top: 50px;">Phan Đình Minh</p>
+        </div>
+        <div>
+            <p><strong>Kế toán thanh toán</strong></p>
+            <p style="margin-top: 50px;">Nguyễn Thanh Loan</p>
+        </div>
+        <div>
+            <p><strong>Tổ Trưởng</strong></p>
+            <p style="margin-top: 50px;">Nguyễn Hữu Kính</p>
+        </div>
+        <div>
+            <p><strong>Người đề nghị thanh toán</strong></p>
+            <p style="margin-top: 50px;">Nguyễn Xuân Khánh</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Dữ liệu mẫu ban đầu (có thể sửa trực tiếp trong code)
+    const initialData = [
+        { name: "Võ Ngọc Sơn", role: "Nhân viên", days: 2, rate: 250000, note: "Ngày 07->08/8/2026" },
+        { name: "Lưu Đức Minh", role: "Nhân viên", days: 2, rate: 250000, note: "Ngày 07->08/8/2026" },
+        { name: "Nguyễn Xuân Khánh", role: "Nhân viên", days: 2, rate: 250000, note: "Ngày 07->08/8/2026" },
+        { name: "Nguyễn Mạnh Hiệp", role: "Nhân viên", days: 2, rate: 250000, note: "Ngày 07->08/8/2026" },
+        { name: "Kim Văn Quỳnh", role: "Nhân viên", days: 2, rate: 250000, note: "Ngày 07->08/8/2026" },
+        { name: "Trần Phúc Linh", role: "Nhân viên", days: 2, rate: 250000, note: "Ngày 07->08/8/2026" },
+        { name: "Mai Văn Giáp", role: "Nhân viên", days: 2, rate: 250000, note: "Ngày 07->08/8/2026" },
+        { name: "Nguyễn Hữu Kính", role: "Tổ trưởng", days: 2, rate: 250000, note: "Ngày 07->08/8/2026" },
+        { name: "Ngô Văn Quang", role: "Tổ phó", days: 2, rate: 250000, note: "Ngày 07->08/8/2026" },
+        { name: "Nguyễn Mạnh Hiệp", role: "Tổ trưởng", days: 2, rate: 250000, note: "Ngày 07->08/8/2026" }
+    ];
+
+    // Hàm định dạng tiền tệ
+    function formatMoney(amount) {
+        return amount.toLocaleString('vi-VN');
+    }
+
+    // Hàm thêm dòng vào bảng
+    function addRow(data = null) {
+        const tbody = document.getElementById('tableBody');
+        const row = document.createElement('tr');
+        
+        // Nếu có dữ liệu truyền vào thì điền, không thì để trống
+        const name = data ? data.name : "";
+        const role = data ? data.role : "Nhân viên";
+        const days = data ? data.days : 1;
+        const rate = data ? data.rate : 250000;
+        const note = data ? data.note : "";
+
+        row.innerHTML = `
+            <td class="stt"></td>
+            <td><input type="text" class="name-input" value="${name}" style="width: 90%; border: none; text-align: center; font-weight: bold;"></td>
+            <td><input type="text" class="role-input" value="${role}" style="width: 90%; border: none; text-align: center;"></td>
+            <td><input type="number" class="days-input" value="${days}" min="1" style="width: 50px; text-align: center; border: none; border-bottom: 1px dashed #ccc;"></td>
+            <td>
+                <select class="rate-input" style="border: none; background: transparent;">
+                    <option value="250000" ${rate == 250000 ? 'selected' : ''}>250.000</option>
+                    <option value="100000" ${rate == 100000 ? 'selected' : ''}>100.000</option>
+                </select>
+            </td>
+            <td class="money-cell">0</td>
+            <td><input type="text" class="note-input" value="${note}" placeholder="Ghi chú..."></td>
+            <td class="no-print"><button class="btn btn-delete" onclick="deleteRow(this)">X</button></td>
+        `;
+        tbody.appendChild(row);
+        updateRowCalculations(row);
+        updateSTT();
+        calculateTotal();
+    }
+
+    // Hàm xóa dòng
+    function deleteRow(btn) {
+        if(confirm("Bạn có chắc muốn xóa người này?")) {
+            const row = btn.parentNode.parentNode;
+            row.remove();
+            updateSTT();
+            calculateTotal();
+        }
+    }
+
+    // Cập nhật số thứ tự
+    function updateSTT() {
+        const rows = document.querySelectorAll('#tableBody tr');
+        rows.forEach((row, index) => {
+            row.querySelector('.stt').innerText = index + 1;
+        });
+    }
+
+    // Tính toán cho từng dòng
+    function updateRowCalculations(row) {
+        const days = parseFloat(row.querySelector('.days-input').value) || 0;
+        const rate = parseFloat(row.querySelector('.rate-input').value) || 0;
+        const money = days * rate;
+        row.querySelector('.money-cell').innerText = formatMoney(money);
+        return money;
+    }
+
+    // Tính tổng cộng
+    function calculateTotal() {
+        let total = 0;
+        const rows = document.querySelectorAll('#tableBody tr');
+        rows.forEach(row => {
+            total += updateRowCalculations(row);
+        });
+        document.getElementById('totalMoney').innerText = formatMoney(total);
+    }
+
+    // Lắng nghe sự kiện thay đổi trên bảng
+    document.getElementById('tableBody').addEventListener('input', function(e) {
+        if (e.target.classList.contains('days-input') || e.target.classList.contains('rate-input')) {
+            calculateTotal();
+        }
+    });
+
+    // Hàm xuất Excel (CSV)
+    function exportToExcel() {
+        let csvContent = "\uFEFF"; // BOM để Excel hiển thị tiếng Việt
+        csvContent += "STT,Họ và tên,Chức vụ,Số ngày,Mức phụ cấp,Thành tiền,Ghi chú\n";
+
+        const rows = document.querySelectorAll('#tableBody tr');
+        let total = 0;
+
+        rows.forEach((row, index) => {
+            const stt = index + 1;
+            const name = row.querySelector('.name-input').value;
+            const role = row.querySelector('.role-input').value;
+            const days = row.querySelector('.days-input').value;
+            const rate = row.querySelector('.rate-input').value;
+            const money = parseFloat(days) * parseFloat(rate);
+            const note = row.querySelector('.note-input').value;
+            total += money;
+
+            // Bọc trong dấu ngoặc kép để tránh lỗi dấu phẩy
+            csvContent += `${stt},"${name}","${role}",${days},${rate},${money},"${note}"\n`;
+        });
+
+        csvContent += `,,,,,TỔNG CỘNG: ${total},\n`;
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", "Bang_Thanh_Toan_CTP.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // Hàm lưu dữ liệu vào LocalStorage (để không mất khi tải lại trang)
+    function saveData() {
+        const rows = document.querySelectorAll('#tableBody tr');
+        const data = [];
+        rows.forEach(row => {
+            data.push({
+                name: row.querySelector('.name-input').value,
+                role: row.querySelector('.role-input').value,
+                days: row.querySelector('.days-input').value,
+                rate: row.querySelector('.rate-input').value,
+                note: row.querySelector('.note-input').value
+            });
+        });
+        localStorage.setItem('ctp_data', JSON.stringify(data));
+        alert("Đã lưu dữ liệu nháp vào trình duyệt!");
+    }
+
+    // Tải dữ liệu khi mở trang
+    function loadData() {
+        const saved = localStorage.getItem('ctp_data');
+        if (saved) {
+            const data = JSON.parse(saved);
+            data.forEach(item => addRow(item));
+        } else {
+            initialData.forEach(item => addRow(item));
+        }
+    }
+
+    // Khởi tạo
+    window.onload = loadData;
+
+</script>
+</body>
+</html>
