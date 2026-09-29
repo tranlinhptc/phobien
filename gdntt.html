@@ -303,18 +303,101 @@
     }
 
     // --- XUẤT FILE WORD ---
-    async function xuatWord(type) {
+async function xuatWord(type) {
     document.getElementById("loading").style.display = "flex";
     
     let data = {};
     let fileId = "";
     let fileName = "";
 
-    // ... (Phần gán dữ liệu data giữ nguyên như code cũ của anh/chị) ...
-    // Tôi giả định anh/chị đã có logic gán data ở trên.
-    // Nếu chưa, hãy copy lại phần gán data từ code tôi gửi lần trước.
+    // --- GÁN DỮ LIỆU CHO TỪNG LOẠI FILE ---
+    if (type === 'decuong') {
+        fileId = ID_TEMPLATE_DECUONG;
+        fileName = "De_cuong_cong_tac.docx";
+        
+        // Lấy danh sách nhân sự
+        let nhanSu = [];
+        document.querySelectorAll('#nvDeCuong input:checked').forEach((cb, idx) => {
+            nhanSu.push({ stt: idx+1, ho_ten: cb.value, nhiem_vu: "Thí nghiệm" });
+        });
 
-    // --- ĐOẠN SỬA LỖI ---
+        // Lấy danh sách xe và KM
+        let danhSachXe = [];
+        document.querySelectorAll('.km-input').forEach(input => {
+            const idx = input.getAttribute('data-idx');
+            const km = parseFloat(input.value) || 0;
+            const xe = dsXe[idx];
+            const soLit = (km * xe.dinhMuc) / 100;
+            const tien = soLit * 22460; // Giá xăng tạm tính
+            danhSachXe.push({ 
+                ten_xe: xe.ten, bien_so: xe.bienSo, lai_xe: xe.laiXe, 
+                so_km: km, dinh_muc: xe.dinhMuc, so_lit: soLit.toFixed(2), 
+                don_gia: 22460, thanh_tien: tien.toLocaleString('vi-VN') 
+            });
+        });
+
+        data = {
+            noi_dung: document.getElementById('ndDeCuong').value,
+            dia_diem: document.getElementById('ddDeCuong').value,
+            tu_ngay: document.getElementById('tgTu').value,
+            den_ngay: document.getElementById('tgDen').value,
+            danh_sach_nhan_su: nhanSu,
+            danh_sach_xe: danhSachXe,
+            du_tru_phong: (parseFloat(document.getElementById('duTruPhong').value) || 0).toLocaleString('vi-VN')
+        };
+
+    } else if (type === 'dieuxe') {
+        fileId = ID_TEMPLATE_DIEUXE;
+        const idx = document.getElementById('chonXeDieuXe').value;
+        if(idx === "") { alert("Chọn xe!"); document.getElementById("loading").style.display = "none"; return; }
+        const xe = dsXe[idx];
+        fileName = `Lenh_dieu_xe_${xe.bienSo}.docx`;
+
+        data = {
+            lai_xe: xe.laiXe,
+            bien_so: xe.bienSo,
+            noi_dung: document.getElementById('ndDeCuong').value,
+            thoi_gian: `Từ ${document.getElementById('tgTu').value} đến ${document.getElementById('tgDen').value}`,
+            dia_diem: document.getElementById('ddDeCuong').value
+        };
+
+    } else if (type === 'thanhtoan') {
+        fileId = ID_TEMPLATE_THANHTOAN;
+        fileName = "Phieu_thanh_toan.docx";
+
+        // Lấy danh sách nhân sự thực tế
+        let nhanSuTT = [];
+        document.querySelectorAll('.ngay-tt').forEach(input => {
+            nhanSuTT.push({ 
+                ho_ten: input.getAttribute('data-ten'), 
+                so_ngay: input.value, 
+                thanh_tien: (input.value * 250000).toLocaleString('vi-VN') 
+            });
+        });
+
+        // Lấy hóa đơn XML
+        let hoaDon = [];
+        document.querySelectorAll('#tblHoaDon tbody tr').forEach(row => {
+            hoaDon.push({
+                loai: row.cells[1].innerText,
+                so_hd: row.cells[2].innerText,
+                ngay: row.cells[3].innerText,
+                so_tien: row.cells[4].innerText
+            });
+        });
+
+        data = {
+            danh_sach_nhan_su: nhanSuTT,
+            danh_sach_hoa_don: hoaDon,
+            tong_nhien_lieu: document.getElementById('tt_NhienLieu').innerText,
+            tong_ctp: document.getElementById('tt_CTP').innerText,
+            tong_cau_duong: document.getElementById('tt_CauDuong').innerText,
+            tong_phong_nghi: document.getElementById('tt_PhongNghi').innerText,
+            tong_cong: document.getElementById('tt_TongCong').innerText
+        };
+    }
+
+    // --- GỌI API LẤY FILE MẪU VÀ RENDER ---
     try {
         const res = await fetch(`${GOOGLE_WEB_APP_URL}?action=getTemplate&fileId=${fileId}`);
         const result = await res.json();
@@ -325,12 +408,9 @@
         const zip = new PizZip(bytes.buffer);
         const doc = new window.docxtemplater(zip, {
             paragraphLoop: true, 
-            linebreaks: true,
-            // Tùy chọn này giúp bỏ qua lỗi nếu có thẻ lạ trong Word
-            // nullGetter: function() { return ""; } 
+            linebreaks: true
         });
 
-        // Render dữ liệu
         doc.render(data);
 
         const blob = doc.getZip().generate({
@@ -342,17 +422,14 @@
         document.getElementById("loading").style.display = "none";
         
     } catch(e) { 
-        // IN LỖI CHI TIẾT RA MÀN HÌNH
         console.error("Lỗi chi tiết:", e);
         let errorMsg = "Lỗi: " + e.message;
-        
         if (e.properties && e.properties.errors) {
             errorMsg += "\n\nChi tiết lỗi:\n";
             e.properties.errors.forEach(function(error) {
                 errorMsg += "- " + error.message + " (tại thẻ: " + (error.properties?.id || "không rõ") + ")\n";
             });
         }
-        
         alert(errorMsg); 
         document.getElementById("loading").style.display = "none";
     }
