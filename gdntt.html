@@ -9,138 +9,126 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.11/docxtemplater.js"></script>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 10px; }
-        .container { width: 100%; max-width: 600px; background: #ffffff; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin: auto; box-sizing: border-box; }
-        h2 { text-align: center; color: #c00; margin-top: 0; text-transform: uppercase; }
-        h3 { color: #0056b3; border-bottom: 2px solid #007bff; padding-bottom: 5px; margin-top: 20px; font-size: 16px; }
+        .container { width: 100%; max-width: 600px; background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); margin: auto; box-sizing: border-box; }
+        h2 { text-align: center; color: #c00; margin-top: 0; text-transform: uppercase; font-size: 20px; }
+        h3 { color: #0056b3; border-bottom: 2px solid #007bff; padding-bottom: 5px; margin-top: 20px; font-size: 15px; }
         .form-group { margin-bottom: 12px; }
-        label { font-weight: bold; font-size: 14px; display: block; margin-bottom: 4px; color: #c00; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
-        .chip-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 5px; }
-        .chip-item input { display: none; }
-        .chip-item label { padding: 6px 4px; background: #eee; border-radius: 15px; cursor: pointer; font-size: 12px; text-align: center; display: block; margin: 0; font-weight: normal; color: #333; }
-        .chip-item input:checked + label { background: #007bff; color: white; font-weight: bold; }
-        button { background: #28a745; color: white; border: none; padding: 12px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; border-radius: 6px; font-size: 15px; }
-        .btn-blue { background: #007bff; }
-        .btn-orange { background: #fd7e14; }
-        .btn-red { background: #dc3545; }
-        .btn-sm { padding: 5px 10px; font-size: 12px; width: auto; margin: 2px; }
-        .btn-gray { background: #6c757d; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        label { font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px; color: #c00; }
+        input, select, textarea { width: 100%; padding: 9px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 15px; }
+        button { background: #28a745; color: white; border: none; padding: 11px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 8px; border-radius: 6px; font-size: 14px; }
+        .btn-blue { background: #007bff; } .btn-orange { background: #fd7e14; } .btn-red { background: #dc3545; }
+        .btn-gray { background: #6c757d; } .btn-sm { padding: 5px 10px; font-size: 12px; width: auto; margin: 2px; }
+
+        /* Chế độ vai trò */
+        .mode-bar { display: flex; gap: 6px; margin: 10px 0; }
+        .mode-btn { flex: 1; padding: 8px 4px; border-radius: 8px; border: 2px solid #ccc; background: #f0f0f0; color: #333; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; }
+        .mode-btn.active { border-color: #007bff; background: #e7f1ff; color: #007bff; }
+        .mode-btn[data-role="CHT"].active { border-color: #dc3545; background: #ffe7e7; color: #dc3545; }
+        .mode-btn[data-role="LX"].active { border-color: #28a745; background: #e7f7ec; color: #28a745; }
+
+        /* Chips */
+        .chip-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 5px; }
+        .chip { position: relative; padding: 8px 4px; border-radius: 18px; border: 2px solid #ccc; background: #f4f4f4; color: #333; font-size: 12px; cursor: pointer; text-align: center; font-weight: normal; transition: .15s; }
+        .chip .role-badge { display: block; font-size: 10px; margin-top: 1px; font-weight: bold; }
+        .chip .driver-icon { position: absolute; top: -4px; right: -2px; font-size: 11px; }
+        .chip.chip-nv { background: #007bff; color: #fff; border-color: #007bff; }
+        .chip.chip-cht { background: #dc3545; color: #fff; border-color: #dc3545; }
+        .chip.chip-lx { background: #28a745; color: #fff; border-color: #28a745; }
+
+        /* Xe */
+        .xe-card { border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px; background: #f9f9f9; }
+        .xe-card .row { display: flex; gap: 6px; align-items: center; margin-bottom: 5px; }
+        .xe-card .row label { flex: 0 0 90px; color: #333; font-size: 12px; margin: 0; }
+        .xe-card .row input, .xe-card .row select { flex: 1; padding: 5px; font-size: 13px; }
+        .xe-card .money-row { text-align: right; font-weight: bold; color: #d63384; font-size: 13px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
         th, td { border: 1px solid #ccc; padding: 5px; text-align: center; }
         th { background-color: #e9ecef; }
-        .input-sm { width: 60px; padding: 4px; font-size: 13px; text-align: center; }
-        .input-full { width: 95%; padding: 4px; font-size: 13px; }
         .money { font-weight: bold; color: #d63384; }
         .total-row { background-color: #fff3cd; font-weight: bold; }
-        #loading { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(255, 255, 255, 0.9); align-items: center; justify-content: center; color: #007bff; font-weight: bold; font-size: 18px; }
-        .note { font-size: 12px; color: #666; font-style: italic; }
+        #loading { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(255,255,255,.9); align-items: center; justify-content: center; color: #007bff; font-weight: bold; font-size: 18px; }
+        .note { font-size: 11px; color: #666; font-style: italic; margin: 4px 0; }
         .row-input { display: flex; gap: 5px; margin-bottom: 5px; align-items: center; }
         .row-input input { flex: 1; }
-        .role-select { font-size: 11px; padding: 2px; width: 100%; margin-top: 2px; }
-        .person-row { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; background: #f9f9f9; padding: 5px; border-radius: 4px; }
-        .person-row span { flex: 1; font-size: 13px; }
-        .person-row select { width: 130px; font-size: 11px; padding: 2px; }
+        .header-actions { display: flex; gap: 6px; margin-bottom: 10px; }
+        .header-actions button { margin: 0; padding: 8px; font-size: 12px; }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <div class="header-actions">
+        <button class="btn-blue" onclick="luuForm()">💾 Lưu form</button>
+        <button class="btn-gray" onclick="taiForm()">📂 Tải form</button>
+        <button class="btn-red" onclick="xoaForm()">🗑️ Xóa form</button>
+    </div>
+
     <h2>ĐỀ CƯƠNG CÔNG TÁC</h2>
 
-    <!-- CĂN CỨ -->
     <h3>Căn cứ</h3>
     <div id="canCuContainer">
-        <div class="row-input"><input type="text" class="can-cu" value="Căn cứ lịch cắt điện tháng 09/2026;"><button class="btn-red btn-sm" onclick="this.parentElement.remove()">X</button></div>
-        <div class="row-input"><input type="text" class="can-cu" value="Căn cứ phương án thi công công tác thí nghiệm MC 212 sau xử lý rò khí tại TBA 220kV Hàm Tân."><button class="btn-red btn-sm" onclick="this.parentElement.remove()">X</button></div>
+        <div class="row-input"><input type="text" class="can-cu" value="Căn cứ lịch cắt điện tháng 09/2026."><button class="btn-red btn-sm" onclick="this.parentElement.remove()">X</button></div>
     </div>
     <button class="btn-blue btn-sm" onclick="addCanCu()">+ Thêm căn cứ</button>
 
-    <!-- I. THỜI GIAN XUẤT PHÁT -->
     <h3>I. Thời gian xuất phát dự kiến</h3>
     <div class="form-group"><input type="datetime-local" id="tgXuatPhat" value="2026-09-26T13:00"></div>
 
-    <!-- II. NỘI DUNG CÔNG TÁC -->
     <h3>II. Nội dung công tác</h3>
-    <div class="form-group"><textarea id="ndCongTac" rows="3">Thí nghiệm MC 212 sau xử lý rò khí (hạng mục đổ ẩm khí SF6, chụp sông hành trình đông cắt) tại TBA 220kV Hàm Tân.</textarea></div>
+    <div class="form-group"><textarea id="ndCongTac" rows="3">Thí nghiệm MC 212 sau xử lý rò khí tại TBA 220kV Hàm Tân.</textarea></div>
 
-    <!-- III. THỜI GIAN LÀM VIỆC -->
     <h3>III. Thời gian làm việc dự kiến</h3>
-    <div class="form-group">Từ <input type="date" id="tgTu" value="2026-09-26" style="width: 48%; display: inline-block;"> Đến <input type="date" id="tgDen" value="2026-09-26" style="width: 48%; display: inline-block;"></div>
+    <div class="form-group">Từ <input type="date" id="tgTu" value="2026-09-26" style="width:48%; display:inline-block;"> Đến <input type="date" id="tgDen" value="2026-09-26" style="width:48%; display:inline-block;"></div>
 
-    <!-- IV. ĐỊA ĐIỂM -->
     <h3>IV. Địa điểm làm việc</h3>
     <div class="form-group"><input type="text" id="diaDiem" value="TBA 220kV Hàm Tân."></div>
 
-    <!-- V. DANH SÁCH NHÓM CÔNG TÁC -->
     <h3>V. Danh sách nhóm công tác</h3>
-    <p class="note">Chọn nhân viên bằng cách click vào chip bên dưới. Sau đó chọn vai trò (nếu cần).</p>
+    <p class="note">① Chọn chế độ vai trò → ② Bấm chip người để gán. Bấm lại cùng vai trò để bỏ.</p>
+    <div class="mode-bar">
+        <button type="button" class="mode-btn active" data-role="NV" onclick="setMode('NV')">👤 NV</button>
+        <button type="button" class="mode-btn" data-role="CHT" onclick="setMode('CHT')">⭐ CHT</button>
+        <button type="button" class="mode-btn" data-role="LX" onclick="setMode('LX')">🚗 LX</button>
+    </div>
     <div class="chip-group" id="nvChipContainer"></div>
-    <button class="btn-blue btn-sm" onclick="luuDanhSachNhanVien()">💾 Lưu danh sách nhân viên</button>
-    
-    <div id="dsDaChon" style="margin-top: 10px;"></div>
 
-    <!-- VI. PHƯƠNG TIỆN -->
     <h3>VI. Phương tiện đi lại</h3>
-    <div class="form-group">
-        <label>Chọn xe:</label>
-        <select id="chonXe" onchange="capNhatXe()">
-            <option value="">-- Chọn xe --</option>
-            <option value="0">Transit</option>
-            <option value="1">Ford Ranger</option>
-            <option value="2">Ford Fortuner</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label>Biển số xe:</label>
-        <input type="text" id="bienSoXe" readonly>
-    </div>
-    <div class="form-group">
-        <label>Định mức nhiên liệu (L/100km):</label>
-        <input type="number" id="dinhMucXe" readonly>
-    </div>
+    <button class="btn-blue btn-sm" onclick="addXe()">+ Thêm xe</button>
+    <div id="dsXeContainer" style="margin-top:8px;"></div>
 
-    <!-- VII. DỰ TRÙ KINH PHÍ -->
     <h3>VII. Dự trù kinh phí</h3>
     <div class="form-group">
         <label>Phòng nghỉ:</label>
         <div class="row-input">
-            <input type="number" id="soPhong" value="2" placeholder="Số phòng" style="width: 60px;">
+            <input type="number" id="soPhong" value="1" placeholder="Số phòng" style="width:55px;">
             <span>x</span>
-            <input type="number" id="soDem" value="1" placeholder="Số đêm" style="width: 60px;">
+            <input type="number" id="soDem" value="1" placeholder="Số đêm" style="width:55px;">
             <span>x</span>
-            <input type="number" id="giaPhong" value="700000" placeholder="Đơn giá" style="width: 100px;">
+            <input type="number" id="giaPhong" value="700000" placeholder="Đơn giá" style="width:90px;">
             <span>=</span>
             <span id="tienPhong" class="money">0</span>
         </div>
     </div>
     <div class="form-group">
-        <label>Phụ cấp lưu trú:</label>
+        <label>Phụ cấp lưu trú (Số người tự động):</label>
         <div class="row-input">
-            <input type="number" id="soNguoi" value="0" placeholder="Số người" style="width: 60px;" readonly>
+            <input type="number" id="soNguoi" value="0" readonly style="width:55px;">
             <span>x</span>
-            <input type="number" id="soNgay" value="2" placeholder="Số ngày" style="width: 60px;">
+            <input type="number" id="soNgay" value="1" placeholder="Số ngày" style="width:55px;">
             <span>x</span>
-            <input type="number" id="giaPhuCap" value="250000" placeholder="Đơn giá" style="width: 100px;">
+            <input type="number" id="giaPhuCap" value="250000" placeholder="Đơn giá" style="width:90px;">
             <span>=</span>
             <span id="tienPhuCap" class="money">0</span>
         </div>
-        <p class="note">Số người tự động đếm từ danh sách đã chọn.</p>
     </div>
     <div class="form-group">
-        <label>Nhiên liệu:</label>
-        <div class="row-input">
-            <input type="number" id="soKm" value="450" placeholder="Số KM" style="width: 60px;">
-            <span>x</span>
-            <input type="number" id="dinhMuc" value="19" placeholder="L/100km" style="width: 60px;">
-            <span>x</span>
-            <input type="number" id="giaXang" value="28000" placeholder="Đơn giá" style="width: 100px;">
-            <span>=</span>
-            <span id="tienNhienLieu" class="money">0</span>
-        </div>
+        <label>Tổng nhiên liệu các xe:</label>
+        <div style="text-align:right;"><span id="tienNhienLieu" class="money" style="font-size:16px;">0</span></div>
     </div>
     <div class="form-group">
         <label>TỔNG DỰ TRÙ:</label>
-        <input type="text" id="tongDuTru" readonly style="font-weight: bold; color: #d63384; font-size: 18px;">
+        <input type="text" id="tongDuTru" readonly style="font-weight:bold; color:#d63384; font-size:17px;">
     </div>
 
     <button class="btn-orange" onclick="xuatWord()">📄 Xuất Đề cương Word</button>
@@ -149,179 +137,319 @@
 <div id="loading">⏳ Đang xử lý, chờ xíu...</div>
 
 <script>
-    // --- CẤU HÌNH ---
+    // ============ CẤU HÌNH ============
     const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxlM-814su7_q0yS7Qx1bdwC1j9CB18Km6UOdMcJW4ifZUecl633RmEhvxnsUIwerlE/exec";
-    const ID_TEMPLATE_DECUONG = "1GeIU57-WNr9XOgF5w8UInBMMZKdupfzv"; // Thay ID file Word mẫu của anh/chị
+    const ID_TEMPLATE_DECUONG = "1GeIU57-WNr9XOgF5w8UInBMMZKdupfzv"; // Thay ID file Word mẫu
 
-    // Danh sách xe cố định
-    const DS_XE = [
-        { ten: "Transit", bienSo: "79B 33211", dinhMuc: 20 },
-        { ten: "Ford Ranger", bienSo: "79C 038.20", dinhMuc: 15 },
-        { ten: "Ford Fortuner", bienSo: "79A 866.70", dinhMuc: 19 }
+    const DS_XE_GOC = [
+        { ten: "Transit",        bienSo: "79B 33211",   dinhMuc: 20 },
+        { ten: "Ford Ranger",    bienSo: "79C 038.20",  dinhMuc: 15 },
+        { ten: "Ford Fortuner",  bienSo: "79A 866.70",  dinhMuc: 19 }
     ];
 
-    // Danh sách nhân viên mặc định
     const DEFAULT_NV = [
-        "Nguyễn Hữu Kính", "Hoàng Trần Quản Trọng", "Ngô Văn Quang", "Trần Văn Hoàng", 
-        "Kim Văn Quỳnh", "Hồ Văn Huy", "Lê Hữu Anh", "Trần Phúc Linh", "Tạ Quốc Đạt", 
-        "Võ Ngọc Sơn", "Nguyễn Xuân Khánh", "Đoàn Hoàng Quang Định", "Võ Văn Sỹ", 
-        "Lưu Đức Minh", "Nguyễn Mạnh Hiệp", "Phan Đình Minh", "Nguyễn Thanh Loan", 
-        "Nguyễn Thị Thanh Hương", "Bùi Thị Thái", "Phạm Văn Bình", "Hoàng Văn Nam", "Nguyễn Văn Tú"
+        "Nguyễn Hữu Kính","Hoàng Trần Quản Trọng","Ngô Văn Quang","Trần Văn Hoàng",
+        "Kim Văn Quỳnh","Hồ Văn Huy","Lê Hữu Anh","Trần Phúc Linh","Tạ Quốc Đạt",
+        "Võ Ngọc Sơn","Nguyễn Xuân Khánh","Đoàn Hoàng Quang Định","Võ Văn Sỹ",
+        "Lưu Đức Minh","Nguyễn Mạnh Hiệp","Mai Văn Giáp","Phan Đình Minh",
+        "Nguyễn Thanh Loan","Lê Thị Hoa","Trần Thị Mai","Phạm Văn Bình","Hoàng Văn Nam"
     ];
 
-    // Vai trò
-    const DS_VAI_TRO = [
-        { value: "Nhân viên đơn vị công tác", label: "NV đơn vị công tác" },
-        { value: "Chỉ huy trực tiếp", label: "Chỉ huy" },
-        { value: "Lãnh đạo công việc", label: "LDDCV },
-        { value: "Công nhân lái xe", label: "Lái xe" }
-        { value: "", label: "--- Chọn vai trò ---" },
-    ];
+    const DEFAULT_DRIVERS = ["Nguyễn Mạnh Hiệp", "Mai Văn Giáp"];
 
-    // --- KHỞI TẠO ---
+    // ============ STATE ============
+    let dsNV = [];
+    let currentMode = "NV";
+    let selectedRoles = {}; // { "Nguyễn Hữu Kính": "CHT", ... }
+
+    // ============ KHỞI TẠO ============
     window.onload = function() {
-        loadDanhSachNhanVien();
+        let saved = localStorage.getItem('danh_sach_nhan_su');
+        dsNV = saved ? JSON.parse(saved) : DEFAULT_NV.slice();
+        renderChips();
+        addXe(); // Thêm 1 xe mặc định
         tinhToan();
-        document.querySelectorAll('input[type="number"]').forEach(input => {
-            input.addEventListener('input', tinhToan);
-        });
+        document.querySelectorAll('input[type="number"]').forEach(i => i.addEventListener('input', tinhToan));
     };
 
-    // --- QUẢN LÝ NHÂN SỰ ---
-    function loadDanhSachNhanVien() {
-        let saved = localStorage.getItem('danh_sach_nhan_su');
-        let ds = saved ? JSON.parse(saved) : DEFAULT_NV;
-        renderChipNhanVien(ds);
+    // ============ CHIP & VAI TRÒ ============
+    function setMode(role) {
+        currentMode = role;
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.role === role));
     }
 
-    function renderChipNhanVien(ds) {
+    function getShortName(full) {
+        const parts = full.split(' ');
+        return parts[parts.length - 1];
+    }
+
+    function isFemale(name) {
+        return name.includes("Thị") || name.startsWith("Lê Thị") || name.startsWith("Trần Thị");
+    }
+
+    function renderChips() {
         const container = document.getElementById('nvChipContainer');
-        container.innerHTML = '';
-        ds.forEach((nv, idx) => {
-            let tenRutGon = "Mr." + nv.split(' ').pop();
-            if (nv.includes("Thị") || nv.includes("Hoa") || nv.includes("Mai")) {
-                tenRutGon = "B." + nv.split(' ').pop();
+        container.innerHTML = dsNV.map(nv => {
+            const role = selectedRoles[nv];
+            const isDriver = DEFAULT_DRIVERS.includes(nv);
+            const cls = role ? `chip chip-${role.toLowerCase()}` : 'chip';
+            const prefix = isFemale(nv) ? "B." : "Mr.";
+            const badge = role ? `<span class="role-badge">${role}</span>` : "";
+            const icon = isDriver ? `<span class="driver-icon">🚗</span>` : "";
+            return `<button type="button" class="${cls}" onclick="handleChipClick('${nv.replace(/'/g, "\\'")}')">${prefix}${getShortName(nv)}${icon}${badge}</button>`;
+        }).join('');
+    }
+
+    function handleChipClick(name) {
+        if (selectedRoles[name]) {
+            if (selectedRoles[name] === currentMode) {
+                delete selectedRoles[name]; // Bỏ chọn
+            } else {
+                selectedRoles[name] = currentMode; // Đổi vai trò
             }
-            container.innerHTML += `<div class="chip-item"><input type="checkbox" id="nv_${idx}" value="${nv}" onchange="capNhatDanhSachChon()"><label for="nv_${idx}">${tenRutGon}</label></div>`;
-        });
-    }
-
-    function luuDanhSachNhanVien() {
-        let dsMoi = prompt("Nhập danh sách nhân viên (cách nhau bởi dấu phẩy):", DEFAULT_NV.join(", "));
-        if (dsMoi) {
-            let arr = dsMoi.split(",").map(s => s.trim()).filter(s => s !== "");
-            localStorage.setItem('danh_sach_nhan_su', JSON.stringify(arr));
-            renderChipNhanVien(arr);
-            document.getElementById('dsDaChon').innerHTML = '';
-            document.getElementById('soNguoi').value = 0;
-            tinhToan();
+        } else {
+            // Người mặc định lái xe → luôn gán LX
+            if (DEFAULT_DRIVERS.includes(name)) {
+                selectedRoles[name] = "LX";
+            } else {
+                selectedRoles[name] = currentMode;
+            }
         }
+        renderChips();
+        updateSoNguoi();
+        updateLaiXeDropdowns();
     }
 
-    function capNhatDanhSachChon() {
-        const container = document.getElementById('dsDaChon');
-        container.innerHTML = '';
-        let count = 0;
-        document.querySelectorAll('#nvChipContainer input:checked').forEach((cb, idx) => {
-            count++;
-            const div = document.createElement('div');
-            div.className = 'person-row';
-            div.innerHTML = `
-                <span>${cb.value}</span>
-                <select class="role-select" data-ten="${cb.value}">
-                    ${DS_VAI_TRO.map(r => `<option value="${r.value}">${r.label}</option>`).join('')}
-                </select>
-            `;
-            container.appendChild(div);
-        });
+    function updateSoNguoi() {
+        const count = Object.keys(selectedRoles).length;
         document.getElementById('soNguoi').value = count;
         tinhToan();
     }
 
-    // --- CĂN CỨ ---
+    // ============ CĂN CỨ ============
     function addCanCu() {
-        const container = document.getElementById('canCuContainer');
         const div = document.createElement('div');
         div.className = 'row-input';
         div.innerHTML = `<input type="text" class="can-cu" placeholder="Nhập căn cứ..."><button class="btn-red btn-sm" onclick="this.parentElement.remove()">X</button>`;
-        container.appendChild(div);
+        document.getElementById('canCuContainer').appendChild(div);
     }
 
-    // --- XE ---
-    function capNhatXe() {
-        const idx = document.getElementById('chonXe').value;
-        if(idx === "") return;
-        const xe = DS_XE[idx];
-        document.getElementById('bienSoXe').value = xe.bienSo;
-        document.getElementById('dinhMucXe').value = xe.dinhMuc;
-        document.getElementById('dinhMuc').value = xe.dinhMuc;
+    // ============ XE ============
+    function addXe() {
+        const container = document.getElementById('dsXeContainer');
+        const card = document.createElement('div');
+        card.className = 'xe-card';
+        card.innerHTML = `
+            <div class="row">
+                <label>Chọn xe:</label>
+                <select class="chon-xe" onchange="capNhatXe(this)">
+                    <option value="">-- Chọn --</option>
+                    ${DS_XE_GOC.map((x, i) => `<option value="${i}">${x.ten}</option>`).join('')}
+                </select>
+                <button class="btn-red btn-sm" style="width:auto; margin:0;" onclick="this.closest('.xe-card').remove(); tinhToan();">X</button>
+            </div>
+            <div class="row"><label>Biển số:</label><input type="text" class="bien-so" readonly></div>
+            <div class="row"><label>Số KM:</label><input type="number" class="so-km" value="0" onchange="tinhToan()"></div>
+            <div class="row"><label>Định mức:</label><input type="number" class="dinh-muc" readonly></div>
+            <div class="row"><label>Lái xe:</label><select class="lai-xe"></select></div>
+            <div class="money-row">Tiền NL: <span class="tien-nl">0</span> đ</div>
+        `;
+        container.appendChild(card);
+        updateLaiXeDropdowns();
         tinhToan();
     }
 
-    // --- TÍNH TOÁN ---
+    function capNhatXe(select) {
+        const idx = select.value;
+        const card = select.closest('.xe-card');
+        if (idx === "") {
+            card.querySelector('.bien-so').value = "";
+            card.querySelector('.dinh-muc').value = "";
+        } else {
+            const xe = DS_XE_GOC[idx];
+            card.querySelector('.bien-so').value = xe.bienSo;
+            card.querySelector('.dinh-muc').value = xe.dinhMuc;
+        }
+        tinhToan();
+    }
+
+    function updateLaiXeDropdowns() {
+        const drivers = Object.keys(selectedRoles).filter(n => selectedRoles[n] === "LX");
+        document.querySelectorAll('.lai-xe').forEach(sel => {
+            const cur = sel.value;
+            sel.innerHTML = '<option value="">-- Chọn lái xe --</option>' +
+                drivers.map(d => `<option value="${d}" ${d === cur ? "selected" : ""}>${d}</option>`).join('');
+        });
+    }
+
+    // ============ TÍNH TOÁN ============
     function tinhToan() {
-        const soPhong = parseFloat(document.getElementById('soPhong').value) || 0;
-        const soDem = parseFloat(document.getElementById('soDem').value) || 0;
-        const giaPhong = parseFloat(document.getElementById('giaPhong').value) || 0;
+        // Phòng
+        const soPhong = +document.getElementById('soPhong').value || 0;
+        const soDem = +document.getElementById('soDem').value || 0;
+        const giaPhong = +document.getElementById('giaPhong').value || 0;
         const tienPhong = soPhong * soDem * giaPhong;
         document.getElementById('tienPhong').innerText = tienPhong.toLocaleString('vi-VN');
 
-        const soNguoi = parseFloat(document.getElementById('soNguoi').value) || 0;
-        const soNgay = parseFloat(document.getElementById('soNgay').value) || 0;
-        const giaPhuCap = parseFloat(document.getElementById('giaPhuCap').value) || 0;
-        const tienPhuCap = soNguoi * soNgay * giaPhuCap;
-        document.getElementById('tienPhuCap').innerText = tienPhuCap.toLocaleString('vi-VN');
+        // Phụ cấp
+        const soNguoi = +document.getElementById('soNguoi').value || 0;
+        const soNgay = +document.getElementById('soNgay').value || 0;
+        const giaPC = +document.getElementById('giaPhuCap').value || 0;
+        const tienPC = soNguoi * soNgay * giaPC;
+        document.getElementById('tienPhuCap').innerText = tienPC.toLocaleString('vi-VN');
 
-        const soKm = parseFloat(document.getElementById('soKm').value) || 0;
-        const dinhMuc = parseFloat(document.getElementById('dinhMuc').value) || 0;
-        const giaXang = parseFloat(document.getElementById('giaXang').value) || 0;
-        const tienNhienLieu = (soKm * dinhMuc / 100) * giaXang;
-        document.getElementById('tienNhienLieu').innerText = tienNhienLieu.toLocaleString('vi-VN');
+        // Nhiên liệu (tổng tất cả xe)
+        let tongNL = 0;
+        document.querySelectorAll('.xe-card').forEach(card => {
+            const km = +card.querySelector('.so-km').value || 0;
+            const dm = +card.querySelector('.dinh-muc').value || 0;
+            const gia = 28000; // Giá xăng mặc định
+            const tien = (km * dm / 100) * gia;
+            card.querySelector('.tien-nl').innerText = tien.toLocaleString('vi-VN');
+            tongNL += tien;
+        });
+        document.getElementById('tienNhienLieu').innerText = tongNL.toLocaleString('vi-VN');
 
-        const tong = tienPhong + tienPhuCap + tienNhienLieu;
+        // Tổng
+        const tong = tienPhong + tienPC + tongNL;
         document.getElementById('tongDuTru').value = tong.toLocaleString('vi-VN') + " đồng";
     }
 
-    // --- ĐỊNH DẠNG NGÀY DD/MM/YYYY ---
-    function formatDate(dateStr) {
-        if (!dateStr) return "";
-        const d = new Date(dateStr);
-        const day = ('0' + d.getDate()).slice(-2);
-        const month = ('0' + (d.getMonth() + 1)).slice(-2);
-        const year = d.getFullYear();
-        return `${day}/${month}/${year}`;
+    // ============ ĐỊNH DẠNG NGÀY ============
+    function formatDate(str) {
+        if (!str) return "";
+        const d = new Date(str);
+        return `${('0'+d.getDate()).slice(-2)}/${('0'+(d.getMonth()+1)).slice(-2)}/${d.getFullYear()}`;
+    }
+    function formatDateTime(str) {
+        if (!str) return "";
+        const d = new Date(str);
+        return `${('0'+d.getHours()).slice(-2)} giờ ${('0'+d.getMinutes()).slice(-2)} ngày ${formatDate(str)}`;
     }
 
-    function formatDateTime(dateTimeStr) {
-        if (!dateTimeStr) return "";
-        const d = new Date(dateTimeStr);
-        const day = ('0' + d.getDate()).slice(-2);
-        const month = ('0' + (d.getMonth() + 1)).slice(-2);
-        const year = d.getFullYear();
-        const hour = ('0' + d.getHours()).slice(-2);
-        const minute = ('0' + d.getMinutes()).slice(-2);
-        return `${hour} giờ ${minute} ngày ${day}/${month}/${year}`;
-    }
-
-    // --- XUẤT WORD ---
-    async function xuatWord() {
-        document.getElementById("loading").style.display = "flex";
-        
-        // 1. Thu thập dữ liệu
-        let canCu = [];
-        document.querySelectorAll('.can-cu').forEach(input => {
-            if(input.value.trim() !== "") canCu.push({ noi_dung: input.value });
+    // ============ LƯU / TẢI FORM ============
+    function luuForm() {
+        const xeList = [];
+        document.querySelectorAll('.xe-card').forEach(card => {
+            xeList.push({
+                xeIdx: card.querySelector('.chon-xe').value,
+                bienSo: card.querySelector('.bien-so').value,
+                dinhMuc: card.querySelector('.dinh-muc').value,
+                soKm: card.querySelector('.so-km').value,
+                laiXe: card.querySelector('.lai-xe').value
+            });
         });
 
-        let nhanSu = [];
-        document.querySelectorAll('.person-row').forEach((row, idx) => {
-            const ten = row.querySelector('span').innerText;
-            const vaiTro = row.querySelector('select').value;
-            nhanSu.push({
-                stt: idx + 1,
-                ho_ten: ten,
-                don_vi: "Tổ TNLĐ",
-                ghi_chu: vaiTro
+        const data = {
+            canCu: [...document.querySelectorAll('.can-cu')].map(i => i.value),
+            tgXuatPhat: document.getElementById('tgXuatPhat').value,
+            ndCongTac: document.getElementById('ndCongTac').value,
+            tgTu: document.getElementById('tgTu').value,
+            tgDen: document.getElementById('tgDen').value,
+            diaDiem: document.getElementById('diaDiem').value,
+            selectedRoles: selectedRoles,
+            xeList: xeList,
+            soPhong: document.getElementById('soPhong').value,
+            soDem: document.getElementById('soDem').value,
+            giaPhong: document.getElementById('giaPhong').value,
+            soNgay: document.getElementById('soNgay').value,
+            giaPhuCap: document.getElementById('giaPhuCap').value
+        };
+        localStorage.setItem('decuong_form_data', JSON.stringify(data));
+        alert("✅ Đã lưu form!");
+    }
+
+    function taiForm() {
+        const saved = localStorage.getItem('decuong_form_data');
+        if (!saved) { alert("Chưa có dữ liệu form được lưu."); return; }
+        const d = JSON.parse(saved);
+
+        // Căn cứ
+        const cc = document.getElementById('canCuContainer');
+        cc.innerHTML = '';
+        (d.canCu || []).forEach(v => {
+            const div = document.createElement('div');
+            div.className = 'row-input';
+            div.innerHTML = `<input type="text" class="can-cu" value="${v.replace(/"/g,'&quot;')}"><button class="btn-red btn-sm" onclick="this.parentElement.remove()">X</button>`;
+            cc.appendChild(div);
+        });
+
+        document.getElementById('tgXuatPhat').value = d.tgXuatPhat || '';
+        document.getElementById('ndCongTac').value = d.ndCongTac || '';
+        document.getElementById('tgTu').value = d.tgTu || '';
+        document.getElementById('tgDen').value = d.tgDen || '';
+        document.getElementById('diaDiem').value = d.diaDiem || '';
+        selectedRoles = d.selectedRoles || {};
+        renderChips();
+        updateSoNguoi();
+
+        // Xe
+        const xc = document.getElementById('dsXeContainer');
+        xc.innerHTML = '';
+        (d.xeList || []).forEach(x => {
+            addXe();
+            const card = xc.lastElementChild;
+            if (x.xeIdx !== '') {
+                card.querySelector('.chon-xe').value = x.xeIdx;
+                card.querySelector('.bien-so').value = x.bienSo;
+                card.querySelector('.dinh-muc').value = x.dinhMuc;
+            }
+            card.querySelector('.so-km').value = x.soKm || 0;
+            // Lái xe sẽ được set sau khi update dropdown
+        });
+        updateLaiXeDropdowns();
+        // Set lái xe
+        const cards = xc.querySelectorAll('.xe-card');
+        (d.xeList || []).forEach((x, i) => {
+            if (cards[i] && x.laiXe) cards[i].querySelector('.lai-xe').value = x.laiXe;
+        });
+
+        document.getElementById('soPhong').value = d.soPhong || 1;
+        document.getElementById('soDem').value = d.soDem || 1;
+        document.getElementById('giaPhong').value = d.giaPhong || 700000;
+        document.getElementById('soNgay').value = d.soNgay || 1;
+        document.getElementById('giaPhuCap').value = d.giaPhuCap || 250000;
+
+        tinhToan();
+        alert("✅ Đã tải form!");
+    }
+
+    function xoaForm() {
+        if (confirm("Xóa toàn bộ form đã lưu?")) {
+            localStorage.removeItem('decuong_form_data');
+            alert("Đã xóa.");
+        }
+    }
+
+    // ============ XUẤT WORD ============
+    async function xuatWord() {
+        document.getElementById("loading").style.display = "flex";
+
+        // Căn cứ
+        const canCu = [...document.querySelectorAll('.can-cu')].filter(i => i.value.trim()).map(i => ({ noi_dung: i.value }));
+
+        // Nhân sự (theo thứ tự NV → CHT → LX)
+        const nhanSu = [];
+        const order = { 'CHT': 1, 'NV': 2, 'LX': 3 };
+        Object.entries(selectedRoles)
+            .sort((a, b) => (order[a[1]] || 9) - (order[b[1]] || 9))
+            .forEach(([ten, vaiTro], i) => {
+                nhanSu.push({ stt: i + 1, ho_ten: ten, don_vi: "Tổ TNLĐ", ghi_chu: vaiTro });
+            });
+
+        // Xe
+        const danhSachXe = [];
+        document.querySelectorAll('.xe-card').forEach(card => {
+            const bienSo = card.querySelector('.bien-so').value;
+            if (!bienSo) return;
+            const soKm = +card.querySelector('.so-km').value || 0;
+            const dm = +card.querySelector('.dinh-muc').value || 0;
+            const tien = (soKm * dm / 100) * 28000;
+            danhSachXe.push({
+                ten_xe: card.querySelector('.chon-xe').selectedOptions[0]?.text || "",
+                bien_so: bienSo, lai_xe: card.querySelector('.lai-xe').value || "",
+                so_km: soKm, dinh_muc: dm,
+                tien_nhien_lieu: tien.toLocaleString('vi-VN')
             });
         });
 
@@ -333,57 +461,49 @@
             den_ngay: formatDate(document.getElementById('tgDen').value),
             dia_diem: document.getElementById('diaDiem').value,
             danh_sach_nhan_su: nhanSu,
-            bien_so_xe: document.getElementById('bienSoXe').value,
+            danh_sach_xe: danhSachXe,
+            so_luong_xe: danhSachXe.length,
+            bien_so_xe: danhSachXe.map(x => x.bien_so).join(", "),
             so_phong: document.getElementById('soPhong').value,
             so_dem: document.getElementById('soDem').value,
-            gia_phong: (parseFloat(document.getElementById('giaPhong').value) || 0).toLocaleString('vi-VN'),
+            gia_phong: (+document.getElementById('giaPhong').value || 0).toLocaleString('vi-VN'),
             tien_phong: document.getElementById('tienPhong').innerText,
             so_nguoi: document.getElementById('soNguoi').value,
             so_ngay: document.getElementById('soNgay').value,
-            gia_phu_cap: (parseFloat(document.getElementById('giaPhuCap').value) || 0).toLocaleString('vi-VN'),
+            gia_phu_cap: (+document.getElementById('giaPhuCap').value || 0).toLocaleString('vi-VN'),
             tien_phu_cap: document.getElementById('tienPhuCap').innerText,
-            so_km: document.getElementById('soKm').value,
-            dinh_muc: document.getElementById('dinhMuc').value,
-            gia_xang: (parseFloat(document.getElementById('giaXang').value) || 0).toLocaleString('vi-VN'),
             tien_nhien_lieu: document.getElementById('tienNhienLieu').innerText,
             tong_du_tru: document.getElementById('tongDuTru').value
         };
 
-        // 2. Gọi API lấy file mẫu và render
         try {
             const res = await fetch(`${GOOGLE_WEB_APP_URL}?action=getTemplate&fileId=${ID_TEMPLATE_DECUONG}`);
             const result = await res.json();
             const binary = window.atob(result.base64);
             const bytes = new Uint8Array(binary.length);
-            for(let i=0; i<binary.length; i++) bytes[i] = binary.charCodeAt(i);
-            
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
             const zip = new PizZip(bytes.buffer);
             const doc = new window.docxtemplater(zip, {
-                paragraphLoop: true, 
-                linebreaks: true,
+                paragraphLoop: true, linebreaks: true,
                 nullGetter: function() { return ""; }
             });
-
             doc.render(data);
 
             const blob = doc.getZip().generate({
                 type: "blob",
                 mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             });
-
             saveAs(blob, "De_cuong_cong_tac.docx");
             document.getElementById("loading").style.display = "none";
-            
-        } catch(e) { 
-            console.error("Lỗi chi tiết:", e);
-            let errorMsg = "Lỗi: " + e.message;
+        } catch (e) {
+            console.error(e);
+            let msg = "Lỗi: " + e.message;
             if (e.properties && e.properties.errors) {
-                errorMsg += "\n\nChi tiết lỗi:\n";
-                e.properties.errors.forEach(function(error) {
-                    errorMsg += "- " + error.message + " (tại thẻ: " + (error.properties?.id || "không rõ") + ")\n";
-                });
+                msg += "\n";
+                e.properties.errors.forEach(err => msg += "- " + err.message + "\n");
             }
-            alert(errorMsg); 
+            alert(msg);
             document.getElementById("loading").style.display = "none";
         }
     }
