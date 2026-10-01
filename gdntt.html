@@ -121,13 +121,13 @@
     <div class="form-group">
         <label>Phụ cấp lưu trú:</label>
         <div class="row-input">
-            <input type="number" id="soNguoi" value="0" readonly style="width:55px; background:#eee;">
+            <input type="number" id="soNguoi" value="" readonly style="width:55px; background:#eee;">
             <span>x</span>
             <input type="number" id="soNgay" value="1" placeholder="Số ngày" style="width:55px;">
             <span>x</span>
             <input type="number" id="giaPhuCap" value="250000" placeholder="Đơn giá" style="width:90px;">
             <span>=</span>
-            <span id="tienPhuCap" class="money">0</span>
+            <span id="tienPhuCap" class="money"></span>
         </div>
         <p class="note">Số người tự động đếm từ danh sách nhóm công tác.</p>
     </div>
@@ -151,7 +151,7 @@
     const ID_TEMPLATE_DECUONG = "1GeIU57-WNr9XOgF5w8UInBMMZKdupfzv"; // Thay ID file Word mẫu
 
     const DEFAULT_XE = [
-        { ten: "Transit",        bienSo: "79B 33211",   dinhMuc: 20 },
+        { ten: "Ford Transit",        bienSo: "79B 332.11",  dinhMuc: 20 },
         { ten: "Ford Ranger",    bienSo: "79C 038.20",  dinhMuc: 15 },
         { ten: "Ford Fortuner",  bienSo: "79A 866.70",  dinhMuc: 19 }
     ];
@@ -161,8 +161,7 @@
         "Kim Văn Quỳnh","Hồ Văn Huy","Lê Hữu Anh","Trần Phúc Linh","Tạ Quốc Đạt",
         "Võ Ngọc Sơn","Nguyễn Xuân Khánh","Đoàn Hoàng Quang Định","Võ Văn Sỹ",
         "Lưu Đức Minh","Nguyễn Mạnh Hiệp","Mai Văn Giáp","Nguyễn Thị Thanh Hương",
-        "Nguyễn Mạnh Hòa ","Nguyễn Thanh Loan","Lê Thị Hoa","Trần Thị Mai",
-        "Phạm Văn Bình","Hoàng Văn Nam"
+        "Nguyễn Mạnh Hòa ","Bùi Thị Thái ","Bùi Thị Thu Thảo","Đinh Hồng Phi", "Mai Văn Hùng", "Lộc An Cường"
     ];
 
     // 2 ông này LUÔN LUÔN là lái xe khi được chọn
