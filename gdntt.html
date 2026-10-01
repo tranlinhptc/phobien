@@ -33,7 +33,7 @@
         .chip .driver-icon { position: absolute; top: -6px; right: -4px; font-size: 13px; }
         .chip.chip-nv  { background: #007bff; color: #fff; border-color: #007bff; }
         .chip.chip-cht { background: #dc3545; color: #fff; border-color: #dc3545; }
-        .chip.chip-lđcv{ background: #ffc107; color: #000; border-color: #ffc107; }
+        .chip.chip-lđcv{ background: #ffc107; color: #fff; border-color: #ffc107; }
         .chip.chip-lx  { background: #28a745; color: #fff; border-color: #28a745; }
 
         .xe-card { border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin-bottom: 10px; background: #f9f9f9; }
@@ -91,9 +91,9 @@
     <h3>V. Danh sách nhóm công tác</h3>
     <p class="note">① Chọn chế độ vai trò → ② Bấm chip người để gán. Bấm lại cùng vai trò để bỏ.</p>
     <div class="mode-bar">
-        <button type="button" class="mode-btn active" data-role="NV" onclick="setMode('NV')">👤 NV</button>
-        <button type="button" class="mode-btn" data-role="CHT" onclick="setMode('CHT')">⭐ CHT</button>
         <button type="button" class="mode-btn" data-role="LĐCV" onclick="setMode('LĐCV')">📋 LĐCV</button>
+        <button type="button" class="mode-btn" data-role="CHT" onclick="setMode('CHT')">⭐ CHT</button>
+        <button type="button" class="mode-btn active" data-role="NV" onclick="setMode('NV')">👤 NV</button>
         <button type="button" class="mode-btn" data-role="LX" onclick="setMode('LX')">🚗 LX</button>
     </div>
     <div class="chip-group" id="nvChipContainer"></div>
