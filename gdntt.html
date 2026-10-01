@@ -8,45 +8,49 @@
     <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.11/docxtemplater.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 10px; }
-        .container { width: 100%; max-width: 600px; background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); margin: auto; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 10px; }
+        .container { width: 100%; max-width: 620px; background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); margin: auto; box-sizing: border-box; }
         h2 { text-align: center; color: #c00; margin-top: 0; text-transform: uppercase; font-size: 20px; }
         h3 { color: #0056b3; border-bottom: 2px solid #007bff; padding-bottom: 5px; margin-top: 20px; font-size: 15px; }
         .form-group { margin-bottom: 12px; }
         label { font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px; color: #c00; }
         input, select, textarea { width: 100%; padding: 9px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 15px; }
-        button { background: #28a745; color: white; border: none; padding: 11px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 8px; border-radius: 6px; font-size: 14px; }
+        button { background: #28a745; color: #fff; border: none; padding: 11px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 8px; border-radius: 6px; font-size: 14px; }
         .btn-blue { background: #007bff; } .btn-orange { background: #fd7e14; } .btn-red { background: #dc3545; }
-        .btn-gray { background: #6c757d; } .btn-sm { padding: 5px 10px; font-size: 12px; width: auto; margin: 2px; }
+        .btn-gray { background: #6c757d; } .btn-purple { background: #6f42c1; }
+        .btn-sm { padding: 5px 10px; font-size: 12px; width: auto; margin: 2px; }
 
-        /* Chế độ vai trò */
-        .mode-bar { display: flex; gap: 6px; margin: 10px 0; }
-        .mode-btn { flex: 1; padding: 8px 4px; border-radius: 8px; border: 2px solid #ccc; background: #f0f0f0; color: #333; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; }
-        .mode-btn.active { border-color: #007bff; background: #e7f1ff; color: #007bff; }
-        .mode-btn[data-role="CHT"].active { border-color: #dc3545; background: #ffe7e7; color: #dc3545; }
-        .mode-btn[data-role="LX"].active { border-color: #28a745; background: #e7f7ec; color: #28a745; }
+        .mode-bar { display: flex; gap: 5px; margin: 10px 0; }
+        .mode-btn { flex: 1; padding: 8px 2px; border-radius: 8px; border: 2px solid #ccc; background: #f0f0f0; color: #333; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; }
+        .mode-btn.active[data-role="NV"]  { border-color: #007bff; background: #e7f1ff; color: #007bff; }
+        .mode-btn.active[data-role="CHT"] { border-color: #dc3545; background: #ffe7e7; color: #dc3545; }
+        .mode-btn.active[data-role="LĐCV"]{ border-color: #ffc107; background: #fff8e1; color: #b8860b; }
+        .mode-btn.active[data-role="LX"]  { border-color: #28a745; background: #e7f7ec; color: #28a745; }
 
-        /* Chips */
         .chip-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 5px; }
         .chip { position: relative; padding: 8px 4px; border-radius: 18px; border: 2px solid #ccc; background: #f4f4f4; color: #333; font-size: 12px; cursor: pointer; text-align: center; font-weight: normal; transition: .15s; }
-        .chip .role-badge { display: block; font-size: 10px; margin-top: 1px; font-weight: bold; }
-        .chip .driver-icon { position: absolute; top: -4px; right: -2px; font-size: 11px; }
-        .chip.chip-nv { background: #007bff; color: #fff; border-color: #007bff; }
+        .chip .role-badge { display: block; font-size: 9px; margin-top: 1px; font-weight: bold; }
+        .chip .driver-icon { position: absolute; top: -6px; right: -4px; font-size: 13px; }
+        .chip.chip-nv  { background: #007bff; color: #fff; border-color: #007bff; }
         .chip.chip-cht { background: #dc3545; color: #fff; border-color: #dc3545; }
-        .chip.chip-lx { background: #28a745; color: #fff; border-color: #28a745; }
+        .chip.chip-lđcv{ background: #ffc107; color: #000; border-color: #ffc107; }
+        .chip.chip-lx  { background: #28a745; color: #fff; border-color: #28a745; }
 
-        /* Xe */
-        .xe-card { border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px; background: #f9f9f9; }
-        .xe-card .row { display: flex; gap: 6px; align-items: center; margin-bottom: 5px; }
-        .xe-card .row label { flex: 0 0 90px; color: #333; font-size: 12px; margin: 0; }
-        .xe-card .row input, .xe-card .row select { flex: 1; padding: 5px; font-size: 13px; }
-        .xe-card .money-row { text-align: right; font-weight: bold; color: #d63384; font-size: 13px; }
+        .xe-card { border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin-bottom: 10px; background: #f9f9f9; }
+        .xe-card .row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+        .xe-card .row label { flex: 0 0 95px; color: #333; font-size: 12px; margin: 0; font-weight: bold; }
+        .xe-card .row input, .xe-card .row select { flex: 1; padding: 6px; font-size: 13px; }
+        .xe-card .bien-so-text { flex: 1; font-size: 13px; color: #555; font-style: italic; background: #fff; padding: 6px; border-radius: 4px; border: 1px dashed #ccc; }
+        .xe-card .money-row { text-align: right; font-weight: bold; color: #d63384; font-size: 13px; margin-top: 4px; }
+        .xe-card .xe-title { font-weight: bold; color: #0056b3; font-size: 13px; margin-bottom: 6px; border-bottom: 1px dashed #ccc; padding-bottom: 4px; }
+
+        .info-text { font-size: 12px; color: #666; font-style: italic; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
         th, td { border: 1px solid #ccc; padding: 5px; text-align: center; }
-        th { background-color: #e9ecef; }
+        th { background: #e9ecef; }
         .money { font-weight: bold; color: #d63384; }
-        .total-row { background-color: #fff3cd; font-weight: bold; }
+        .total-row { background: #fff3cd; font-weight: bold; }
         #loading { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(255,255,255,.9); align-items: center; justify-content: center; color: #007bff; font-weight: bold; font-size: 18px; }
         .note { font-size: 11px; color: #666; font-style: italic; margin: 4px 0; }
         .row-input { display: flex; gap: 5px; margin-bottom: 5px; align-items: center; }
@@ -89,12 +93,16 @@
     <div class="mode-bar">
         <button type="button" class="mode-btn active" data-role="NV" onclick="setMode('NV')">👤 NV</button>
         <button type="button" class="mode-btn" data-role="CHT" onclick="setMode('CHT')">⭐ CHT</button>
+        <button type="button" class="mode-btn" data-role="LĐCV" onclick="setMode('LĐCV')">📋 LĐCV</button>
         <button type="button" class="mode-btn" data-role="LX" onclick="setMode('LX')">🚗 LX</button>
     </div>
     <div class="chip-group" id="nvChipContainer"></div>
+    <div class="info-text" style="text-align:right; margin-top:5px;">Tổng: <b id="tongsonguoi">0</b> người</div>
+    <button class="btn-purple btn-sm" onclick="themNguoiMoi()">+ Thêm người mới</button>
 
     <h3>VI. Phương tiện đi lại</h3>
-    <button class="btn-blue btn-sm" onclick="addXe()">+ Thêm xe</button>
+    <button class="btn-blue btn-sm" onclick="addXe()">+ Thêm xe (tạm)</button>
+    <button class="btn-purple btn-sm" onclick="themXeMoi()">+ Thêm xe mới (lưu)</button>
     <div id="dsXeContainer" style="margin-top:8px;"></div>
 
     <h3>VII. Dự trù kinh phí</h3>
@@ -111,9 +119,9 @@
         </div>
     </div>
     <div class="form-group">
-        <label>Phụ cấp lưu trú (Số người tự động):</label>
+        <label>Phụ cấp lưu trú:</label>
         <div class="row-input">
-            <input type="number" id="soNguoi" value="0" readonly style="width:55px;">
+            <input type="number" id="soNguoi" value="0" readonly style="width:55px; background:#eee;">
             <span>x</span>
             <input type="number" id="soNgay" value="1" placeholder="Số ngày" style="width:55px;">
             <span>x</span>
@@ -121,6 +129,7 @@
             <span>=</span>
             <span id="tienPhuCap" class="money">0</span>
         </div>
+        <p class="note">Số người tự động đếm từ danh sách nhóm công tác.</p>
     </div>
     <div class="form-group">
         <label>Tổng nhiên liệu các xe:</label>
@@ -141,7 +150,7 @@
     const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxlM-814su7_q0yS7Qx1bdwC1j9CB18Km6UOdMcJW4ifZUecl633RmEhvxnsUIwerlE/exec";
     const ID_TEMPLATE_DECUONG = "1GeIU57-WNr9XOgF5w8UInBMMZKdupfzv"; // Thay ID file Word mẫu
 
-    const DS_XE_GOC = [
+    const DEFAULT_XE = [
         { ten: "Transit",        bienSo: "79B 33211",   dinhMuc: 20 },
         { ten: "Ford Ranger",    bienSo: "79C 038.20",  dinhMuc: 15 },
         { ten: "Ford Fortuner",  bienSo: "79A 866.70",  dinhMuc: 19 }
@@ -151,23 +160,33 @@
         "Nguyễn Hữu Kính","Hoàng Trần Quản Trọng","Ngô Văn Quang","Trần Văn Hoàng",
         "Kim Văn Quỳnh","Hồ Văn Huy","Lê Hữu Anh","Trần Phúc Linh","Tạ Quốc Đạt",
         "Võ Ngọc Sơn","Nguyễn Xuân Khánh","Đoàn Hoàng Quang Định","Võ Văn Sỹ",
-        "Lưu Đức Minh","Nguyễn Mạnh Hiệp","Mai Văn Giáp","Phan Đình Minh",
-        "Nguyễn Thanh Loan","Lê Thị Hoa","Trần Thị Mai","Phạm Văn Bình","Hoàng Văn Nam"
+        "Lưu Đức Minh","Nguyễn Mạnh Hiệp","Mai Văn Giáp","Nguyễn Thị Thanh Hương",
+        "Phan Đình Minh","Nguyễn Thanh Loan","Lê Thị Hoa","Trần Thị Mai",
+        "Phạm Văn Bình","Hoàng Văn Nam"
     ];
 
+    // 2 ông này LUÔN LUÔN là lái xe khi được chọn
     const DEFAULT_DRIVERS = ["Nguyễn Mạnh Hiệp", "Mai Văn Giáp"];
 
+    const ROLE_LABEL = {
+        'NV':   'Nhân viên đơn vị công tác',
+        'CHT':  'Chỉ huy trực tiếp',
+        'LĐCV': 'Lãnh đạo công việc',
+        'LX':   'Công nhân lái xe'
+    };
+
     // ============ STATE ============
-    let dsNV = [];
+    let dsNV = [];       // danh sách người gốc
+    let dsXeGoc = [];    // danh sách xe gốc
     let currentMode = "NV";
     let selectedRoles = {}; // { "Nguyễn Hữu Kính": "CHT", ... }
 
     // ============ KHỞI TẠO ============
     window.onload = function() {
-        let saved = localStorage.getItem('danh_sach_nhan_su');
-        dsNV = saved ? JSON.parse(saved) : DEFAULT_NV.slice();
+        dsNV = JSON.parse(localStorage.getItem('ds_nv_goc')) || DEFAULT_NV.slice();
+        dsXeGoc = JSON.parse(localStorage.getItem('ds_xe_goc')) || DEFAULT_XE.slice();
         renderChips();
-        addXe(); // Thêm 1 xe mặc định
+        addXe();
         tinhToan();
         document.querySelectorAll('input[type="number"]').forEach(i => i.addEventListener('input', tinhToan));
     };
@@ -192,7 +211,7 @@
         container.innerHTML = dsNV.map(nv => {
             const role = selectedRoles[nv];
             const isDriver = DEFAULT_DRIVERS.includes(nv);
-            const cls = role ? `chip chip-${role.toLowerCase()}` : 'chip';
+            const cls = role ? `chip chip-${role.toLowerCase().replace('đ','d')}` : 'chip';
             const prefix = isFemale(nv) ? "B." : "Mr.";
             const badge = role ? `<span class="role-badge">${role}</span>` : "";
             const icon = isDriver ? `<span class="driver-icon">🚗</span>` : "";
@@ -201,19 +220,26 @@
     }
 
     function handleChipClick(name) {
+        const isDefaultDriver = DEFAULT_DRIVERS.includes(name);
         if (selectedRoles[name]) {
-            if (selectedRoles[name] === currentMode) {
-                delete selectedRoles[name]; // Bỏ chọn
+            // Đang có vai trò
+            if (isDefaultDriver) {
+                // Lái xe mặc định: bấm lại để bỏ
+                if (selectedRoles[name] === 'LX' && currentMode === 'LX') {
+                    delete selectedRoles[name];
+                } else {
+                    selectedRoles[name] = 'LX'; // luôn giữ LX
+                }
             } else {
-                selectedRoles[name] = currentMode; // Đổi vai trò
+                if (selectedRoles[name] === currentMode) {
+                    delete selectedRoles[name]; // bỏ chọn
+                } else {
+                    selectedRoles[name] = currentMode; // đổi vai trò
+                }
             }
         } else {
-            // Người mặc định lái xe → luôn gán LX
-            if (DEFAULT_DRIVERS.includes(name)) {
-                selectedRoles[name] = "LX";
-            } else {
-                selectedRoles[name] = currentMode;
-            }
+            // Chưa có vai trò
+            selectedRoles[name] = isDefaultDriver ? 'LX' : currentMode;
         }
         renderChips();
         updateSoNguoi();
@@ -223,7 +249,39 @@
     function updateSoNguoi() {
         const count = Object.keys(selectedRoles).length;
         document.getElementById('soNguoi').value = count;
+        document.getElementById('tongsonguoi').innerText = count;
         tinhToan();
+    }
+
+    // ============ QUẢN LÝ DANH SÁCH GỐC ============
+    function themNguoiMoi() {
+        const ten = prompt("Nhập họ tên người mới:");
+        if (!ten || !ten.trim()) return;
+        const t = ten.trim();
+        if (dsNV.includes(t)) { alert("Người này đã có trong danh sách!"); return; }
+        dsNV.push(t);
+        localStorage.setItem('ds_nv_goc', JSON.stringify(dsNV));
+        renderChips();
+        alert(`✅ Đã thêm "${t}" vào danh sách gốc.`);
+    }
+
+    function themXeMoi() {
+        const ten = prompt("Nhập tên xe mới (VD: Hyundai):");
+        if (!ten || !ten.trim()) return;
+        const bienSo = prompt("Nhập biển số xe:");
+        if (!bienSo || !bienSo.trim()) return;
+        const dmStr = prompt("Nhập định mức nhiên liệu (L/100km):", "15");
+        const dinhMuc = parseFloat(dmStr) || 15;
+        dsXeGoc.push({ ten: ten.trim(), bienSo: bienSo.trim(), dinhMuc: dinhMuc });
+        localStorage.setItem('ds_xe_goc', JSON.stringify(dsXeGoc));
+        alert(`✅ Đã thêm xe "${ten}" vào danh sách gốc.`);
+        // Refresh dropdown trong các card hiện tại
+        document.querySelectorAll('.chon-xe').forEach(sel => {
+            const cur = sel.value;
+            sel.innerHTML = '<option value="">-- Chọn --</option>' +
+                dsXeGoc.map((x, i) => `<option value="${i}">${x.ten}</option>`).join('');
+            sel.value = cur;
+        });
     }
 
     // ============ CĂN CỨ ============
@@ -237,20 +295,23 @@
     // ============ XE ============
     function addXe() {
         const container = document.getElementById('dsXeContainer');
+        const idx = container.children.length + 1;
         const card = document.createElement('div');
         card.className = 'xe-card';
         card.innerHTML = `
+            <div class="xe-title">Xe ${idx}</div>
             <div class="row">
                 <label>Chọn xe:</label>
                 <select class="chon-xe" onchange="capNhatXe(this)">
                     <option value="">-- Chọn --</option>
-                    ${DS_XE_GOC.map((x, i) => `<option value="${i}">${x.ten}</option>`).join('')}
+                    ${dsXeGoc.map((x, i) => `<option value="${i}">${x.ten}</option>`).join('')}
                 </select>
                 <button class="btn-red btn-sm" style="width:auto; margin:0;" onclick="this.closest('.xe-card').remove(); tinhToan();">X</button>
             </div>
-            <div class="row"><label>Biển số:</label><input type="text" class="bien-so" readonly></div>
+            <div class="row"><label>Biển số:</label><span class="bien-so-text">--</span></div>
             <div class="row"><label>Số KM:</label><input type="number" class="so-km" value="0" onchange="tinhToan()"></div>
-            <div class="row"><label>Định mức:</label><input type="number" class="dinh-muc" readonly></div>
+            <div class="row"><label>Định mức:</label><input type="number" class="dinh-muc" readonly style="background:#f0f0f0;"></div>
+            <div class="row"><label>Đơn giá (đ/L):</label><input type="number" class="don-gia" value="28000" onchange="tinhToan()"></div>
             <div class="row"><label>Lái xe:</label><select class="lai-xe"></select></div>
             <div class="money-row">Tiền NL: <span class="tien-nl">0</span> đ</div>
         `;
@@ -263,17 +324,18 @@
         const idx = select.value;
         const card = select.closest('.xe-card');
         if (idx === "") {
-            card.querySelector('.bien-so').value = "";
+            card.querySelector('.bien-so-text').innerText = "--";
             card.querySelector('.dinh-muc').value = "";
         } else {
-            const xe = DS_XE_GOC[idx];
-            card.querySelector('.bien-so').value = xe.bienSo;
+            const xe = dsXeGoc[idx];
+            card.querySelector('.bien-so-text').innerText = xe.bienSo;
             card.querySelector('.dinh-muc').value = xe.dinhMuc;
         }
         tinhToan();
     }
 
     function updateLaiXeDropdowns() {
+        // Lấy tất cả người có vai trò LX
         const drivers = Object.keys(selectedRoles).filter(n => selectedRoles[n] === "LX");
         document.querySelectorAll('.lai-xe').forEach(sel => {
             const cur = sel.value;
@@ -284,33 +346,29 @@
 
     // ============ TÍNH TOÁN ============
     function tinhToan() {
-        // Phòng
         const soPhong = +document.getElementById('soPhong').value || 0;
         const soDem = +document.getElementById('soDem').value || 0;
         const giaPhong = +document.getElementById('giaPhong').value || 0;
         const tienPhong = soPhong * soDem * giaPhong;
         document.getElementById('tienPhong').innerText = tienPhong.toLocaleString('vi-VN');
 
-        // Phụ cấp
         const soNguoi = +document.getElementById('soNguoi').value || 0;
         const soNgay = +document.getElementById('soNgay').value || 0;
         const giaPC = +document.getElementById('giaPhuCap').value || 0;
         const tienPC = soNguoi * soNgay * giaPC;
         document.getElementById('tienPhuCap').innerText = tienPC.toLocaleString('vi-VN');
 
-        // Nhiên liệu (tổng tất cả xe)
         let tongNL = 0;
         document.querySelectorAll('.xe-card').forEach(card => {
             const km = +card.querySelector('.so-km').value || 0;
             const dm = +card.querySelector('.dinh-muc').value || 0;
-            const gia = 28000; // Giá xăng mặc định
+            const gia = +card.querySelector('.don-gia').value || 0;
             const tien = (km * dm / 100) * gia;
             card.querySelector('.tien-nl').innerText = tien.toLocaleString('vi-VN');
             tongNL += tien;
         });
         document.getElementById('tienNhienLieu').innerText = tongNL.toLocaleString('vi-VN');
 
-        // Tổng
         const tong = tienPhong + tienPC + tongNL;
         document.getElementById('tongDuTru').value = tong.toLocaleString('vi-VN') + " đồng";
     }
@@ -333,9 +391,10 @@
         document.querySelectorAll('.xe-card').forEach(card => {
             xeList.push({
                 xeIdx: card.querySelector('.chon-xe').value,
-                bienSo: card.querySelector('.bien-so').value,
+                bienSo: card.querySelector('.bien-so-text').innerText,
                 dinhMuc: card.querySelector('.dinh-muc').value,
                 soKm: card.querySelector('.so-km').value,
+                donGia: card.querySelector('.don-gia').value,
                 laiXe: card.querySelector('.lai-xe').value
             });
         });
@@ -364,7 +423,6 @@
         if (!saved) { alert("Chưa có dữ liệu form được lưu."); return; }
         const d = JSON.parse(saved);
 
-        // Căn cứ
         const cc = document.getElementById('canCuContainer');
         cc.innerHTML = '';
         (d.canCu || []).forEach(v => {
@@ -383,7 +441,6 @@
         renderChips();
         updateSoNguoi();
 
-        // Xe
         const xc = document.getElementById('dsXeContainer');
         xc.innerHTML = '';
         (d.xeList || []).forEach(x => {
@@ -391,14 +448,13 @@
             const card = xc.lastElementChild;
             if (x.xeIdx !== '') {
                 card.querySelector('.chon-xe').value = x.xeIdx;
-                card.querySelector('.bien-so').value = x.bienSo;
+                card.querySelector('.bien-so-text').innerText = x.bienSo;
                 card.querySelector('.dinh-muc').value = x.dinhMuc;
             }
             card.querySelector('.so-km').value = x.soKm || 0;
-            // Lái xe sẽ được set sau khi update dropdown
+            card.querySelector('.don-gia').value = x.donGia || 28000;
         });
         updateLaiXeDropdowns();
-        // Set lái xe
         const cards = xc.querySelectorAll('.xe-card');
         (d.xeList || []).forEach((x, i) => {
             if (cards[i] && x.laiXe) cards[i].querySelector('.lai-xe').value = x.laiXe;
@@ -425,30 +481,35 @@
     async function xuatWord() {
         document.getElementById("loading").style.display = "flex";
 
-        // Căn cứ
         const canCu = [...document.querySelectorAll('.can-cu')].filter(i => i.value.trim()).map(i => ({ noi_dung: i.value }));
 
-        // Nhân sự (theo thứ tự NV → CHT → LX)
-        const nhanSu = [];
-        const order = { 'CHT': 1, 'NV': 2, 'LX': 3 };
-        Object.entries(selectedRoles)
+        // Nhân sự theo thứ tự LĐCV → CHT → NV → LX
+        const order = { 'LĐCV': 1, 'CHT': 2, 'NV': 3, 'LX': 4 };
+        const nhanSu = Object.entries(selectedRoles)
             .sort((a, b) => (order[a[1]] || 9) - (order[b[1]] || 9))
-            .forEach(([ten, vaiTro], i) => {
-                nhanSu.push({ stt: i + 1, ho_ten: ten, don_vi: "Tổ TNLĐ", ghi_chu: vaiTro });
-            });
+            .map(([ten, vaiTro], i) => ({
+                stt: i + 1,
+                ho_ten: ten,
+                don_vi: "Tổ TNLĐ",
+                ghi_chu: ROLE_LABEL[vaiTro] || vaiTro
+            }));
 
         // Xe
         const danhSachXe = [];
         document.querySelectorAll('.xe-card').forEach(card => {
-            const bienSo = card.querySelector('.bien-so').value;
-            if (!bienSo) return;
+            const bienSo = card.querySelector('.bien-so-text').innerText;
+            if (!bienSo || bienSo === '--') return;
             const soKm = +card.querySelector('.so-km').value || 0;
             const dm = +card.querySelector('.dinh-muc').value || 0;
-            const tien = (soKm * dm / 100) * 28000;
+            const gia = +card.querySelector('.don-gia').value || 0;
+            const tien = (soKm * dm / 100) * gia;
             danhSachXe.push({
                 ten_xe: card.querySelector('.chon-xe').selectedOptions[0]?.text || "",
-                bien_so: bienSo, lai_xe: card.querySelector('.lai-xe').value || "",
-                so_km: soKm, dinh_muc: dm,
+                bien_so: bienSo,
+                lai_xe: card.querySelector('.lai-xe').value || "",
+                so_km: soKm,
+                dinh_muc: dm,
+                don_gia: gia.toLocaleString('vi-VN'),
                 tien_nhien_lieu: tien.toLocaleString('vi-VN')
             });
         });
