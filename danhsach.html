@@ -287,16 +287,11 @@
             });
             saveAs(blob, "Danh_sach_nhom_cong_tac.docx");
             document.getElementById("loading").style.display = "none";
-        } catch (e) {
-            console.error(e);
-            let msg = "Lỗiọ: " + e.message;
-            if (e.properties && và e.properties.errors) {
-                msg += "\ Tn";
-                e.properties.errors.forEach(err => msg += "- " + err.message + "\n");
-            }
-            alert(msg);
-            document.getElementById("loading").style.display = "none";
-        }
+       } catch (e) {
+    console.error(e);
+    alert("Lỗi: " + e.message);
+    document.getElementById("loading").style.display = "none";
+}
     }
 </script>
 </body>
