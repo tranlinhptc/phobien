@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Danh Sách Nhóm Công Tác - TNĐLĐ</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.11/docxtemplater.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 10px; }
+        .container { width: 100%; max-width: 720px; background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); margin: auto; box-sizing: border-box; }
+        h2 { text-align: center; color: #c00; margin-top: 0; text-transform: uppercase; font-size: 20px; }
+        h3 { color: #0056b3; border-bottom: 2px solid #007bff; padding-bottom: 5px; margin-top: 20px; font-size: 15px; }
+        .form-group { margin-bottom: 12px; }
+        label { font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px; color: #c00; }
+        input, select, textarea { width: 100%; padding: 9px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 15px; }
+        button { background: #28a745; color: #fff; border: none; padding: 11px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 8px; border-radius: 6px; font-size: 14px; }
+        .btn-blue { background: #007bff; } .btn-orange { background: #fd7e14; } .btn-red { background: #dc3545; }
+        .btn-gray { background: #6c757d; } .btn-purple { background: #6f42c1; }
+        .btn-sm { padding: 5px 10px; font-size: 12px; width: auto; margin: 2px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+        th, td { border: 1px solid #999; padding: 4px; text-align: center; }
+        th { background: #e9ecef; font-size: 12px; }
+        td input, td select { padding: 4px; font-size: 12px; border: 1px solid #ddd; }
+
+        .header-actions { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+        .header-actions button { margin: 0; padding: 8px; font-size: 12px; flex: 1; min-width: 100px; }
+        .info-text { font-size: 12px; color: #666; font-style: italic; }
+        #loading { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(255,255,255,.9); align-items: center; justify-content: center; color: #007bff; font-weight: bold; font-size: 18px; }
+        .note { font-size: 11px; color: #666; font-style: italic; margin: 4px 0; }
+        .row-input { display: flex; gap: 5px; margin-bottom: 5px; align-items: center; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-actions">
+        <button class="btn-blue" onclick="luuForm()">💾 Lưu form</button>
+        <button class="btn-gray" onclick="taiForm()">📂 Tải form</button>
+        <button class="btn-red" onclick="xoaForm()">🗑️ Xóa form</button>
+    </div>
+
+    <h2>DANH SÁCH NHÓM CÔNG TÁC</h2>
+
+    <div class="form-group">
+        <label>Kèm giấy đi đường số:</label>
+        <input type="text" id="soGiay" value="301">
+    </div>
+    <div class="form-group">
+        <label>Ngày giấy đi đường:</label>
+        <input type="date" id="ngayGiay">
+    </div>
+
+    <div class="header-actions" style="margin-top:15px;">
+        <button class="btn-purple" onclick="dongBoTuDeCuong()">🔄 Đồng bộ từ Đề cương</button>
+        <button class="btn-blue" onclick="addNguoi()">+ Thêm người</button>
+    </div>
+
+    <div style="overflow-x:auto;">
+        <table id="tblNhanSu">
+            <thead>
+                <tr>
+                    <th style="width:35px;">STT</th>
+                    <th>Họ và Tên</th>
+                    <th style="width:110px;">Chức vụ</th>
+                    <th style="width:120px;">Từ ngày</th>
+                    <th style="width:120px;">Đến ngày</th>
+                    <th>Ghi chú</th>
+                    <th style="width:35px;">X</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <button class="btn-orange" onclick="xuatWord()" style="margin-top:15px;">📄 Xuất Danh sách Word</button>
+</div>
+
+<div id="loading">⏳ Đang xử lý, chờ xíu...</div>
+
+<script>
+    // ============ CẤU HÌNH ============
+    const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxlM-814su7_q0yS7Qx1bdwC1j9CB18Km6UOdMcJW4ifZUecl633RmEhvxnsUIwerlE/exec";
+    const ID_TEMPLATE_DANHSACH = "1GeIU57-WNr9XOgF5w8UInBMMZKdupfzv"; // Thay ID file Word mẫu
+
+    // Chức vụ mặc định theo tên
+    const CHUC_VU_MAC_DINH = {
+        "Nguyễn Hữu Kính":       "Tổ trưởng",
+        "Hoàng Trần Quản Trọng": "Tổ phó",
+        "Ngô Văn Quang":         "Tổ phó"
+    };
+
+    const DS_CHUC_VU = ["Nhân viên", "Tổ trưởng", "Tổ phó", "Lãnh đạo"];
+
+    // ============ KHỞI TẠO ============
+    window.onload = function() {
+        // Ngày giấy = hôm nay
+        const today = new Date();
+        document.getElementById('ngayGiay').value =
+            `${today.getFullYear()}-${('0'+(today.getMonth()+1)).slice(-2)}-${('0'+today.getDate()).slice(-2)}`;
+
+        // Tự động đồng bộ từ Đề cương nếu có
+        const coDeCuong = localStorage.getItem('decuong_form_data');
+        if (coDeCuong) {
+            dongBoTuDeCuong();
+        } else {
+            addNguoi();
+        }
+    };
+
+    // ============ ĐỒNG BỘ TỪ ĐỀ CƯƠNG ============
+    function dongBoTuDeCuong() {
+        const decuong = JSON.parse(localStorage.getItem('decuong_form_data') || '{}');
+        if (!decuong.selectedRoles || Object.keys(decuong.selectedRoles).length === 0) {
+            alert("Chưa có dữ liệu nhân sự từ Đề cương. Vui lòng nhập Đề cương trước.");
+            return;
+        }
+
+        const tbody = document.querySelector('#tblNhanSu tbody');
+        tbody.innerHTML = '';
+
+        // Ngày mặc định từ Đề cương
+        const tuNgay = decuong.tgTu || '';
+        const denNgay = decuong.tgDen || '';
+
+        // Sắp xếp theo thứ tự: Tổ trưởng → Tổ phó → Nhân viên
+        const order = { "Tổ trưởng": 1, "Tổ phó": 2, "Lãnh đạo": 3, "Nhân viên": 4 };
+        const dsNguoi = Object.keys(decuong.selectedRoles).sort((a, b) => {
+            const cvA = CHUC_VU_MAC_DINH[a] || "Nhân viên";
+            const cvB = CHUC_VU_MAC_DINH[b] || "Nhân viên";
+            return (order[cvA] || 9) - (order[cvB] || 9);
+        });
+
+        dsNguoi.forEach((ten, idx) => {
+            const chucVu = CHUC_VU_MAC_DINH[ten] || "Nhân viên";
+            addNguoi(ten, chucVu, tuNgay, denNgay, '');
+        });
+
+        alert(`✅ Đã đồng bộ ${dsNguoi.length} người từ Đề cương.`);
+    }
+
+    // ============ THÊM NGƯỜI ============
+    function addNguoi(ten = "", chucVu = "Nhân viên", tuNgay = "", denNgay = "", ghiChu = "") {
+        const tbody = document.querySelector('#tblNhanSu tbody');
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="stt"></td>
+            <td><input type="text" class="ten-nv" value="${ten.replace(/"/g,'&quot;')}" placeholder="Họ tên"></td>
+            <td>
+                <select class="chuc-vu">
+                    ${DS_CHUC_VU.map(cv => `<option value="${cv}" ${cv === chucVu ? 'selected' : ''}>${cv}</option>`).join('')}
+                </select>
+            </td>
+            <td><input type="date" class="tu-ngay" value="${tuNgay}"></td>
+            <td><input type="date" class="den-ngay" value="${denNgay}"></td>
+            <td><input type="text" class="ghi-chu" value="${ghiChu.replace(/"/g,'&quot;')}" placeholder="Ghi chú..."></td>
+            <td><button class="btn-red btn-sm" onclick="xoaNguoi(this)">X</button></td>
+        `;
+        tbody.appendChild(row);
+        capNhatSTT();
+    }
+
+    function xoaNguoi(btn) {
+        btn.closest('tr').remove();
+        capNhatSTT();
+    }
+
+    function capNhatSTT() {
+        document.querySelectorAll('#tblNhanSu tbody tr').forEach((row, i) => {
+            row.querySelector('.stt').innerText = ('0' + (i + 1)).slice(-2);
+        });
+    }
+
+    // ============ ĐỊNH DẠNG NGÀY ============
+    function formatDate(str) {
+        if (!str) return "";
+        const d = new Date(str);
+        return `${('0'+d.getDate()).slice(-2)}/${('0'+(d.getMonth()+1)).slice(-2)}/${d.getFullYear()}`;
+    }
+    function splitDate(str) {
+        if (!str) return { ngay: "", thang: "", nam: "" };
+        const d = new Date(str);
+        return {
+            ngay: ('0'+d.getDate()).slice(-2),
+            thang: ('0'+(d.getMonth()+1)).slice(-2),
+            nam: d.getFullYear()
+        };
+    }
+
+    // ============ LƯU / TẢI FORM ============
+    function luuForm() {
+        const dsNguoi = [];
+        document.querySelectorAll('#tblNhanSu tbody tr').forEach(row => {
+            dsNguoi.push({
+                ten: row.querySelector('.ten-nv').value,
+                chucVu: row.querySelector('.chuc-vu').value,
+                tuNgay: row.querySelector('.tu-ngay').value,
+                denNgay: row.querySelector('.den-ngay').value,
+                ghiChu: row.querySelector('.ghi-chu').value
+            });
+        });
+
+        localStorage.setItem('danhsach_form_data', JSON.stringify({
+            soGiay: document.getElementById('soGiay').value,
+            ngayGiay: document.getElementById('ngayGiay').value,
+            danhSach: dsNguoi
+        }));
+        alert("✅ Đã lưu form!");
+    }
+
+    function taiForm() {
+        const saved = localStorage.getItem('danhsach_form_data');
+        if (!saved) { alert("Chưa có dữ liệu form được lưu."); return; }
+        const d = JSON.parse(saved);
+
+        document.getElementById('soGiay').value = d.soGiay || '';
+        document.getElementById('ngayGiay').value = d.ngayGiay || '';
+
+        const tbody = document.querySelector('#tblNhanSu tbody');
+        tbody.innerHTML = '';
+        (d.danhSach || []).forEach(n => {
+            addNguoi(n.ten, n.chucVu, n.tuNgay, n.denNgay, n.ghiChu);
+        });
+        alert("✅ Đã tải form!");
+    }
+
+    function xoaForm() {
+        if (confirm("Xóa toàn bộ form đã lưu?")) {
+            localStorage.removeItem('danhsach_form_data');
+            alert("Đã xóa.");
+        }
+    }
+
+    // ============ XUẤT WORD ============
+    async function xuatWord() {
+        document.getElementById("loading").style.display = "flex";
+
+        const rows = document.querySelectorAll('#tblNhanSu tbody tr');
+        if (rows.length === 0) {
+            alert("Chưa có người nào!");
+            document.getElementById("loading").style.display = "none";
+            return;
+        }
+
+        const ngayObj = splitDate(document.getElementById('ngayGiay').value);
+
+        const danhSach = [];
+        rows.forEach((row, idx) => {
+            danhSach.push({
+                stt: ('0' + (idx + 1)).slice(-2),
+                ho_ten: row.querySelector('.ten-nv').value,
+                chuc_vu: row.querySelector('.chuc-vu').value,
+                tu_ngay: formatDate(row.querySelector('.tu-ngay').value),
+                den_ngay: formatDate(row.querySelector('.den-ngay').value),
+                ghi_chu: row.querySelector('.ghi-chu').value,
+                ky_xac_nhan: ""
+            });
+        });
+
+        const data = {
+            so_giay: document.getElementById('soGiay').value,
+            ngay_giay: ngayObj.ngay,
+            thang_giay: ngayObj.thang,
+            nam_giay: ngayObj.nam,
+            danh_sach: danhSach
+        };
+
+        try {
+            const res = await fetch(`${GOOGLE_WEB_APP_URL}?action=getTemplate&fileId=${ID_TEMPLATE_DANHSACH}`);
+            const result = await res.json();
+            const binary = window.atob(result.base64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+            const zip = new PizZip(bytes.buffer);
+            const doc = new window.docxtemplater(zip, {
+                paragraphLoop: true, linebreaks: true,
+                nullGetter: function() { return ""; }
+            });
+            doc.render(data);
+
+            const blob = doc.getZip().generate({
+                type: "blob",
+                mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            });
+            saveAs(blob, "Danh_sach_nhom_cong_tac.docx");
+            document.getElementById("loading").style.display = "none";
+        } catch (e) {
+            console.error(e);
+            let msg = "Lỗiọ: " + e.message;
+            if (e.properties && và e.properties.errors) {
+                msg += "\ Tn";
+                e.properties.errors.forEach(err => msg += "- " + err.message + "\n");
+            }
+            alert(msg);
+            document.getElementById("loading").style.display = "none";
+        }
+    }
+</script>
+</body>
+</html>
