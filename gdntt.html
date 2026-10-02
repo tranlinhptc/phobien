@@ -72,21 +72,21 @@
 
     <h3>Căn cứ</h3>
     <div id="canCuContainer">
-        <div class="row-input"><input type="text" class="can-cu" value="Căn cứ lịch cắt điện tháng 09/2026."><button class="btn-red btn-sm" onclick="this.parentElement.remove()">X</button></div>
+        <div class="row-input"><input type="text" class="can-cu" placehoder="Căn cứ....."><button class="btn-red btn-sm" onclick="this.parentElement.remove()">X</button></div>
     </div>
-    <button class="btn-blue btn-sm" onclick="addCanCu()">+ Thêm căn cứ</button>
+    <button class="btn-blue btn-sm" onclick="addCanCu()">+..</button>
 
     <h3>I. Thời gian xuất phát dự kiến</h3>
     <div class="form-group"><input type="datetime-local" id="tgXuatPhat" value="2026-09-26T13:00"></div>
 
     <h3>II. Nội dung công tác</h3>
-    <div class="form-group"><textarea id="ndCongTac" rows="3">Thí nghiệm MC 212 sau xử lý rò khí tại TBA 220kV Hàm Tân.</textarea></div>
+    <div class="form-group"><textarea id="ndCongTac" rows="3">Thí nghiệm định kỳ... </textarea></div>
 
     <h3>III. Thời gian làm việc dự kiến</h3>
-    <div class="form-group">Từ <input type="date" id="tgTu" value="2026-09-26" style="width:48%; display:inline-block;"> Đến <input type="date" id="tgDen" value="2026-09-26" style="width:48%; display:inline-block;"></div>
+    <div class="form-group">Từ <input type="datetime-local" id="tgTu" style="width:48%; display:inline-block;"> Đến <input type="date" id="tgDen" style="width:48%; display:inline-block;"></div>
 
     <h3>IV. Địa điểm làm việc</h3>
-    <div class="form-group"><input type="text" id="diaDiem" value="TBA 220kV Hàm Tân."></div>
+    <div class="form-group"><input type="text" id="diaDiem" placehoder="Trạm/Kho...."></div>
 
     <h3>V. Danh sách nhóm công tác</h3>
     <p class="note">① Chọn chế độ vai trò → ② Bấm chip người để gán. Bấm lại cùng vai trò để bỏ.</p>
@@ -101,17 +101,17 @@
     <button class="btn-purple btn-sm" onclick="themNguoiMoi()">+ Thêm người mới</button>
 
     <h3>VI. Phương tiện đi lại</h3>
-    <button class="btn-purple btn-sm" onclick="themXeMoi()">+ Thêm xe mới (lưu)</button>
+    <button class="btn-purple btn-sm" onclick="themXeMoi()">+ Xe cá nhân</button>
     <div id="dsXeContainer" style="margin-top:8px;"></div>
-    <button class="btn-blue btn-sm" onclick="addXe()">+ Thêm xe (tạm)</button>
+    <button class="btn-blue btn-sm" onclick="addXe()">+ Xe cơ quan</button>
     
     <h3>VII. Dự trù kinh phí</h3>
     <div class="form-group">
         <label>Phòng nghỉ:</label>
         <div class="row-input">
-            <input type="number" id="soPhong" value="1" placeholder="Số phòng" style="width:55px;">
+            <input type="number" id="soPhong" placeholder="Số phòng" style="width:55px;">
             <span>x</span>
-            <input type="number" id="soDem" value="1" placeholder="Số đêm" style="width:55px;">
+            <input type="number" id="soDem" placeholder="Số đêm" style="width:55px;">
             <span>x</span>
             <input type="number" id="giaPhong" value="700000" placeholder="Đơn giá" style="width:90px;">
             <span>=</span>
@@ -151,7 +151,7 @@
     const ID_TEMPLATE_DECUONG = "1GeIU57-WNr9XOgF5w8UInBMMZKdupfzv"; // Thay ID file Word mẫu
 
     const DEFAULT_XE = [
-        { ten: "Ford Transit",        bienSo: "79B 332.11",  dinhMuc: 20 },
+        { ten: "Ford Transit",   bienSo: "79B 332.11",  dinhMuc: 20 },
         { ten: "Ford Ranger",    bienSo: "79C 038.20",  dinhMuc: 15 },
         { ten: "Ford Fortuner",  bienSo: "79A 866.70",  dinhMuc: 19 }
     ];
@@ -168,8 +168,8 @@
     const DEFAULT_DRIVERS = ["Nguyễn Mạnh Hiệp", "Mai Văn Giáp"];
 
     const ROLE_LABEL = {
-        'NV':   'NVĐVCT',
-        'CHT':  'CHTT',
+        'NV':   'NV',
+        'CHT':  'Chỉ huy',
         'LĐCV': 'LĐCV',
         'LX':   'Lái xe'
     };
@@ -211,7 +211,7 @@
             const role = selectedRoles[nv];
             const isDriver = DEFAULT_DRIVERS.includes(nv);
             const cls = role ? `chip chip-${role.toLowerCase().replace('đ','d')}` : 'chip';
-            const prefix = isFemale(nv) ? "B." : "Mr.";
+            const prefix = isFemale(nv) ? "Mrs." : "Mr.";
             const badge = role ? `<span class="role-badge">${role}</span>` : "";
             const icon = isDriver ? `<span class="driver-icon">🚗</span>` : "";
             return `<button type="button" class="${cls}" onclick="handleChipClick('${nv.replace(/'/g, "\\'")}')">${prefix}${getShortName(nv)}${icon}${badge}</button>`;
@@ -518,6 +518,7 @@ const danhSachXeText = danhSachXe
     .join(', ') + '.';
         const data = {
             can_cu: canCu,
+            danh_sach_xe_text: danhSachXeText,
             thoi_gian_xuat_phat: formatDateTime(document.getElementById('tgXuatPhat').value),
             noi_dung: document.getElementById('ndCongTac').value,
             tu_ngay: formatDate(document.getElementById('tgTu').value),
@@ -537,7 +538,7 @@ const danhSachXeText = danhSachXe
             tien_phu_cap: document.getElementById('tienPhuCap').innerText,
             tien_nhien_lieu: document.getElementById('tienNhienLieu').innerText,
             tong_du_tru: document.getElementById('tongDuTru').value
-            danh_sach_xe_text: danhSachXeText
+            
         };
 
         try {
