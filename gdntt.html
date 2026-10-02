@@ -512,7 +512,10 @@
                 tien_nhien_lieu: tien.toLocaleString('vi-VN')
             });
         });
-
+// Tạo chuỗi liệt kê xe: "xe A biển số X, xe B biển số Y, xe C biển số Z."
+const danhSachXeText = danhSachXe
+    .map(x => `xe ${x.ten_xe} biển số ${x.bien_so}`)
+    .join(', ') + '.';
         const data = {
             can_cu: canCu,
             thoi_gian_xuat_phat: formatDateTime(document.getElementById('tgXuatPhat').value),
@@ -534,6 +537,7 @@
             tien_phu_cap: document.getElementById('tienPhuCap').innerText,
             tien_nhien_lieu: document.getElementById('tienNhienLieu').innerText,
             tong_du_tru: document.getElementById('tongDuTru').value
+            danh_sach_xe_text: danhSachXeText,
         };
 
         try {
