@@ -23,14 +23,17 @@
         .ct-selector { border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: #f9f9f9; margin-bottom: 12px; }
         .ct-selector .item { display: flex; align-items: center; padding: 8px; background: #fff; border-radius: 6px; margin-bottom: 6px; border: 1px solid #eee; }
         .ct-selector .item input { width: auto; margin-right: 10px; }
-        .ct-selector .item .info { flex: 1; font-size: 13px; }
+        .ct-selector .item .info { flex: 1; font-size: 13px; min-width: 0; }
         .ct-selector .item .info b { color: #0056b3; }
+        .ct-selector .item .info span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .ct-selector .item .info small { color: #666; display: block; font-size: 11px; }
-        .ct-selector .item .cost { font-size: 11px; color: #d63384; font-weight: bold; text-align: right; }
+        .ct-selector .item .cost { font-size: 11px; color: #d63384; font-weight: bold; text-align: right; flex: 0 0 100px; }
 
         .warning-box { background: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; border-radius: 6px; margin-bottom: 12px; font-size: 12px; }
         .warning-box b { color: #856404; }
         .warning-box ul { margin: 6px 0 0 20px; padding: 0; color: #856404; }
+
+        .error-box { background: #f8d7da; border-left: 4px solid #dc3545; padding: 10px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; color: #721c24; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
         th, td { border: 1px solid #999; padding: 4px; text-align: center; }
@@ -60,7 +63,7 @@
     </div>
     <div class="form-group">
         <label>Người đề nghị thanh toán:</label>
-        <input type="text" id="nguoiDeNghi" value="Nguyễn Xuân Khánh">
+        <input type="text" id="nguoiDeNghi" list="dsNguoiDeNghi" placeholder="Gõ hoặc chọn...">
     </div>
 
     <h3>Chọn công tác để thanh toán</h3>
@@ -76,46 +79,114 @@
 
 <script>
     // ============ CẤU HÌNH ============
-    const GOOGLE_WEB_CHAPP_URL = "https://script.google.com/macros/s/AKfycbxlM-814su7_q0yS7Qx1bdwC1j9CB18Km6UOdMcJW4ifZUecl633RmEhvxnsUIwerlE/exec";
-    const ID_TEMPLATE_TONG = "THAY_ID_FILE_WORD_MAU_TONG"; // Anh tạo file Word mẫu tổng và thay ID
-
-    const MUC_CTP = 250000; // Mức CTP/ngày/người
+    const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxlM-814su7_q0yS7Qx1bdwC1j9CB18Km6UOdMcJW4ifZUecl633RmEhvxnsUIwerlE/exec";
+    const ID_TEMPLATE_TONG = "THAY_ID_FILE_WORD_MAU_TONG";
+    const MUC_CTP = 250000;
 
     // ============ STATE ============
     let dbCongTac = {};
 
     // ============ KHỞI TẠO ============
     window.onload = function() {
-        dbCongTac = JSON.parse(localStorage.getItem('db_congtac') || '{}');
+        try {
+            dbCongTac = JSON.parse(localStorage.getItem('db_congtac') || '{}');
+        } catch (e) {
+            console.error("Lỗi parse db_congtac:", e);
+            dbCongTac = {};
+        }
 
         // Ngày lập = hôm nay
         const today = new Date();
         document.getElementById('ngayLap').value =
             `${today.getFullYear()}-${('0'+(today.getMonth()+1)).slice(-2)}-${('0'+today.getDate()).slice(-2)}`;
 
-        renderCTSelector();
-        updatePreview();
+        try {
+            renderCTSelector();
+            renderNguoiDeNghi();
+            updatePreview();
+        } catch (e) {
+            console.error("Lỗi khởi tạo:", e);
+            document.getElementById('ctSelector').innerHTML =
+                `<div class="error-box">⚠️ Lỗi khởi tạo: ${e.message}. Vui lòng kiểm tra Console (F12).</div>`;
+        }
     };
 
-    // ============ RENDER DANH SÁ CT ============
+    // ============ RENDER DANH SÁCH NGƯỜI ĐỀ NGHỊ ============
+    function renderNguoiDeNghi() {
+        const dsNguoi = new Set();
+        Object.values(dbCongTac).forEach(ct => {
+            // Từ Đề cương
+            if (ct.decuong && ct.decuong.selectedRoles) {
+                Object.keys(ct.decuong.selectedRoles).forEach(n => dsNguoi.add(n));
+            }
+            // Từ DS nhân sự
+            if (ct.danhsach && ct.danhsach.danhSach) {
+                ct.danhsach.danhSach.forEach(n => dsNguoi.add(n.ten));
+            }
+            // Từ Điều xe (lái xe)
+            if (ct.dieuxe && ct.dieuxe.xeList) {
+                ct.dieuxe.xeList.forEach(x => { if (x.laiXe) dsNguoi.add(x.laiXe); });
+            }
+        });
+
+        let dl = document.getElementById('dsNguoiDeNghi');
+        if (!dl) {
+            dl = document.createElement('datalist');
+            dl.id = 'dsNguoiDeNghi';
+            document.body.appendChild(dl);
+        }
+        dl.innerHTML = [...dsNguoi].map(n => `<option value="${n.replace(/"/g,'&quot;')}">`).join('');
+
+        // Đặt mặc định là người đầu tiên tìm thấy (nếu có)
+        const currentVal = document.getElementById('nguoiDeNghi').value;
+        if (!currentVal && dsNguoi.size > 0) {
+            // Ưu tiên Nguyễn Xuân Khánh, không thì lấy người đầu
+            const arr = [...dsNguoi];
+            document.getElementById('nguoiDeNghi').value = arr.includes('Nguyễn Xuân Khánh') ? 'Nguyễn Xuân Khánh' : arr[0];
+        }
+    }
+
+    // ============ RENDER DANH SÁCH CT ============
     function renderCTSelector() {
         const container = document.getElementById('ctSelector');
-        const dsCT = Object.values(dbCongTac).sort((a, b) => (b.ngayBatDau || '').localeCompare(a.ngayBatDau || ''));
+        let dsCT = [];
+        try {
+            dsCT = Object.values(dbCongTac).sort((a, b) => (b.ngayBatDau || '').localeCompare(a.ngayBatDau || ''));
+        } catch (e) {
+            console.error("Lỗi sort CT:", e);
+            dsCT = Object.values(dbCongTac);
+        }
 
         if (dsCT.length === 0) {
-            container.innerHTML = '<p class="info-text">Chưa có công tác nào.</p>';
+            container.innerHTML = `<div class="error-box">
+                ⚠️ <b>Chưa có công tác nào trong hệ thống.</b><br>
+                Anh cần vào <a href="index.html">Trang chủ</a> tạo công tác trước, rồi làm Đề cương / Điều xe / DS nhân sự / Thanh toán NL cho công tác đó.
+            </div>`;
             return;
         }
 
         let html = '';
         dsCT.forEach(ct => {
-            // Tính tổng chi phí của CT
-            const chiPhi = tinhChiPhiCT(ct);
+            let chiPhi = { tongNhienLieu: 0, tongCTP: 0, tongPhongNghi: 0, tong: 0 };
+            try {
+                chiPhi = tinhChiPhiCT(ct);
+            } catch (e) {
+                console.error("Lỗi tính chi phí CT " + ct.id, e);
+            }
+
+            // Đếm module đã hoàn thành
+            const mods = [];
+            if (ct.decuong) mods.push('ĐC');
+            if (ct.dieuxe) mods.push('ĐX');
+            if (ct.danhsach) mods.push('DS');
+            if (ct.nhienlieu) mods.push('NL');
+            const modStr = mods.length > 0 ? `[${mods.join('+')}]` : '[chưa có dữ liệu]';
+
             html += `<div class="item">
                 <input type="checkbox" class="ct-check" data-id="${ct.id}" checked onchange="updatePreview()">
                 <div class="info">
-                    <b>${ct.id}</b>
-                    <span>${escapeHtml(ct.tenCongTac || '')}</span>
+                    <b>${ct.id}</b> <small style="color:#28a745;">${modStr}</small>
+                    <span>${escapeHtml(ct.tenCongTac || '(chưa có tên)')}</span>
                     <small>📅 ${formatDate(ct.ngayBatDau)}${ct.ngayKetThuc && ct.ngayKetThuc !== ct.ngayBatDau ? ' → ' + formatDate(ct.ngayKetThuc) : ''}</small>
                 </div>
                 <div class="cost">
@@ -131,7 +202,7 @@
 
     // ============ TÍNH CHI PHÍ 1 CT ============
     function tinhChiPhiCT(ct) {
-        // Nhiên liệu: từ module nhienlieu
+        // Nhiên liệu
         let tongNhienLieu = 0;
         if (ct.nhienlieu && ct.nhienlieu.xeList) {
             ct.nhienlieu.xeList.forEach(xe => {
@@ -143,9 +214,8 @@
             });
         }
 
-        // CTP: từ module danhsach, mỗi người = số ngày x 250k
-        let tongCTP = 0;
-        let soNguoi = 0;
+        // CTP
+        let tongCTP = 0, soNguoi = 0;
         if (ct.danhsach && ct.danhsach.danhSach) {
             soNguoi = ct.danhsach.danhSach.length;
             ct.danhsach.danhSach.forEach(n => {
@@ -154,24 +224,20 @@
             });
         }
 
-        // Phòng nghỉ: từ module decuong
+        // Phòng nghỉ
         let tongPhongNghi = 0;
         if (ct.decuong && ct.decuong.soPhong && ct.decuong.soDem && ct.decuong.giaPhong) {
             tongPhongNghi = (parseFloat(ct.decuong.soPhong) || 0)
-                * (parseFloat(ct.decuong.soDem       ) }
+                * (parseFloat(ct.decuong.soDem) || 0)
+                * (parseFloat(ct.decuong.giaPhong) || 0);
+        }
 
- || 0)
-                * (parseFloat(ct.decuong.g       iaPhong) || 0);
- return {
-            tongNhienLieu: tongNhienLieu,
-            tongCTP: tongCTP,
-            tongPhongNghi: tongPhongNghi,
-            soNguoi: soNguoi,
+        return {
+            tongNhienLieu, tongCTP, tongPhongNghi, soNguoi,
             tong: tongNhienLieu + tongCTP + tongPhongNghi
         };
     }
 
-    // Tính số ngày giữa 2 mốc (bao gồm cả 2 đầu)
     function tinhSoNgay(tuNgay, denNgay) {
         if (!tuNgay || !denNgay) return 0;
         const parse = (s) => {
@@ -181,8 +247,7 @@
             }
             return new Date(s);
         };
-        const d1 = parse(tuNgay);
-        const d2 = parse(denNgay);
+        const d1 = parse(tuNgay), d2 = parse(denNgay);
         if (isNaN(d1) || isNaN(d2)) return 0;
         const diff = Math.round((d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
         return diff > 0 ? diff : 1;
@@ -190,7 +255,6 @@
 
     // ============ CẢNH BÁO TRÙNG CTP ============
     function kiemTraTrungCTP(dsCTChon) {
-        // Build map: { tenNguoi: { "YYYY-MM-DD": [CT1, CT2, ...] } }
         const map = {};
         dsCTChon.forEach(ct => {
             if (!ct.danhsach || !ct.danhsach.danhSach) return;
@@ -204,23 +268,17 @@
             });
         });
 
-        // Tìm trùng
         const canhBao = [];
         Object.keys(map).forEach(ten => {
             Object.keys(map[ten]).forEach(ngay => {
                 if (map[ten][ngay].length > 1) {
-                    canhBao.push({
-                        ten: ten,
-                        ngay: ngay,
-                        dsCT: map[ten][ngay]
-                    });
+                    canhBao.push({ ten, ngay, dsCT: map[ten][ngay] });
                 }
             });
         });
         return canhBao;
     }
 
-    // Liệt kê các ngày giữa 2 mốc
     function lietKeNgay(tuNgay, denNgay) {
         const parse = (s) => {
             if (!s) return null;
@@ -230,8 +288,7 @@
             }
             return new Date(s);
         };
-        const d1 = parse(tuNgay);
-        const d2 = parse(denNgay);
+        const d1 = parse(tuNgay), d2 = parse(denNgay);
         if (!d1 || !d2 || isNaN(d1) || isNaN(d2)) return [];
         const list = [];
         const cur = new Date(d1);
@@ -250,7 +307,6 @@
             if (dbCongTac[id]) dsCTChon.push(dbCongTac[id]);
         });
 
-        // Tính tổng
         let tongNL = 0, tongCTP = 0, tongPN = 0;
         dsCTChon.forEach(ct => {
             const cp = tinhChiPhiCT(ct);
@@ -260,7 +316,6 @@
         });
         const tongAll = tongNL + tongCTP + tongPN;
 
-        // Cảnh báo trùng
         const canhBao = kiemTraTrungCTP(dsCTChon);
 
         let warningHtml = '';
@@ -297,19 +352,15 @@
         if (dsCTChon.length === 0) { alert("Chưa chọn công tác nào!"); return; }
 
         document.getElementById("loading").style.display = "flex";
+        const ngayLapObj = splitDate(document.getElementById('ngayLap').value);
 
-        // Build data cho template Word
-        const ngayLapStr = document.getElementById('ngayLap').value;
-        const ngayLapObj = splitDate(ngayLapStr);
-
-        // Bảng 1: Chi tiết chi phí từng CT
+        // Bảng 1: Chi tiết chi phí
         const bangChiPhi = [];
         let tongToanBo = 0;
         dsCTChon.forEach((ct, idx) => {
             const cp = tinhChiPhiCT(ct);
             const chiTiet = [];
 
-            // Nhiên liệu chi tiết theo xe (nếu có)
             if (ct.nhienlieu && ct.nhienlieu.xeList) {
                 ct.nhienlieu.xeList.forEach(xe => {
                     let tongXe = 0;
@@ -317,57 +368,45 @@
                     (xe.congTacList || []).forEach(congTac => {
                         (congTac.hoaDon || []).forEach(hd => {
                             tongXe += parseFloat(hd.thanh_tien) || 0;
-                            dsHD.push(hd.so_hd);
+                            if (hd.so_hd) dsHD.push(hd.so_hd);
                         });
                     });
                     if (tongXe > 0) {
                         chiTiet.push({
-                            ten: `Nhiên liệu xe ${xe.bienSo} (HĐ ${dsHD.join(', ')})`,
+                            ten: `Nhiên liệu xe ${xe.bienSo}${dsHD.length ? ' (HĐ ' + dsHD.join(', ') + ')' : ''}`,
                             so_tien: tongXe.toLocaleString('vi-VN')
                         });
                     }
                 });
             }
 
-            // CTP
             if (cp.tongCTP > 0) {
-                chiTiet.push({
-                    ten: `Phụ cấp lưu trú (${cp.soNguoi} người)`,
-                    so_tien: cp.tongCTP.toLocaleString('vi-VN')
-                });
+                chiTiet.push({ ten: `Phụ cấp lưu trú (${cp.soNguoi} người)`, so_tien: cp.tongCTP.toLocaleString('vi-VN') });
             }
-
-            // Phòng nghỉ
             if (cp.tongPhongNghi > 0) {
-                chiTiet.push({
-                    ten: `Phòng nghỉ`,
-                    so_tien: cp.tongPhongNghi.toLocaleString('vi-VN')
-                });
+                chiTiet.push({ ten: `Phòng nghỉ`, so_tien: cp.tongPhongNghi.toLocaleString('vi-VN') });
             }
 
             tongToanBo += cp.tong;
 
             bangChiPhi.push({
-                stt_la_ma: ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'][idx] || (idx + 1),
+                stt_la_ma: ['I','II','III','IV','V','VI','VII','VIII','IX','X'][idx] || (idx + 1),
                 ten_cong_tac: ct.tenCongTac,
                 tong_ct: cp.tong.toLocaleString('vi-VN'),
                 chi_tiet: chiTiet
             });
         });
 
-        // Bảng 2: Chi tiết CTP từng người
+        // Bảng 2: CTP chi tiết
         const bangCTP = [];
-        const theoNguoi = {}; // { ten: { so_ngay: X, dsCT: [...] } }
-
+        const theoNguoi = {};
         dsCTChon.forEach(ct => {
             if (!ct.danhsach || !ct.danhsach.danhSach) return;
             ct.danhsach.danhSach.forEach(n => {
                 const soNgay = tinhSoNgay(n.tuNgay, n.denNgay);
-                if (!theoNguoi[n.ten]) {
-                    theoNguoi[n.ten] = { so_ngay: 0, ghi_chu: [] };
-                }
+                if (!theoNguoi[n.ten]) theoNguoi[n.ten] = { so_ngay: 0, ghi_chu: [] };
                 theoNguoi[n.ten].so_ngay += soNgay;
-                theoNguoi[n.ten].ghi_chu.push(`${ct.id}`);
+                theoNguoi[n.ten].ghi_chu.push(ct.id);
             });
         });
 
@@ -424,6 +463,7 @@
     function formatDate(str) {
         if (!str) return "";
         const d = new Date(str);
+        if (isNaN(d)) return str;
         return `${('0'+d.getDate()).slice(-2)}/${('0'+(d.getMonth()+1)).slice(-2)}/${d.getFullYear()}`;
     }
     function splitDate(str) {
