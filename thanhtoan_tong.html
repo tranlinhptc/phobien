@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bảng Thanh Toán Tổng</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.11/docxtemplater.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 10px; }
+        .container { width: 100%; max-width: 720px; background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); margin: auto; box-sizing: border-box; }
+        h2 { text-align: center; color: #c00; margin-top: 0; text-transform: uppercase; font-size: 20px; }
+        h3 { color: #0056b3; border-bottom: 2px solid #007bff; padding-bottom: 5px; margin-top: 20px; font-size: 15px; }
+        .form-group { margin-bottom: 12px; }
+        label { font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px; color: #c00; }
+        input, select, textarea { width: 100%; padding: 9px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 15px; }
+        button { background: #28a745; color: #fff; border: none; padding: 11px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 8px; border-radius: 6px; font-size: 14px; }
+        .btn-blue { background: #007bff; } .btn-orange { background: #fd7e14; } .btn-red { background: #dc3545; }
+        .btn-gray { background: #6c757d; } .btn-purple { background: #6f42c1; }
+        .btn-sm { padding: 5px 10px; font-size: 12px; width: auto; margin: 2px; }
+
+        .ct-selector { border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: #f9f9f9; margin-bottom: 12px; }
+        .ct-selector .item { display: flex; align-items: center; padding: 8px; background: #fff; border-radius: 6px; margin-bottom: 6px; border: 1px solid #eee; }
+        .ct-selector .item input { width: auto; margin-right: 10px; }
+        .ct-selector .item .info { flex: 1; font-size: 13px; }
+        .ct-selector .item .info b { color: #0056b3; }
+        .ct-selector .item .info small { color: #666; display: block; font-size: 11px; }
+        .ct-selector .item .cost { font-size: 11px; color: #d63384; font-weight: bold; text-align: right; }
+
+        .warning-box { background: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; border-radius: 6px; margin-bottom: 12px; font-size: 12px; }
+        .warning-box b { color: #856404; }
+        .warning-box ul { margin: 6px 0 0 20px; padding: 0; color: #856404; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
+        th, td { border: 1px solid #999; padding: 4px; text-align: center; }
+        th { background: #e9ecef; font-size: 11px; }
+        .money { font-weight: bold; color: #d63384; }
+        .total-row { background: #fff3cd; font-weight: bold; }
+
+        .info-text { font-size: 12px; color: #666; font-style: italic; }
+        #loading { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(255,255,255,.9); align-items: center; justify-content: center; color: #007bff; font-weight: bold; font-size: 18px; }
+        .note { font-size: 11px; color: #666; font-style: italic; margin: 4px 0; }
+        .header-actions { display: flex; gap: 6px; margin-bottom: 10px; }
+        .header-actions button { margin: 0; padding: 8px; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-actions">
+        <button class="btn-red" onclick="location.href='index.html'">← Trang chủ</button>
+    </div>
+
+    <h2>BẢNG THANH TOÁN TỔNG</h2>
+
+    <div class="form-group">
+        <label>Ngày lập phiếu thanh toán:</label>
+        <input type="date" id="ngayLap">
+    </div>
+    <div class="form-group">
+        <label>Người đề nghị thanh toán:</label>
+        <input type="text" id="nguoiDeNghi" value="Nguyễn Xuân Khánh">
+    </div>
+
+    <h3>Chọn công tác để thanh toán</h3>
+    <div id="ctSelector"></div>
+
+    <h3>Xem trước chi phí</h3>
+    <div id="preview"></div>
+
+    <button class="btn-orange" onclick="xuatWord()">📄 Xuất Phiếu thanh toán tổng Word</button>
+</div>
+
+<div id="loading">⏳ Đang xử lý, chờ xíu...</div>
+
+<script>
+    // ============ CẤU HÌNH ============
+    const GOOGLE_WEB_CHAPP_URL = "https://script.google.com/macros/s/AKfycbxlM-814su7_q0yS7Qx1bdwC1j9CB18Km6UOdMcJW4ifZUecl633RmEhvxnsUIwerlE/exec";
+    const ID_TEMPLATE_TONG = "THAY_ID_FILE_WORD_MAU_TONG"; // Anh tạo file Word mẫu tổng và thay ID
+
+    const MUC_CTP = 250000; // Mức CTP/ngày/người
+
+    // ============ STATE ============
+    let dbCongTac = {};
+
+    // ============ KHỞI TẠO ============
+    window.onload = function() {
+        dbCongTac = JSON.parse(localStorage.getItem('db_congtac') || '{}');
+
+        // Ngày lập = hôm nay
+        const today = new Date();
+        document.getElementById('ngayLap').value =
+            `${today.getFullYear()}-${('0'+(today.getMonth()+1)).slice(-2)}-${('0'+today.getDate()).slice(-2)}`;
+
+        renderCTSelector();
+        updatePreview();
+    };
+
+    // ============ RENDER DANH SÁ CT ============
+    function renderCTSelector() {
+        const container = document.getElementById('ctSelector');
+        const dsCT = Object.values(dbCongTac).sort((a, b) => (b.ngayBatDau || '').localeCompare(a.ngayBatDau || ''));
+
+        if (dsCT.length === 0) {
+            container.innerHTML = '<p class="info-text">Chưa có công tác nào.</p>';
+            return;
+        }
+
+        let html = '';
+        dsCT.forEach(ct => {
+            // Tính tổng chi phí của CT
+            const chiPhi = tinhChiPhiCT(ct);
+            html += `<div class="item">
+                <input type="checkbox" class="ct-check" data-id="${ct.id}" checked onchange="updatePreview()">
+                <div class="info">
+                    <b>${ct.id}</b>
+                    <span>${escapeHtml(ct.tenCongTac || '')}</span>
+                    <small>📅 ${formatDate(ct.ngayBatDau)}${ct.ngayKetThuc && ct.ngayKetThuc !== ct.ngayBatDau ? ' → ' + formatDate(ct.ngayKetThuc) : ''}</small>
+                </div>
+                <div class="cost">
+                    NL: ${chiPhi.tongNhienLieu.toLocaleString('vi-VN')}<br>
+                    CTP: ${chiPhi.tongCTP.toLocaleString('vi-VN')}<br>
+                    PN: ${chiPhi.tongPhongNghi.toLocaleString('vi-VN')}<br>
+                    <b>Σ: ${chiPhi.tong.toLocaleString('vi-VN')}</b>
+                </div>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    // ============ TÍNH CHI PHÍ 1 CT ============
+    function tinhChiPhiCT(ct) {
+        // Nhiên liệu: từ module nhienlieu
+        let tongNhienLieu = 0;
+        if (ct.nhienlieu && ct.nhienlieu.xeList) {
+            ct.nhienlieu.xeList.forEach(xe => {
+                (xe.congTacList || []).forEach(congTac => {
+                    (congTac.hoaDon || []).forEach(hd => {
+                        tongNhienLieu += parseFloat(hd.thanh_tien) || 0;
+                    });
+                });
+            });
+        }
+
+        // CTP: từ module danhsach, mỗi người = số ngày x 250k
+        let tongCTP = 0;
+        let soNguoi = 0;
+        if (ct.danhsach && ct.danhsach.danhSach) {
+            soNguoi = ct.danhsach.danhSach.length;
+            ct.danhsach.danhSach.forEach(n => {
+                const soNgay = tinhSoNgay(n.tuNgay, n.denNgay);
+                tongCTP += soNgay * MUC_CTP;
+            });
+        }
+
+        // Phòng nghỉ: từ module decuong
+        let tongPhongNghi = 0;
+        if (ct.decuong && ct.decuong.soPhong && ct.decuong.soDem && ct.decuong.giaPhong) {
+            tongPhongNghi = (parseFloat(ct.decuong.soPhong) || 0)
+                * (parseFloat(ct.decuong.soDem       ) }
+
+ || 0)
+                * (parseFloat(ct.decuong.g       iaPhong) || 0);
+ return {
+            tongNhienLieu: tongNhienLieu,
+            tongCTP: tongCTP,
+            tongPhongNghi: tongPhongNghi,
+            soNguoi: soNguoi,
+            tong: tongNhienLieu + tongCTP + tongPhongNghi
+        };
+    }
+
+    // Tính số ngày giữa 2 mốc (bao gồm cả 2 đầu)
+    function tinhSoNgay(tuNgay, denNgay) {
+        if (!tuNgay || !denNgay) return 0;
+        const parse = (s) => {
+            if (s.includes('/')) {
+                const [d, m, y] = s.split('/');
+                return new Date(`${y}-${m}-${d}`);
+            }
+            return new Date(s);
+        };
+        const d1 = parse(tuNgay);
+        const d2 = parse(denNgay);
+        if (isNaN(d1) || isNaN(d2)) return 0;
+        const diff = Math.round((d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
+        return diff > 0 ? diff : 1;
+    }
+
+    // ============ CẢNH BÁO TRÙNG CTP ============
+    function kiemTraTrungCTP(dsCTChon) {
+        // Build map: { tenNguoi: { "YYYY-MM-DD": [CT1, CT2, ...] } }
+        const map = {};
+        dsCTChon.forEach(ct => {
+            if (!ct.danhsach || !ct.danhsach.danhSach) return;
+            ct.danhsach.danhSach.forEach(n => {
+                const ngayList = lietKeNgay(n.tuNgay, n.denNgay);
+                if (!map[n.ten]) map[n.ten] = {};
+                ngayList.forEach(ngay => {
+                    if (!map[n.ten][ngay]) map[n.ten][ngay] = [];
+                    map[n.ten][ngay].push(ct.id);
+                });
+            });
+        });
+
+        // Tìm trùng
+        const canhBao = [];
+        Object.keys(map).forEach(ten => {
+            Object.keys(map[ten]).forEach(ngay => {
+                if (map[ten][ngay].length > 1) {
+                    canhBao.push({
+                        ten: ten,
+                        ngay: ngay,
+                        dsCT: map[ten][ngay]
+                    });
+                }
+            });
+        });
+        return canhBao;
+    }
+
+    // Liệt kê các ngày giữa 2 mốc
+    function lietKeNgay(tuNgay, denNgay) {
+        const parse = (s) => {
+            if (!s) return null;
+            if (s.includes('/')) {
+                const [d, m, y] = s.split('/');
+                return new Date(`${y}-${m}-${d}`);
+            }
+            return new Date(s);
+        };
+        const d1 = parse(tuNgay);
+        const d2 = parse(denNgay);
+        if (!d1 || !d2 || isNaN(d1) || isNaN(d2)) return [];
+        const list = [];
+        const cur = new Date(d1);
+        while (cur <= d2) {
+            list.push(`${cur.getFullYear()}-${('0'+(cur.getMonth()+1)).slice(-2)}-${('0'+cur.getDate()).slice(-2)}`);
+            cur.setDate(cur.getDate() + 1);
+        }
+        return list;
+    }
+
+    // ============ XEM TRƯỚC ============
+    function updatePreview() {
+        const dsCTChon = [];
+        document.querySelectorAll('.ct-check:checked').forEach(cb => {
+            const id = cb.dataset.id;
+            if (dbCongTac[id]) dsCTChon.push(dbCongTac[id]);
+        });
+
+        // Tính tổng
+        let tongNL = 0, tongCTP = 0, tongPN = 0;
+        dsCTChon.forEach(ct => {
+            const cp = tinhChiPhiCT(ct);
+            tongNL += cp.tongNhienLieu;
+            tongCTP += cp.tongCTP;
+            tongPN += cp.tongPhongNghi;
+        });
+        const tongAll = tongNL + tongCTP + tongPN;
+
+        // Cảnh báo trùng
+        const canhBao = kiemTraTrungCTP(dsCTChon);
+
+        let warningHtml = '';
+        if (canhBao.length > 0) {
+            warningHtml = `<div class="warning-box">
+                <b>⚠️ Cảnh báo trùng CTP (${canhBao.length} trường hợp):</b>
+                <ul>
+                    ${canhBao.map(c => `<li>${c.ten} - ngày ${formatDate(c.ngay)} - CT: ${c.dsCT.join(', ')}</li>`).join('')}
+                </ul>
+                <small>Vẫn cho thanh toán, nhưng nên kiểm tra lại.</small>
+            </div>`;
+        }
+
+        document.getElementById('preview').innerHTML = `
+            ${warningHtml}
+            <table>
+                <tr><td style="text-align:left;">Số công tác đã chọn:</td><td><b>${dsCTChon.length}</b></td></tr>
+                <tr><td style="text-align:left;">Tổng nhiên liệu:</td><td class="money">${tongNL.toLocaleString('vi-VN')} đồng</td></tr>
+                <tr><td style="text-align:left;">Tổng công tác phí:</td><td class="money">${tongCTP.toLocaleString('vi-VN')} đồng</td></tr>
+                <tr><td style="text-align:left;">Tổng phòng nghỉ:</td><td class="money">${tongPN.toLocaleString('vi-VN')} đồng</td></tr>
+                <tr class="total-row"><td style="text-align:left;">TỔNG CỘNG:</td><td class="money">${tongAll.toLocaleString('vi-VN')} đồng</td></tr>
+            </table>
+        `;
+    }
+
+    // ============ XUẤT WORD ============
+    async function xuatWord() {
+        const dsCTChon = [];
+        document.querySelectorAll('.ct-check:checked').forEach(cb => {
+            const id = cb.dataset.id;
+            if (dbCongTac[id]) dsCTChon.push(dbCongTac[id]);
+        });
+
+        if (dsCTChon.length === 0) { alert("Chưa chọn công tác nào!"); return; }
+
+        document.getElementById("loading").style.display = "flex";
+
+        // Build data cho template Word
+        const ngayLapStr = document.getElementById('ngayLap').value;
+        const ngayLapObj = splitDate(ngayLapStr);
+
+        // Bảng 1: Chi tiết chi phí từng CT
+        const bangChiPhi = [];
+        let tongToanBo = 0;
+        dsCTChon.forEach((ct, idx) => {
+            const cp = tinhChiPhiCT(ct);
+            const chiTiet = [];
+
+            // Nhiên liệu chi tiết theo xe (nếu có)
+            if (ct.nhienlieu && ct.nhienlieu.xeList) {
+                ct.nhienlieu.xeList.forEach(xe => {
+                    let tongXe = 0;
+                    const dsHD = [];
+                    (xe.congTacList || []).forEach(congTac => {
+                        (congTac.hoaDon || []).forEach(hd => {
+                            tongXe += parseFloat(hd.thanh_tien) || 0;
+                            dsHD.push(hd.so_hd);
+                        });
+                    });
+                    if (tongXe > 0) {
+                        chiTiet.push({
+                            ten: `Nhiên liệu xe ${xe.bienSo} (HĐ ${dsHD.join(', ')})`,
+                            so_tien: tongXe.toLocaleString('vi-VN')
+                        });
+                    }
+                });
+            }
+
+            // CTP
+            if (cp.tongCTP > 0) {
+                chiTiet.push({
+                    ten: `Phụ cấp lưu trú (${cp.soNguoi} người)`,
+                    so_tien: cp.tongCTP.toLocaleString('vi-VN')
+                });
+            }
+
+            // Phòng nghỉ
+            if (cp.tongPhongNghi > 0) {
+                chiTiet.push({
+                    ten: `Phòng nghỉ`,
+                    so_tien: cp.tongPhongNghi.toLocaleString('vi-VN')
+                });
+            }
+
+            tongToanBo += cp.tong;
+
+            bangChiPhi.push({
+                stt_la_ma: ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'][idx] || (idx + 1),
+                ten_cong_tac: ct.tenCongTac,
+                tong_ct: cp.tong.toLocaleString('vi-VN'),
+                chi_tiet: chiTiet
+            });
+        });
+
+        // Bảng 2: Chi tiết CTP từng người
+        const bangCTP = [];
+        const theoNguoi = {}; // { ten: { so_ngay: X, dsCT: [...] } }
+
+        dsCTChon.forEach(ct => {
+            if (!ct.danhsach || !ct.danhsach.danhSach) return;
+            ct.danhsach.danhSach.forEach(n => {
+                const soNgay = tinhSoNgay(n.tuNgay, n.denNgay);
+                if (!theoNguoi[n.ten]) {
+                    theoNguoi[n.ten] = { so_ngay: 0, ghi_chu: [] };
+                }
+                theoNguoi[n.ten].so_ngay += soNgay;
+                theoNguoi[n.ten].ghi_chu.push(`${ct.id}`);
+            });
+        });
+
+        Object.keys(theoNguoi).forEach((ten, idx) => {
+            const info = theoNguoi[ten];
+            bangCTP.push({
+                stt: ('0' + (idx + 1)).slice(-2),
+                ho_ten: ten,
+                so_ngay: info.so_ngay,
+                thanh_tien: (info.so_ngay * MUC_CTP).toLocaleString('vi-VN'),
+                ghi_chu: info.ghi_chu.join(', ')
+            });
+        });
+
+        const tongCTP = Object.values(theoNguoi).reduce((s, x) => s + x.so_ngay * MUC_CTP, 0);
+
+        const data = {
+            ngay_lap: ngayLapObj.ngay,
+            thang_lap: ngayLapObj.thang,
+            nam_lap: ngayLapObj.nam,
+            nguoi_de_nghi: document.getElementById('nguoiDeNghi').value,
+            bang_chi_phi: bangChiPhi,
+            bang_ctp: bangCTP,
+            tong_ctp: tongCTP.toLocaleString('vi-VN'),
+            tong_toan_bo: tongToanBo.toLocaleString('vi-VN'),
+            so_cong_tac: dsCTChon.length
+        };
+
+        try {
+            const res = await fetch(`${GOOGLE_WEB_APP_URL}?action=getTemplate&fileId=${ID_TEMPLATE_TONG}`);
+            const result = await res.json();
+            const binary = window.atob(result.base64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+            const zip = new PizZip(bytes.buffer);
+            const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true, nullGetter: () => "" });
+            doc.render(data);
+
+            const blob = doc.getZip().generate({
+                type: "blob",
+                mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            });
+            saveAs(blob, `Bang_thanh_toan_tong.docx`);
+            document.getElementById("loading").style.display = "none";
+        } catch (e) {
+            console.error(e);
+            alert("Lỗi: " + e.message);
+            document.getElementById("loading").style.display = "none";
+        }
+    }
+
+    // ============ ĐỊNH DẠNG ============
+    function formatDate(str) {
+        if (!str) return "";
+        const d = new Date(str);
+        return `${('0'+d.getDate()).slice(-2)}/${('0'+(d.getMonth()+1)).slice(-2)}/${d.getFullYear()}`;
+    }
+    function splitDate(str) {
+        if (!str) return { ngay: "", thang: "", nam: "" };
+        const d = new Date(str);
+        return {
+            ngay: ('0'+d.getDate()).slice(-2),
+            thang: ('0'+(d.getMonth()+1)).slice(-2),
+            nam: d.getFullYear()
+        };
+    }
+    function escapeHtml(str) {
+        if (!str) return "";
+        return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+</script>
+</body>
+</html>
