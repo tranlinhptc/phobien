@@ -14,11 +14,18 @@
         h3 { color: #0056b3; border-bottom: 2px solid #007bff; padding-bottom: 5px; margin-top: 20px; font-size: 15px; }
         .form-group { margin-bottom: 12px; }
         label { font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px; color: #c00; }
-        input, select, textarea { width: 100%; padding: 9px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 15px; }
+        input, select { width: 100%; padding: 9px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 15px; }
         button { background: #28a745; color: #fff; border: none; padding: 11px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 8px; border-radius: 6px; font-size: 14px; }
         .btn-blue { background: #007bff; } .btn-orange { background: #fd7e14; } .btn-red { background: #dc3545; }
         .btn-gray { background: #6c757d; } .btn-purple { background: #6f42c1; }
         .btn-sm { padding: 5px 10px; font-size: 12px; width: auto; margin: 2px; }
+
+        /* Chips */
+        .chip-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+        .chip { position: relative; padding: 8px 4px; border-radius: 18px; border: 2px solid #ccc; background: #f4f4f4; color: #666; font-size: 12px; cursor: pointer; text-align: center; font-weight: normal; transition: .15s; }
+        .chip.selected { background: #007bff; color: #fff; border-color: #007bff; font-weight: bold; }
+        .chip .driver-icon { position: absolute; top: -6px; right: -4px; font-size: 13px; }
+        .info-text { font-size: 12px; color: #666; font-style: italic; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
         th, td { border: 1px solid #999; padding: 4px; text-align: center; }
@@ -27,10 +34,8 @@
 
         .header-actions { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
         .header-actions button { margin: 0; padding: 8px; font-size: 12px; flex: 1; min-width: 100px; }
-        .info-text { font-size: 12px; color: #666; font-style: italic; }
         #loading { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(255,255,255,.9); align-items: center; justify-content: center; color: #007bff; font-weight: bold; font-size: 18px; }
         .note { font-size: 11px; color: #666; font-style: italic; margin: 4px 0; }
-        .row-input { display: flex; gap: 5px; margin-bottom: 5px; align-items: center; }
     </style>
 </head>
 <body>
@@ -53,11 +58,16 @@
         <input type="date" id="ngayGiay">
     </div>
 
-    <div class="header-actions" style="margin-top:15px;">
+    <h3>Chọn nhân sự</h3>
+    <p class="note">Bấm vào chip để chọn/bỏ. Chip xanh = đã chọn. Chip 🚗 = lái xe mặc định.</p>
+    <div class="chip-group" id="nvChipContainer"></div>
+
+    <div class="header-actions" style="margin-top:10px;">
         <button class="btn-purple" onclick="dongBoTuDeCuong()">🔄 Đồng bộ từ Đề cương</button>
-        <button class="btn-blue" onclick="addNguoi()">+ Thêm người</button>
+        <button class="btn-blue" onclick="themNguoiMoi()">+ Thêm người mới</button>
     </div>
 
+    <h3>Danh sách đã chọn</h3>
     <div style="overflow-x:auto;">
         <table id="tblNhanSu">
             <thead>
@@ -67,7 +77,6 @@
                     <th style="width:110px;">Chức vụ</th>
                     <th style="width:120px;">Từ ngày</th>
                     <th style="width:120px;">Đến ngày</th>
-                    <th>Ghi chú</th>
                     <th style="width:35px;">X</th>
                 </tr>
             </thead>
@@ -85,7 +94,17 @@
     const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxlM-814su7_q0yS7Qx1bdwC1j9CB18Km6UOdMcJW4ifZUecl633RmEhvxnsUIwerlE/exec";
     const ID_TEMPLATE_DANHSACH = "1GeIU57-WNr9XOgF5w8UInBMMZKdupfzv"; // Thay ID file Word mẫu
 
-    // Chức vụ mặc định theo tên
+    const DEFAULT_NV = [
+        "Nguyễn Hữu Kính","Hoàng Trần Quản Trọng","Ngô Văn Quang","Trần Văn Hoàng",
+        "Kim Văn Quỳnh","Hồ Văn Huy","Lê Hữu Anh","Trần Phúc Linh","Tạ Quốc Đạt",
+        "Võ Ngọc Sơn","Nguyễn Xuân Khánh","Đoàn Hoàng Quang Định","Võ Văn Sỹ",
+        "Lưu Đức Minh","Nguyễn Mạnh Hiệp","Mai Văn Giáp","Nguyễn Thị Thanh Hương",
+        "Phan Đình Minh","Nguyễn Thanh Loan","Lê Thị Hoa","Trần Thị Mai",
+        "Phạm Văn Bình","Hoàng Văn Nam"
+    ];
+
+    const DEFAULT_DRIVERS = ["Nguyễn Mạnh Hiệp", "Mai Văn Giáp"];
+
     const CHUC_VU_MAC_DINH = {
         "Nguyễn Hữu Kính":       "Tổ trưởng",
         "Hoàng Trần Quản Trọng": "Tổ phó",
@@ -94,8 +113,14 @@
 
     const DS_CHUC_VU = ["Nhân viên", "Tổ trưởng", "Tổ phó", "Lãnh đạo"];
 
+    // ============ STATE ============
+    let dsNVGoc = [];          // danh sách người gốc
+    let dsDangChon = [];       // [{ten, chucVu, tuNgay, denNgay}]
+
     // ============ KHỞI TẠO ============
     window.onload = function() {
+        dsNVGoc = JSON.parse(localStorage.getItem('ds_nv_goc')) || DEFAULT_NV.slice();
+
         // Ngày giấy = hôm nay
         const today = new Date();
         document.getElementById('ngayGiay').value =
@@ -104,28 +129,68 @@
         // Tự động đồng bộ từ Đề cương nếu có
         const coDeCuong = localStorage.getItem('decuong_form_data');
         if (coDeCuong) {
-            dongBoTuDeCuong();
-        } else {
-            addNguoi();
+            const d = JSON.parse(coDeCuong);
+            if (d.selectedRoles && Object.keys(d.selectedRoles).length > 0) {
+                dongBoTuDeCuong(true); // im lặng
+            }
         }
+
+        renderChips();
+        renderBang();
     };
 
+    // ============ CHIP NHÂN SỰ ============
+    function getShortName(full) {
+        const parts = full.split(' ');
+        return parts[parts.length - 1];
+    }
+    function isFemale(name) {
+        return name.includes("Thị") || name.startsWith("Lê Thị") || name.startsWith("Trần Thị");
+    }
+    function isChosen(name) {
+        return dsDangChon.some(n => n.ten === name);
+    }
+
+    function renderChips() {
+        const container = document.getElementById('nvChipContainer');
+        container.innerHTML = dsNVGoc.map(nv => {
+            const sel = isChosen(nv) ? 'selected' : '';
+            const prefix = isFemale(nv) ? "Mrs." : "Mr.";
+            const icon = DEFAULT_DRIVERS.includes(nv) ? `<span class="driver-icon">🚗</span>` : "";
+            return `<button type="button" class="chip ${sel}" onclick="toggleNguoi('${nv.replace(/'/g, "\\'")}')">${prefix}${getShortName(nv)}${icon}</button>`;
+        }).join('');
+    }
+
+    function toggleNguoi(ten) {
+        if (isChosen(ten)) {
+            // Bỏ chọn
+            dsDangChon = dsDangChon.filter(n => n.ten !== ten);
+        } else {
+            // Thêm vào
+            const decuong = JSON.parse(localStorage.getItem('decuong_form_data') || '{}');
+            dsDangChon.push({
+                ten: ten,
+                chucVu: CHUC_VU_MAC_DINH[ten] || "Nhân viên",
+                tuNgay: decuong.tgTu || '',
+                denNgay: decuong.tgDen || ''
+            });
+        }
+        renderChips();
+        renderBang();
+    }
+
     // ============ ĐỒNG BỘ TỪ ĐỀ CƯƠNG ============
-    function dongBoTuDeCuong() {
+    function dongBoTuDeCuong(silent) {
         const decuong = JSON.parse(localStorage.getItem('decuong_form_data') || '{}');
         if (!decuong.selectedRoles || Object.keys(decuong.selectedRoles).length === 0) {
-            alert("Chưa có dữ liệu nhân sự từ Đề cương. Vui lòng nhập Đề cương trước.");
+            if (!silent) alert("Chưa có dữ liệu nhân sự từ Đề cương. Vui lòng nhập Đề cương trước.");
             return;
         }
 
-        const tbody = document.querySelector('#tblNhanSu tbody');
-        tbody.innerHTML = '';
-
-        // Ngày mặc định từ Đề cương
         const tuNgay = decuong.tgTu || '';
         const denNgay = decuong.tgDen || '';
 
-        // Sắp xếp theo thứ tự: Tổ trưởng → Tổ phó → Nhân viên
+        // Sắp xếp: Tổ trưởng → Tổ phó → Nhân viên
         const order = { "Tổ trưởng": 1, "Tổ phó": 2, "Lãnh đạo": 3, "Nhân viên": 4 };
         const dsNguoi = Object.keys(decuong.selectedRoles).sort((a, b) => {
             const cvA = CHUC_VU_MAC_DINH[a] || "Nhân viên";
@@ -133,44 +198,64 @@
             return (order[cvA] || 9) - (order[cvB] || 9);
         });
 
-        dsNguoi.forEach((ten, idx) => {
-            const chucVu = CHUC_VU_MAC_DINH[ten] || "Nhân viên";
-            addNguoi(ten, chucVu, tuNgay, denNgay, '');
-        });
+        // Reset và nạp lại
+        dsDangChon = dsNguoi.map(ten => ({
+            ten: ten,
+            chucVu: CHUC_VU_MAC_DINH[ten] || "Nhân viên",
+            tuNgay: tuNgay,
+            denNgay: denNgay
+        }));
 
-        alert(`✅ Đã đồng bộ ${dsNguoi.length} người từ Đề cương.`);
+        renderChips();
+        renderBang();
+
+        if (!silent) alert(`✅ Đã đồng bộ ${dsNguoi.length} người từ Đề cương.`);
     }
 
-    // ============ THÊM NGƯỜI ============
-    function addNguoi(ten = "", chucVu = "Nhân viên", tuNgay = "", denNgay = "", ghiChu = "") {
+    // ============ BẢNG ============
+    function renderBang() {
         const tbody = document.querySelector('#tblNhanSu tbody');
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td class="stt"></td>
-            <td><input type="text" class="ten-nv" value="${ten.replace(/"/g,'&quot;')}" placeholder="Họ tên"></td>
-            <td>
-                <select class="chuc-vu">
-                    ${DS_CHUC_VU.map(cv => `<option value="${cv}" ${cv === chucVu ? 'selected' : ''}>${cv}</option>`).join('')}
-                </select>
-            </td>
-            <td><input type="date" class="tu-ngay" value="${tuNgay}"></td>
-            <td><input type="date" class="den-ngay" value="${denNgay}"></td>
-            <td><input type="text" class="ghi-chu" value="${ghiChu.replace(/"/g,'&quot;')}" placeholder="Ghi chú..."></td>
-            <td><button class="btn-red btn-sm" onclick="xoaNguoi(this)">X</button></td>
-        `;
-        tbody.appendChild(row);
-        capNhatSTT();
-    }
-
-    function xoaNguoi(btn) {
-        btn.closest('tr').remove();
-        capNhatSTT();
-    }
-
-    function capNhatSTT() {
-        document.querySelectorAll('#tblNhanSu tbody tr').forEach((row, i) => {
-            row.querySelector('.stt').innerText = ('0' + (i + 1)).slice(-2);
+        tbody.innerHTML = '';
+        dsDangChon.forEach((n, i) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="stt">${('0'+(i+1)).slice(-2)}</td>
+                <td><input type="text" class="ten-nv" value="${n.ten.replace(/"/g,'&quot;')}" readonly style="background:#f0f0f0; font-weight:bold;"></td>
+                <td>
+                    <select class="chuc-vu" onchange="capNhatChucVu(${i}, this.value)">
+                        ${DS_CHUC_VU.map(cv => `<option value="${cv}" ${cv === n.chucVu ? 'selected' : ''}>${cv}</option>`).join('')}
+                    </select>
+                </td>
+                <td><input type="date" class="tu-ngay" value="${n.tuNgay}" onchange="capNhatNgay(${i}, 'tuNgay', this.value)"></td>
+                <td><input type="date" class="den-ngay" value="${n.denNgay}" onchange="capNhatNgay(${i}, 'denNgay', this.value)"></td>
+                <td><button class="btn-red btn-sm" onclick="xoaNguoi('${n.ten.replace(/'/g, "\\'")}')">X</button></td>
+            `;
+            tbody.appendChild(row);
         });
+    }
+
+    function capNhatChucVu(idx, val) {
+        dsDangChon[idx].chucVu = val;
+    }
+    function capNhatNgay(idx, field, val) {
+        dsDangChon[idx][field] = val;
+    }
+    function xoaNguoi(ten) {
+        dsDangChon = dsDangChon.filter(n => n.ten !== ten);
+        renderChips();
+        renderBang();
+    }
+
+    // ============ THÊM NGƯỜI MỚI ============
+    function themNguoiMoi() {
+        const ten = prompt("Nhập họ tên người mới:");
+        if (!ten || !ten.trim()) return;
+        const t = ten.trim();
+        if (dsNVGoc.includes(t)) { alert("Người này đã có trong danh sách!"); return; }
+        dsNVGoc.push(t);
+        localStorage.setItem('ds_nv_goc', JSON.stringify(dsNVGoc));
+        renderChips();
+        alert(`✅ Đã thêm "${t}" vào danh sách gốc.`);
     }
 
     // ============ ĐỊNH DẠNG NGÀY ============
@@ -191,21 +276,10 @@
 
     // ============ LƯU / TẢI FORM ============
     function luuForm() {
-        const dsNguoi = [];
-        document.querySelectorAll('#tblNhanSu tbody tr').forEach(row => {
-            dsNguoi.push({
-                ten: row.querySelector('.ten-nv').value,
-                chucVu: row.querySelector('.chuc-vu').value,
-                tuNgay: row.querySelector('.tu-ngay').value,
-                denNgay: row.querySelector('.den-ngay').value,
-                ghiChu: row.querySelector('.ghi-chu').value
-            });
-        });
-
         localStorage.setItem('danhsach_form_data', JSON.stringify({
             soGiay: document.getElementById('soGiay').value,
             ngayGiay: document.getElementById('ngayGiay').value,
-            danhSach: dsNguoi
+            danhSach: dsDangChon
         }));
         alert("✅ Đã lưu form!");
     }
@@ -214,15 +288,11 @@
         const saved = localStorage.getItem('danhsach_form_data');
         if (!saved) { alert("Chưa có dữ liệu form được lưu."); return; }
         const d = JSON.parse(saved);
-
         document.getElementById('soGiay').value = d.soGiay || '';
         document.getElementById('ngayGiay').value = d.ngayGiay || '';
-
-        const tbody = document.querySelector('#tblNhanSu tbody');
-        tbody.innerHTML = '';
-        (d.danhSach || []).forEach(n => {
-            addNguoi(n.ten, n.chucVu, n.tuNgay, n.denNgay, n.ghiChu);
-        });
+        dsDangChon = d.danhSach || [];
+        renderChips();
+        renderBang();
         alert("✅ Đã tải form!");
     }
 
@@ -237,8 +307,7 @@
     async function xuatWord() {
         document.getElementById("loading").style.display = "flex";
 
-        const rows = document.querySelectorAll('#tblNhanSu tbody tr');
-        if (rows.length === 0) {
+        if (dsDangChon.length === 0) {
             alert("Chưa có người nào!");
             document.getElementById("loading").style.display = "none";
             return;
@@ -246,18 +315,14 @@
 
         const ngayObj = splitDate(document.getElementById('ngayGiay').value);
 
-        const danhSach = [];
-        rows.forEach((row, idx) => {
-            danhSach.push({
-                stt: ('0' + (idx + 1)).slice(-2),
-                ho_ten: row.querySelector('.ten-nv').value,
-                chuc_vu: row.querySelector('.chuc-vu').value,
-                tu_ngay: formatDate(row.querySelector('.tu-ngay').value),
-                den_ngay: formatDate(row.querySelector('.den-ngay').value),
-                ghi_chu: row.querySelector('.ghi-chu').value,
-                ky_xac_nhan: ""
-            });
-        });
+        const danhSach = dsDangChon.map((n, idx) => ({
+            stt: ('0' + (idx + 1)).slice(-2),
+            ho_ten: n.ten,
+            chuc_vu: n.chucVu,
+            tu_ngay: formatDate(n.tuNgay),
+            den_ngay: formatDate(n.denNgay),
+            ky_xac_nhan: ""
+        }));
 
         const data = {
             so_giay: document.getElementById('soGiay').value,
@@ -287,12 +352,12 @@
             });
             saveAs(blob, "Danh_sach_nhom_cong_tac.docx");
             document.getElementById("loading").style.display = "none";
-       } catch (e) {
-    console.error(e);
-    alert("Lỗi: " + e.message);
-    document.getElementById("loading").style.display = "none";
-}
+        } catch (e) {
+            console.error(e);
+            alert("Lỗi: " + e.message);
+            document.getElementById("loading").style.display = "none";
+        }
     }
 </script>
 </body>
-</html>
+    </html>
