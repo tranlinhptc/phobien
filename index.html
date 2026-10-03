@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hệ Thống Quản Lý Công Tác - TNĐLĐ</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 10px; }
+        .container { width: 100%; max-width: 720px; margin: auto; }
+        h1 { text-align: center; color: #0056b3; font-size: 22px; margin: 10px 0; text-transform: uppercase; }
+        .subtitle { text-align: center; color: #666; font-size: 13px; margin-bottom: 20px; }
+
+        .toolbar { display: flex; gap: 6px; margin-bottom: 15px; flex-wrap: wrap; }
+        .toolbar button { flex: 1; min-width: 140px; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; color: #fff; }
+        .btn-green { background: #28a745; } .btn-purple { background: #6f42c1; }
+        .btn-orange { background: #fd7e14; } .btn-blue { background: #007bff; }
+
+        .filter-bar { display: flex; gap: 6px; margin-bottom: 15px; }
+        .filter-bar input, .filter-bar select { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+
+        .ngay-group { margin-bottom: 20px; }
+        .ngay-title { background: #e9ecef; padding: 8px 12px; border-radius: 6px 6px 0 0; font-weight: bold; color: #0056b3; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .ngay-title .count { font-size: 12px; color: #666; font-weight: normal; }
+
+        .ct-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+        .ct-card .ct-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .ct-card .ct-id { font-family: monospace; font-size: 11px; color: #666; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; }
+        .ct-card .ct-ten { font-weight: bold; color: #0056b3; font-size: 14px; margin: 4px 0; }
+        .ct-card .ct-info { font-size: 12px; color: #666; margin-bottom: 4px; }
+        .ct-card .ct-info b { color: #333; }
+        .ct-card .ct-status { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+        .status-badge { font-size: 10px; padding: 3px 8px; border-radius: 12px; font-weight: bold; }
+        .badge-done { background: #d4edda; color: #155724; }
+        .badge-todo { background: #fff3cd; color: #856404; }
+
+        .ct-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
+        .ct-actions button { padding: 8px 4px; border: none; border-radius: 6px; font-size: 11px; font-weight: bold; color: #fff; cursor: pointer; }
+        .act-decuong { background: #007bff; }
+        .act-dieuxe { background: #fd7e14; }
+        .act-danhsach { background: #28a745; }
+        .act-nhienlieu { background: #6f42c1; }
+        .ct-actions button:hover { opacity: .85; }
+
+        .ct-meta-actions { display: flex; gap: 6px; margin-top: 6px; }
+        .ct-meta-actions button { flex: 1; padding: 6px; border: 1px solid #dc3545; color: #dc3545; background: #fff; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: bold; }
+        .ct-meta-actions button.rename { border-color: #6c757d; color: #6c757d; }
+
+        .empty { text-align: center; padding: 40px 20px; color: #999; font-style: italic; }
+
+        .extra-modules { margin-top: 30px; padding-top: 20px; border-top: 2px dashed #ccc; }
+        .extra-modules h3 { color: #666; font-size: 14px; margin-bottom: 10px; }
+        .extra-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+        .extra-btns button { padding: 10px 4px; border: 1px dashed #999; background: #fff; border-radius: 6px; font-size: 11px; color: #666; cursor: pointer; }
+
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1000; align-items: center; justify-content: center; padding: 15px; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: #fff; border-radius: 12px; padding: 20px; width: 100%; max-width: 420px; }
+        .modal h3 { margin-top: 0; color: #0056b3; }
+        .modal label { display: block; font-weight: bold; font-size: 13px; color: #c00; margin: 10px 0 4px; }
+        .modal input, .modal textarea { width: 100%; padding: 9px; border: 1px solid #ccc; border-radius: 4px; font-size: 15px; box-sizing: border-box; }
+        .modal .btns { display: flex; gap: 8px; margin-top: 15px; }
+        .modal .btns button { flex: 1; padding: 11px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; }
+        .modal .btns .save { background: #28a745; color: #fff; }
+        .modal .btns .cancel { background: #ccc; color: #333; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Hệ Thống Quản Lý Công Tác</h1>
+    <p class="subtitle">Tổ Thí Nghiệm Điện Lâm Đồng</p>
+
+    <div class="toolbar">
+        <button class="btn-green" onclick="openModal()">+ Tạo công tác mới</button>
+        <button class="btn-orange" onclick="location.href='thanhtoan_tong.html'">💰 Thanh toán tổng</button>
+    </div>
+
+    <div class="filter-bar">
+        <input type="text" id="searchBox" placeholder="🔍 Tìm theo tên, địa điểm, ID..." oninput="renderDanhSach()">
+        <select id="filterMonth" onchange="renderDanhSach()">
+            <option value="">-- Tất cả --</option>
+        </select>
+    </div>
+
+    <div id="danhSachCT"></div>
+
+    <!-- Module dự phòng -->
+    <div class="extra-modules">
+        <h3>🔧 Module dự phòng (đang phát triển)</h3>
+        <div class="extra-btns">
+            <button onclick="location.href='module_duphong_1.html'">Module 1</button>
+            <button onclick="location.href='module_duphong_2.html'">Module 2</button>
+            <button onclick="location.href='module_duphong_3.html'">Module 3</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal tạo/sửa công tác -->
+<div class="modal-overlay" id="modalCT">
+    <div class="modal">
+        <h3 id="modalTitle">Tạo công tác mới</h3>
+        <label>Tên công tác:</label>
+        <textarea id="inpTen" rows="2" placeholder="VD: TNHC thuộc SCL 2026..."></textarea>
+        <label>Địa điểm:</label>
+        <input type="text" id="inpDiaDiem" placeholder="VD: TBA 220kV Tháp Chàm">
+        <label>Từ ngày:</label>
+        <input type="date" id="inpTuNgay">
+        <label>Đến ngày:</label>
+        <input type="date" id="inpDenNgay">
+        <div class="btns">
+            <button class="cancel" onclick="closeModal()">Hủy</button>
+            <button class="save" onclick="luuCongTac()">Lưu</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============ KHỞI TẠO ============
+    let dbCongTac = {};
+    let editingId = null; // null = tạo mới, khác null = đang sửa
+
+    window.onload = function() {
+        loadDB();
+        capNhatFilterMonth();
+        renderDanhSach();
+
+        // Default ngày hôm nay cho ô Từ ngày
+        const today = new Date();
+        document.getElementById('inpTuNgay').value =
+            `${today.getFullYear()}-${('0'+(today.getMonth()+1)).slice(-2)}-${('0'+today.getDate()).slice(-2)}`;
+    };
+
+    function loadDB() {
+        dbCongTac = JSON.parse(localStorage.getItem('db_congtac') || '{}');
+    }
+    function saveDB() {
+        localStorage.setItem('db_congtac', JSON.stringify(dbCongTac));
+    }
+
+    // ============ SINH ID ============
+    function sinhID(ngayISO) {
+        const d = new Date(ngayISO);
+        const ymd = `${d.getFullYear()}${('0'+(d.getMonth()+1)).slice(-2)}${('0'+d.getDate()).slice(-2)}`;
+        const prefix = `CT-${ymd}-`;
+        // Đếm số CT cùng ngày
+        const cungNgay = Object.keys(dbCongTac).filter(id => id.startsWith(prefix));
+        const soTT = ('0' + (cungNgay.length + 1)).slice(-2);
+        return prefix + soTT;
+    }
+
+    // ============ MODAL ============
+    function openModal(id) {
+        editingId = id || null;
+        if (id) {
+            document.getElementById('modalTitle').innerText = 'Sửa công tác';
+            const ct = dbCongTac[id];
+            document.getElementById('inpTen').value = ct.tenCongTac || '';
+            document.getElementById('inpDiaDiem').value = ct.diaDiem || '';
+            document.getElementById('inpTuNgay').value = ct.ngayBatDau || '';
+            document.getElementById('inpDenNgay').value = ct.ngayKetThuc || '';
+        } else {
+            document.getElementById('modalTitle').innerText = 'Tạo công tác mới';
+            document.getElementById('inpTen').value = '';
+            document.getElementById('inpDiaDiem').value = '';
+            document.getElementById('inpDenNgay').value = '';
+        }
+        document.getElementById('modalCT').classList.add('show');
+    }
+    function closeModal() {
+        document.getElementById('modalCT').classList.remove('show');
+    }
+
+    function luuCongTac() {
+        const ten = document.getElementById('inpTen').value.trim();
+        const diaDiem = document.getElementById('inpDiaDiem').value.trim();
+        const tuNgay = document.getElementById('inpTuNgay').value;
+        const denNgay = document.getElementById('inpDenNgay').value;
+
+        if (!ten) { alert("Vui lòng nhập tên công tác!"); return; }
+        if (!tuNgay) { alert("Vui lòng chọn ngày bắt đầu!"); return; }
+
+        if (editingId) {
+            // Sửa
+            dbCongTac[editingId] = {
+                ...dbCongTac[editingId],
+                tenCongTac: ten,
+                diaDiem: diaDiem,
+                ngayBatDau: tuNgay,
+                ngayKetThuc: denNgay || tuNgay
+            };
+        } else {
+            // Tạo mới
+            const id = sinhID(tuNgay);
+            dbCongTac[id] = {
+                id: id,
+                tenCongTac: ten,
+                diaDiem: diaDiem,
+                ngayBatDau: tuNgay,
+                ngayKetThuc: denNgay || tuNgay,
+                ngayTao: new Date().toISOString(),
+                decuong: null,
+                dieuxe: null,
+                danhsach: null,
+                nhienlieu: null
+            };
+        }
+        saveDB();
+        capNhatFilterMonth();
+        renderDanhSach();
+        closeModal();
+    }
+
+    // ============ XÓA ============
+    function xoaCongTac(id) {
+        if (!confirm(`Xóa công tác ${id}? Toàn bộ dữ liệu liên quan sẽ mất!`)) return;
+        delete dbCongTac[id];
+        saveDB();
+        capNhatFilterMonth();
+        renderDanhSach();
+    }
+
+    // ============ FILTER THÁNG ============
+    function capNhatFilterMonth() {
+        const sel = document.getElementById('filterMonth');
+        const cur = sel.value;
+        const thangSet = new Set();
+        Object.values(dbCongTac).forEach(ct => {
+            if (ct.ngayBatDau) {
+                const d = new Date(ct.ngayBatDau);
+                thangSet.add(`${d.getFullYear()}-${('0'+(d.getMonth()+1)).slice(-2)}`);
+            }
+        });
+        const dsThang = [...thangSet].sort().reverse();
+        sel.innerHTML = '<option value="">-- Tất cả --</option>' +
+            dsThang.map(t => {
+                const [y, m] = t.split('-');
+                return `<option value="${t}" ${t === cur ? 'selected' : ''}>Tháng ${m}/${y}</option>`;
+            }).join('');
+    }
+
+    // ============ FORMAT NGÀY ============
+    function formatDate(iso) {
+        if (!iso) return "";
+        const d = new Date(iso);
+        return `${('0'+d.getDate()).slice(-2)}/${('0'+(d.getMonth()+1)).slice(-2)}/${d.getFullYear()}`;
+    }
+
+    // ============ RENDER DANH SÁCH ============
+    function renderDanhSach() {
+        const search = (document.getElementById('searchBox').value || '').toLowerCase().trim();
+        const filterMonth = document.getElementById('filterMonth').value;
+
+        // Filter và sort theo ngày
+        let ds = Object.values(dbCongTac).filter(ct => {
+            // Search
+            if (search) {
+                const blob = `${ct.id} ${ct.tenCongTac} ${ct.diaDiem}`.toLowerCase();
+                if (!blob.includes(search)) return false;
+            }
+            // Month
+            if (filterMonth && ct.ngayBatDau) {
+                const d = new Date(ct.ngayBatDau);
+                const ym = `${d.getFullYear()}-${('0'+(d.getMonth()+1)).slice(-2)}`;
+                if (ym !== filterMonth) return false;
+            }
+            return true;
+        });
+        ds.sort((a, b) => (b.ngayBatDau || '').localeCompare(a.ngayBatDau || ''));
+
+        // Group theo ngày bắt đầu
+        const groups = {};
+        ds.forEach(ct => {
+            const key = ct.ngayBatDau || 'Không rõ ngày';
+            if (!groups[key]) groups[key] = [];
+            groups[key].push(ct);
+        });
+
+        const container = document.getElementById('danhSachCT');
+        if (ds.length === 0) {
+            container.innerHTML = '<div class="empty">Chưa có công tác nào. Bấm "+ Tạo công tác mới" để bắt đầu.</div>';
+            return;
+        }
+
+        let html = '';
+        Object.keys(groups).sort().reverse().forEach(ngay => {
+            const d = ngay !== 'Không rõ ngày' ? formatDate(ngay) : ngay;
+            html += `<div class="ngay-group">
+                <div class="ngay-title">
+                    <span>📅 ${d}</span>
+                    <span class="count">${groups[ngay].length} công tác</span>
+                </div>`;
+            groups[ngay].forEach(ct => {
+                html += renderCTCard(ct);
+            });
+            html += `</div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function renderCTCard(ct) {
+        // Status các module
+        const statusDecuong = ct.decuong ? 'done' : 'todo';
+        const statusDieuxe = ct.dieuxe ? 'done' : 'todo';
+        const statusDanhsach = ct.danhsach ? 'done' : 'todo';
+        const statusNhienlieu = ct.nhienlieu ? 'done' : 'todo';
+
+        const badge = (label, status) =>
+            `<span class="status-badge ${status === 'done' ? 'badge-done' : 'badge-todo'}">${status === 'done' ? '✓' : '○'} ${label}</span>`;
+
+        return `<div class="ct-card">
+            <div class="ct-header">
+                <span class="ct-id">${ct.id}</span>
+            </div>
+            <div class="ct-ten">${escapeHtml(ct.tenCongTac)}</div>
+            <div class="ct-info"><b>📍</b> ${escapeHtml(ct.diaDiem || 'Chưa có địa điểm')}</div>
+            <div class="ct-info"><b>📅</b> ${formatDate(ct.ngayBatDau)}${ct.ngayKetThuc && ct.ngayKetThuc !== ct.ngayBatDau ? ' → ' + formatDate(ct.ngayKetThuc) : ''}</div>
+
+            <div class="ct-status">
+                ${badge('Đề cương', statusDecuong)}
+                ${badge('Điều xe', statusDieuxe)}
+                ${badge('Nhân sự', statusDanhsach)}
+                ${badge('Nhiên liệu', statusNhienlieu)}
+            </div>
+
+            <div class="ct-actions">
+                <button class="act-decuong" onclick="location.href='decuong.html?id=${ct.id}'">📋 Đề cương</button>
+                <button class="act-dieuxe" onclick="location.href='dieuxe.html?id=${ct.id}'">🚗 Điều xe</button>
+                <button class="act-danhsach" onclick="location.href='danhsach.html?id=${ct.id}'">👥 Nhân sự</button>
+                <button class="act-nhienlieu" onclick="location.href='thanhtoan_nl.html?id=${ct.id}'">⛽ Nhiên liệu</button>
+            </div>
+
+            <div class="ct-meta-actions">
+                <button class="rename" onclick="openModal('${ct.id}')">✏️ Sửa</button>
+                <button onclick="xoaCongTac('${ct.id}')">🗑️ Xóa</button>
+            </div>
+        </div>`;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return "";
+        return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+</script>
+</body>
+</html>
