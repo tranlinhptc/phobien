@@ -39,6 +39,8 @@
         .ct-banner .ct-id { font-family: monospace; font-size: 11px; opacity: .85; }
         .ct-banner .ct-ten { font-weight: bold; font-size: 14px; margin-top: 4px; }
         .ct-banner .ct-back { display: inline-block; color: #fff; text-decoration: none; font-size: 12px; margin-bottom: 6px; opacity: .9; }
+
+        .auto-badge { display: inline-block; font-size: 10px; background: #fff3cd; color: #856404; padding: 2px 6px; border-radius: 3px; margin-left: 6px; font-weight: normal; }
     </style>
 </head>
 <body>
@@ -56,7 +58,7 @@
     </div>
 
     <h2>LỆNH ĐIỀU XE</h2>
-    <p class="note">Mỗi xe là 1 lệnh điều xe riêng. Bấm "Xuất tất cả" để tạo nhiều file Word.</p>
+    <p class="note">Dữ liệu tự động lấy từ Đề cương cùng ID. Sửa lại nếu có thay đổi.</p>
 
     <div id="dsXeContainer"></div>
 
@@ -74,6 +76,7 @@
     let dbCongTac = JSON.parse(localStorage.getItem('db_congtac') || '{}');
     if (!dbCongTac[CT_ID]) { alert("Công tác không tồn tại!"); location.href = 'index.html'; }
     let CT = dbCongTac[CT_ID];
+    const DC = CT.decuong || {}; // Đề cương cùng ID
 
     // ============ CẤU HÌNH ============
     const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxlM-814su7_q0yS7Qx1bdwC1j9CB18Km6UOdMcJW4ifZUecl633RmEhvxnsUIwerlE/exec";
@@ -99,13 +102,13 @@
         document.getElementById('bannerId').innerText = CT_ID;
         document.getElementById('bannerTen').innerText = CT.tenCongTac || '';
 
-        // Lấy lái xe từ Đề cương của CHÍNH công tác này
-        if (CT.decuong && CT.decuong.selectedRoles) {
-            dsLaiXe = Object.keys(CT.decuong.selectedRoles).filter(n => CT.decuong.selectedRoles[n] === 'LX');
+        // ===== LẤY LÁI XE TỪ ĐỀ CƯƠNG CÙNG ID =====
+        if (DC.selectedRoles) {
+            dsLaiXe = Object.keys(DC.selectedRoles).filter(n => DC.selectedRoles[n] === 'LX');
         }
         if (dsLaiXe.length === 0) dsLaiXe = ["Nguyễn Mạnh Hiệp", "Mai Văn Giáp"];
 
-        // Gợi ý nội dung/địa điểm (từ tất cả công tác)
+        // ===== GỢI Ý NỘI DUNG/ĐỊA ĐIỂM (từ tất cả CT) =====
         Object.values(dbCongTac).forEach(ct => {
             if (ct.decuong) {
                 if (ct.decuong.ndCongTac && !dsNoiDungGoiY.includes(ct.decuong.ndCongTac)) dsNoiDungGoiY.push(ct.decuong.ndCongTac);
@@ -120,23 +123,59 @@
         });
         renderDatalists();
 
-        // Load dữ liệu đã lưu
+        // ===== LOAD DỮ LIỆU =====
         if (CT.dieuxe && CT.dieuxe.xeList && CT.dieuxe.xeList.length > 0) {
+            // Đã lưu → load từ dieuxe
             CT.dieuxe.xeList.forEach(x => addXe(x));
         } else {
-            addXe();
+            // Chưa lưu → AUTO ĐIỀN từ Đề cương
+            autoFillFromDeCuong();
         }
     };
 
+    // ===== AUTO ĐIỀN TỪ ĐỀ CƯƠNG =====
+    function autoFillFromDeCuong() {
+        // Lấy 3 giá trị từ Đề cương
+        const noiDungAuto = DC.ndCongTac || '';
+        const diaDiemAuto = DC.diaDiem || '';
+        const tuNgayAuto = DC.tgTu ? DC.tgTu.split('T')[0] : (CT.ngayBatDau || '');
+        const denNgayAuto = DC.tgDen || CT.ngayKetThuc || '';
+
+        // Số xe cần tạo: nếu Đề cương có list xe thì tạo bằng đó, không thì 1
+        const soXe = DC.xeList && DC.xeList.length > 0 ? DC.xeList.length : 1;
+
+        for (let i = 0; i < soXe; i++) {
+            const xeDC = DC.xeList && DC.xeList[i] ? DC.xeList[i] : null;
+            
+            // Lấy lái xe theo thứ tự: xe 1 → lái 1, xe 2 → lái 2, ...
+            const laiXeAuto = dsLaiXe[i] || '';
+            
+            const xData = {
+                xeIdx: xeDC ? xeDC.xeIdx : '',
+                bienSo: xeDC ? xeDC.bienSo : '',
+                laiXe: laiXeAuto,
+                nguoiSuDung: NGUOI_SU_DUNG,
+                noiDung: [noiDungAuto],   // Auto điền nội dung Đề cương vào ô đầu
+                diaDiem: [diaDiemAuto],   // Auto điền địa điểm Đề cương vào ô đầu
+                tuNgay: tuNgayAuto,
+                denNgay: denNgayAuto
+            };
+            addXe(xData, true); // true = đánh dấu auto
+        }
+
+        // Cập nhật dropdown lái xe
+        updateLaiXeDropdowns();
+    }
+
     // ============ QUẢN LÝ XE ============
-    function addXe(xData = null) {
+    function addXe(xData = null, isAuto = false) {
         const container = document.getElementById('dsXeContainer');
         const idx = container.children.length + 1;
         const card = document.createElement('div');
         card.className = 'xe-card';
         card.innerHTML = `
             <div class="xe-header">
-                <span class="xe-title">🚗 Xe ${idx}</span>
+                <span class="xe-title">🚗 Xe ${idx}${isAuto ? '<span class="auto-badge">auto từ ĐC</span>' : ''}</span>
                 <button class="btn-red btn-sm" onclick="this.closest('.xe-card').remove(); capNhatSoXe();">Xóa</button>
             </div>
             <div class="row">
@@ -149,7 +188,12 @@
             <div class="row"><label>Biển số:</label><span class="bien-so-text">${xData && xData.bienSo ? xData.bienSo : '--'}</span></div>
             <div class="row">
                 <label>Lái xe:</label>
-                <input type="text" class="lai-xe" list="dsLaiXeList" placeholder="Gõ hoặc chọn..." value="${xData && xData.laiXe ? xData.laiXe : ''}">
+                <select class="lai-xe">
+                    <option value="">-- Chọn --</option>
+                    ${dsLaiXe.map(n => `<option value="${n}" ${xData && xData.laiXe === n ? 'selected' : ''}>${n}</option>`).join('')}
+                    <option value="__other__">-- Khác (nhập tay) --</option>
+                </select>
+                <input type="text" class="lai-xe-other" placeholder="Nhập tên..." value="${xData && xData.laiXe && !dsLaiXe.includes(xData.laiXe) ? xData.laiXe : ''}" style="display:${xData && xData.laiXe && !dsLaiXe.includes(xData.laiXe) ? 'block' : 'none'}; margin-top:4px;">
             </div>
             <div class="row">
                 <label>Người sử dụng:</label>
@@ -178,11 +222,18 @@
         `;
         container.appendChild(card);
 
+        // Xử lý dropdown lái xe "Khác"
+        const laiXeSel = card.querySelector('.lai-xe');
+        const laiXeOther = card.querySelector('.lai-xe-other');
+        laiXeSel.onchange = () => {
+            if (laiXeSel.value === '__other__') laiXeOther.style.display = 'block';
+            else laiXeOther.style.display = 'none';
+        };
+
         // Thêm nội dung & địa điểm
         const ndList = xData && xData.noiDung && xData.noiDung.length > 0 ? xData.noiDung : [''];
         const ddList = xData && xData.diaDiem && xData.diaDiem.length > 0 ? xData.diaDiem : [''];
 
-        // Thêm nội dung trước
         ndList.forEach(nd => {
             const div = document.createElement('div');
             div.className = 'list-input';
@@ -200,7 +251,11 @@
     }
 
     function capNhatSoXe() {
-        document.querySelectorAll('.xe-card').forEach((c, i) => c.querySelector('.xe-title').innerText = `🚗 Xe ${i + 1}`);
+        document.querySelectorAll('.xe-card').forEach((c, i) => {
+            const title = c.querySelector('.xe-title');
+            const hasAuto = title.innerHTML.includes('auto');
+            title.innerHTML = `🚗 Xe ${i + 1}${hasAuto ? '<span class="auto-badge">auto từ ĐC</span>' : ''}`;
+        });
     }
 
     function capNhatXe(select) {
@@ -225,12 +280,12 @@
         card.querySelector('.ds-dia-diem').appendChild(div);
     }
 
+    function updateLaiXeDropdowns() {
+        // Không cần nữa vì đã dùng select trực tiếp
+    }
+
     // ============ DATALIST ============
     function renderDatalists() {
-        let dl = document.getElementById('dsLaiXeList');
-        if (!dl) { dl = document.createElement('datalist'); dl.id = 'dsLaiXeList'; document.body.appendChild(dl); }
-        dl.innerHTML = dsLaiXe.map(n => `<option value="${n}">`).join('');
-
         let dl2 = document.getElementById('dsNoiDungList');
         if (!dl2) { dl2 = document.createElement('datalist'); dl2.id = 'dsNoiDungList'; document.body.appendChild(dl2); }
         dl2.innerHTML = dsNoiDungGoiY.map(n => `<option value="${n.replace(/"/g,'&quot;')}">`).join('');
@@ -247,6 +302,13 @@
         return `${('0'+d.getDate()).slice(-2)}/${('0'+(d.getMonth()+1)).slice(-2)}/${d.getFullYear()}`;
     }
 
+    // ============ LẤY LÁI XE TỪ CARD ============
+    function getLaiXe(card) {
+        const sel = card.querySelector('.lai-xe');
+        if (sel.value === '__other__') return card.querySelector('.lai-xe-other').value.trim();
+        return sel.value;
+    }
+
     // ============ LƯU ============
     function luuForm() {
         const xeList = [];
@@ -256,7 +318,7 @@
             xeList.push({
                 xeIdx: card.querySelector('.chon-xe').value,
                 bienSo: card.querySelector('.bien-so-text').innerText,
-                laiXe: card.querySelector('.lai-xe').value,
+                laiXe: getLaiXe(card),
                 nguoiSuDung: card.querySelector('.nguoi-su-dung').value,
                 noiDung: noiDung,
                 diaDiem: diaDiem,
@@ -272,8 +334,7 @@
 
     // ============ XUẤT WORD ============
     async function xuatTatCa() {
-        luuForm(); // Tự lưu trước
-
+        luuForm();
         const cards = document.querySelectorAll('.xe-card');
         if (cards.length === 0) { alert("Chưa có xe nào!"); return; }
 
@@ -290,7 +351,7 @@
             danhSachXeData.push({
                 ten_xe: card.querySelector('.chon-xe').selectedOptions[0]?.text || "",
                 bien_so: bienSo,
-                lai_xe: card.querySelector('.lai-xe').value,
+                lai_xe: getLaiXe(card),
                 nguoi_su_dung: card.querySelector('.nguoi-su-dung').value,
                 danh_sach_noi_dung: noiDung.map(nd => ({ noi_dung: nd })),
                 dia_diem_text: diaDiem.join(' + '),
