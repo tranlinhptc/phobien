@@ -27,10 +27,10 @@
         .chip .role-badge { display: block; font-size: 9px; margin-top: 1px; font-weight: bold; }
         .info-text { font-size: 12px; color: #666; font-style: italic; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
         th, td { border: 1px solid #999; padding: 4px; text-align: center; }
-        th { background: #e9ecef; font-size: 12px; }
-        td input, td select { padding: 4px; font-size: 12px; border: 1px solid #ddd; }
+        th { background: #e9ecef; font-size: 11px; }
+        td input { padding: 4px; font-size: 12px; border: 1px solid #ddd; }
 
         .header-actions { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
         .header-actions button { margin: 0; padding: 8px; font-size: 12px; flex: 1; min-width: 100px; }
@@ -41,6 +41,14 @@
         .ct-banner .ct-id { font-family: monospace; font-size: 11px; opacity: .85; }
         .ct-banner .ct-ten { font-weight: bold; font-size: 14px; margin-top: 4px; }
         .ct-banner .ct-back { display: inline-block; color: #fff; text-decoration: none; font-size: 12px; margin-bottom: 6px; opacity: .9; }
+
+        .trung-badge { display: inline-block; background: #dc3545; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: bold; }
+
+        .warning-box { background: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; border-radius: 6px; margin-bottom: 12px; font-size: 12px; }
+        .warning-box b { color: #856404; }
+        .warning-box ul { margin: 6px 0 0 20px; padding: 0; color: #856404; }
+
+        .total-ctp { background: #fff3cd; font-weight: bold; padding: 8px; text-align: right; border-radius: 6px; margin-top: 8px; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -72,19 +80,29 @@
     <p class="note">Chip xanh = đã chọn. Chip 🚗 = lái xe mặc định. Bấm để thêm/bỏ.</p>
     <div class="chip-group" id="nvChipContainer"></div>
 
+    <div id="warningBox"></div>
+
     <h3>Danh sách đã chọn</h3>
     <div style="overflow-x:auto;">
         <table id="tblNhanSu">
             <thead>
                 <tr>
-                    <th style="width:35px;">STT</th>
-                    <th>Họ và Tên</th>
-                    <th style="width:110px;">Từ ngày</th>
-                    <th style="width:110px;">Đến ngày</th>
-                    <th style="width:35px;">X</th>
+                    <th style="width:80px;">Họ và Tên</th>
+                    <th style="width:100px;">Từ ngày</th>
+                    <th style="width:100px;">Đến ngày</th>
+                    <th style="width:50px;">Số ngày</th>
+                    <th style="width:90px;">Tiền CTP</th>
+                    <th>Ghi chú</th>
                 </tr>
             </thead>
             <tbody></tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" style="text-align:right; font-weight:bold;">TỔNG CỘNG:</td>
+                    <td id="tongCTP" style="font-weight:bold; color:#d63384;">0</td>
+                    <td></td>
+                </tr>
+            </tfoot>
         </table>
     </div>
 
@@ -101,7 +119,7 @@
     let dbCongTac = JSON.parse(localStorage.getItem('db_congtac') || '{}');
     if (!dbCongTac[CT_ID]) { alert("Công tác không tồn tại!"); location.href = 'index.html'; }
     let CT = dbCongTac[CT_ID];
-    const DC = CT.decuong || {}; // Đề cương cùng ID
+    const DC = CT.decuong || {};
 
     // ============ CẤU HÌNH ============
     const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxlM-814su7_q0yS7Qx1bdwC1j9CB18Km6UOdMcJW4ifZUecl633RmEhvxnsUIwerlE/exec";
@@ -117,15 +135,18 @@
     ];
     const DEFAULT_DRIVERS = ["Nguyễn Mạnh Hiệp", "Mai Văn Giáp"];
     const CHUC_VU_MAC_DINH = {
-        "Nguyễn Hữu Kính":       "Tổ trưởng",
+        "Nguyễn Hữu Kính": "Tổ trưởng",
         "Hoàng Trần Quản Trọng": "Tổ phó",
-        "Ngô Văn Quang":         "Tổ phó"
+        "Ngô Văn Quang": "Tổ phó"
     };
     const ROLE_LABEL = { 'NV': 'NV', 'CHT': 'Chỉ huy', 'LĐCV': 'LĐCV', 'LX': 'Lái xe' };
 
+    const MUC_CTP_1_NGAY = 100000;
+    const MUC_CTP_NHIEU_NGAY = 250000;
+
     // ============ STATE ============
     let dsNVGoc = [];
-    let dsDangChon = [];
+    let dsDangChon = []; // [{ten, tuNgay, denNgay, ghiChu}]
 
     // ============ ĐỊNH DẠNG NGÀY ============
     function toDisplayDate(str) {
@@ -136,6 +157,65 @@
             return `${d}/${m}/${y}`;
         }
         return str;
+    }
+
+    // Parse về Date để tính toán
+    function parseDate(str) {
+        if (!str) return null;
+        if (str.includes('/')) {
+            const [d, m, y] = str.split('/');
+            return new Date(`${y}-${m}-${d}`);
+        }
+        return new Date(str);
+    }
+
+    // ============ TÍNH SỐ NGÀY ============
+    function tinhSoNgay(tuNgay, denNgay) {
+        const d1 = parseDate(tuNgay);
+        const d2 = parseDate(denNgay);
+        if (!d1 || !d2 || isNaN(d1) || isNaN(d2)) return 0;
+        const diff = Math.round((d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
+        return diff > 0 ? diff : 1;
+    }
+
+    // ============ TÍNH CTP 1 NGƯỜI ============
+    function tinhCTP(soNgay) {
+        if (soNgay === 0) return 0;
+        if (soNgay === 1) return MUC_CTP_1_NGAY;
+        return soNgay * MUC_CTP_NHIEU_NGAY;
+    }
+
+    // ============ LIỆT KÊ NGÀY ============
+    function lietKeNgay(tuNgay, denNgay) {
+        const d1 = parseDate(tuNgay);
+        const d2 = parseDate(denNgay);
+        if (!d1 || !d2 || isNaN(d1) || isNaN(d2)) return [];
+        const list = [];
+        const cur = new Date(d1);
+        while (cur <= d2) {
+            list.push(`${cur.getFullYear()}-${('0'+(cur.getMonth()+1)).slice(-2)}-${('0'+cur.getDate()).slice(-2)}`);
+            cur.setDate(cur.getDate() + 1);
+        }
+        return list;
+    }
+
+    // ============ KIỂM TRA TRÙNG NGÀY (với các CT khác) ============
+    function kiemTraTrungNgay(ten, ngayList) {
+        // Tìm trong tất cả công tác KHÁC
+        const dsTrung = [];
+        Object.keys(dbCongTac).forEach(otherId => {
+            if (otherId === CT_ID) return;
+            const other = dbCongTac[otherId];
+            if (!other.danhsach || !other.danhsach.danhSach) return;
+            const otherNguoi = other.danhsach.danhSach.find(n => n.ten === ten);
+            if (!otherNguoi) return;
+            const otherNgayList = lietKeNgay(otherNguoi.tuNgay, otherNguoi.denNgay);
+            const trungNgay = ngayList.filter(ng => otherNgayList.includes(ng));
+            if (trungNgay.length > 0) {
+                dsTrung.push({ ctId: otherId, soNgayTrung: trungNgay.length });
+            }
+        });
+        return dsTrung;
     }
 
     // ============ KHỞI TẠO ============
@@ -151,14 +231,12 @@
             `${today.getFullYear()}-${('0'+(today.getMonth()+1)).slice(-2)}-${('0'+today.getDate()).slice(-2)}`
         );
 
-        // ===== LOAD DỮ LIỆU =====
+        // Load dữ liệu đã lưu hoặc auto-fill
         if (CT.danhsach && CT.danhsach.danhSach && CT.danhsach.danhSach.length > 0) {
-            // Đã lưu → load từ đó
             document.getElementById('soGiay').value = CT.danhsach.soGiay || '301';
             document.getElementById('ngayGiay').value = CT.danhsach.ngayGiay || document.getElementById('ngayGiay').value;
             dsDangChon = CT.danhsach.danhSach;
         } else {
-            // Chưa lưu → AUTO ĐIỀN từ Đề cương
             autoFillFromDeCuong();
         }
 
@@ -173,7 +251,6 @@
         const tuNgay = toDisplayDate(DC.tgTu) || toDisplayDate(CT.ngayBatDau);
         const denNgay = toDisplayDate(DC.tgDen) || toDisplayDate(CT.ngayKetThuc);
 
-        // Sắp xếp: Tổ trưởng → Tổ phó → Nhân viên
         const order = { "Tổ trưởng": 1, "Tổ phó": 2, "Lãnh đạo": 3, "Nhân viên": 4 };
         const dsNguoi = Object.keys(DC.selectedRoles).sort((a, b) => {
             const cvA = CHUC_VU_MAC_DINH[a] || "Nhân viên";
@@ -183,16 +260,23 @@
 
         dsDangChon = dsNguoi.map(ten => ({
             ten: ten,
-            chucVu: CHUC_VU_MAC_DINH[ten] || "Nhân viên",
             tuNgay: tuNgay,
-            denNgay: denNgay
+            denNgay: denNgay,
+            ghiChu: ""
         }));
     }
 
     // ============ CHIP ============
-    function getShortName(full) { const p = full.split(' '); return p[p.length - 1]; }
-    function isFemale(name) { return name.includes("Thị") || name.startsWith("Lê Thị") || name.startsWith("Trần Thị"); }
-    function isChosen(name) { return dsDangChon.some(n => n.ten === name); }
+    function getShortName(full) {
+        const p = full.split(' ');
+        return p[p.length - 1];
+    }
+    function isFemale(name) {
+        return name.includes("Thị") || name.startsWith("Lê Thị") || name.startsWith("Trần Thị");
+    }
+    function isChosen(name) {
+        return dsDangChon.some(n => n.ten === name);
+    }
 
     function renderChips() {
         const container = document.getElementById('nvChipContainer');
@@ -214,37 +298,88 @@
             const denNgay = toDisplayDate(DC.tgDen) || toDisplayDate(CT.ngayKetThuc);
             dsDangChon.push({
                 ten: ten,
-                chucVu: CHUC_VU_MAC_DINH[ten] || "Nhân viên",
                 tuNgay: tuNgay,
-                denNgay: denNgay
+                denNgay: denNgay,
+                ghiChu: ""
             });
         }
         renderChips();
         renderBang();
     }
 
-    // ============ BẢNG ============
+    // ============ RENDER BẢNG ============
     function renderBang() {
         const tbody = document.querySelector('#tblNhanSu tbody');
         tbody.innerHTML = '';
+        let tongCTP = 0;
+
         dsDangChon.forEach((n, i) => {
+            const soNgay = tinhSoNgay(n.tuNgay, n.denNgay);
+            let ctp = tinhCTP(soNgay);
+
+            // Kiểm tra trùng ngày với CT khác → CTP = 0 + ghi chú
+            const ngayList = lietKeNgay(n.tuNgay, n.denNgay);
+            const dsTrung = kiemTraTrungNgay(n.ten, ngayList);
+            let autoGhiChu = "";
+            let ctpDisplay = ctp;
+
+            if (dsTrung.length > 0) {
+                autoGhiChu = `Đã tính ở ${dsTrung.map(x => x.ctId).join(', ')}`;
+                ctpDisplay = 0; // A2: CTP = 0
+            }
+
+            tongCTP += ctpDisplay;
+            const displayName = (isFemale(n.ten) ? "Mrs." : "Mr.") + getShortName(n.ten);
+
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td class="stt">${('0'+(i+1)).slice(-2)}</td>
-                <td><input type="text" class="ten-nv" value="${n.ten.replace(/"/g,'&quot;')}" readonly style="background:#f0f0f0; font-weight:bold;"></td>
+                <td><b>${displayName}</b></td>
                 <td><input type="text" class="tu-ngay" value="${n.tuNgay}" placeholder="dd/mm/yyyy" onchange="capNhatNgay(${i}, 'tuNgay', this.value)"></td>
                 <td><input type="text" class="den-ngay" value="${n.denNgay}" placeholder="dd/mm/yyyy" onchange="capNhatNgay(${i}, 'denNgay', this.value)"></td>
-                <td><button class="btn-red btn-sm" onclick="xoaNguoi('${n.ten.replace(/'/g, "\\'")}')">X</button></td>
+                <td><b>${soNgay}</b></td>
+                <td style="color:#d63384; font-weight:bold;">
+                    ${ctpDisplay.toLocaleString('vi-VN')}
+                    ${dsTrung.length > 0 ? '<br><span class="trung-badge">TRÙNG</span>' : ''}
+                </td>
+                <td><input type="text" class="ghi-chu" value="${(n.ghiChu || '').replace(/"/g,'&quot;')}" placeholder="${autoGhiChu || 'Ghi chú...'}" onchange="capNhatGhiChu(${i}, this.value)"></td>
             `;
             tbody.appendChild(row);
         });
+
+        document.getElementById('tongCTP').innerText = tongCTP.toLocaleString('vi-VN') + " đ";
+        renderWarning();
     }
 
-    function capNhatNgay(idx, field, val) { dsDangChon[idx][field] = val; }
-    function xoaNguoi(ten) {
-        dsDangChon = dsDangChon.filter(n => n.ten !== ten);
-        renderChips();
+    function renderWarning() {
+        const dsCanhBao = [];
+        dsDangChon.forEach(n => {
+            const ngayList = lietKeNgay(n.tuNgay, n.denNgay);
+            const dsTrung = kiemTraTrungNgay(n.ten, ngayList);
+            if (dsTrung.length > 0) {
+                dsCanhBao.push({
+                    ten: n.ten,
+                    dsCT: dsTrung.map(x => `${x.ctId} (${x.soNgayTrung} ngày)`)
+                });
+            }
+        });
+
+        const box = document.getElementById('warningBox');
+        if (dsCanhBao.length === 0) { box.innerHTML = ''; return; }
+
+        box.innerHTML = `<div class="warning-box">
+            <b>⚠️ Cảnh báo trùng ngày công tác (${dsCanhBao.length} người):</b>
+            <ul>
+                ${dsCanhBao.map(c => `<li><b>${c.ten}</b>: Đã tính CTP ở ${c.dsCT.join(', ')} → CT này tính 0đ</li>`).join('')}
+            </ul>
+        </div>`;
+    }
+
+    function capNhatNgay(idx, field, val) {
+        dsDangChon[idx][field] = val;
         renderBang();
+    }
+    function capNhatGhiChu(idx, val) {
+        dsDangChon[idx].ghiChu = val;
     }
 
     // ============ LƯU ============
@@ -276,14 +411,28 @@
             ngayObj = { ngay: d, thang: m, nam: y };
         }
 
-        const danhSach = dsDangChon.map((n, idx) => ({
-            stt: ('0' + (idx + 1)).slice(-2),
-            ho_ten: n.ten,
-            chuc_vu: n.chucVu,
-            tu_ngay: n.tuNgay,
-            den_ngay: n.denNgay,
-            ky_xac_nhan: ""
-        }));
+        const danhSach = dsDangChon.map((n, idx) => {
+            const soNgay = tinhSoNgay(n.tuNgay, n.denNgay);
+            let ctp = tinhCTP(soNgay);
+            const ngayList = lietKeNgay(n.tuNgay, n.denNgay);
+            const dsTrung = kiemTraTrungNgay(n.ten, ngayList);
+            let autoGhiChu = n.ghiChu || "";
+            if (dsTrung.length > 0) {
+                if (!autoGhiChu) autoGhiChu = `Đã tính ở ${dsTrung.map(x => x.ctId).join(', ')}`;
+                ctp = 0;
+            }
+            return {
+                stt: ('0' + (idx + 1)).slice(-2),
+                ho_ten: n.ten,
+                chuc_vu: CHUC_VU_MAC_DINH[n.ten] || "Nhân viên",
+                tu_ngay: n.tuNgay,
+                den_ngay: n.denNgay,
+                so_ngay: soNgay,
+                tien_ctp: ctp.toLocaleString('vi-VN'),
+                ghi_chu: autoGhiChu,
+                ky_xac_nhan: ""
+            };
+        });
 
         const data = {
             so_giay: document.getElementById('soGiay').value,
