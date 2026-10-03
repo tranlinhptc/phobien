@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Danh Sách Nhóm Công Tác - TNĐLĐ</title>
+    <title>Danh Sách Nhóm Công Tác</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.11/docxtemplater.js"></script>
@@ -24,6 +24,7 @@
         .chip { position: relative; padding: 8px 4px; border-radius: 18px; border: 2px solid #ccc; background: #f4f4f4; color: #666; font-size: 12px; cursor: pointer; text-align: center; font-weight: normal; transition: .15s; }
         .chip.selected { background: #007bff; color: #fff; border-color: #007bff; font-weight: bold; }
         .chip .driver-icon { position: absolute; top: -6px; right: -4px; font-size: 13px; }
+        .chip .role-badge { display: block; font-size: 9px; margin-top: 1px; font-weight: bold; }
         .info-text { font-size: 12px; color: #666; font-style: italic; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
@@ -35,15 +36,25 @@
         .header-actions button { margin: 0; padding: 8px; font-size: 12px; flex: 1; min-width: 100px; }
         #loading { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(255,255,255,.9); align-items: center; justify-content: center; color: #007bff; font-weight: bold; font-size: 18px; }
         .note { font-size: 11px; color: #666; font-style: italic; margin: 4px 0; }
+
+        .ct-banner { background: linear-gradient(135deg, #007bff, #0056b3); color: #fff; padding: 12px; border-radius: 8px; margin-bottom: 12px; }
+        .ct-banner .ct-id { font-family: monospace; font-size: 11px; opacity: .85; }
+        .ct-banner .ct-ten { font-weight: bold; font-size: 14px; margin-top: 4px; }
+        .ct-banner .ct-back { display: inline-block; color: #fff; text-decoration: none; font-size: 12px; margin-bottom: 6px; opacity: .9; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header-actions">
-        <button class="btn-blue" onclick="luuForm()">💾 Lưu form</button>
-        <button class="btn-gray" onclick="taiForm()">📂 Tải form</button>
-        <button class="btn-red" onclick="xoaForm()">🗑️ Xóa form</button>
+        <button class="btn-blue" onclick="luuForm()">💾 Lưu</button>
+        <button class="btn-red" onclick="location.href='index.html'">← Trang chủ</button>
+    </div>
+
+    <div class="ct-banner">
+        <a href="index.html" class="ct-back">← Quay lại danh sách</a>
+        <div class="ct-id" id="bannerId"></div>
+        <div class="ct-ten" id="bannerTen"></div>
     </div>
 
     <h2>DANH SÁCH NHÓM CÔNG TÁC</h2>
@@ -58,13 +69,8 @@
     </div>
 
     <h3>Chọn nhân sự</h3>
-    <p class="note">Bấm vào chip để chọn/bỏ. Chip xanh = đã chọn. Chip 🚗 = lái xe mặc định.</p>
+    <p class="note">Chip xanh = đã chọn. Chip 🚗 = lái xe mặc định. Bấm để thêm/bỏ.</p>
     <div class="chip-group" id="nvChipContainer"></div>
-
-    <div class="header-actions" style="margin-top:10px;">
-        <button class="btn-purple" onclick="dongBoTuDeCuong()">🔄 Đồng bộ từ Đề cương</button>
-        <button class="btn-blue" onclick="themNguoiMoi()">+ Thêm người mới</button>
-    </div>
 
     <h3>Danh sách đã chọn</h3>
     <div style="overflow-x:auto;">
@@ -88,9 +94,19 @@
 <div id="loading">⏳ Đang xử lý, chờ xíu...</div>
 
 <script>
+    // ============ URL PARAM + DB ============
+    const CT_ID = new URLSearchParams(location.search).get('id');
+    if (!CT_ID) { alert("Thiếu ID công tác!"); location.href = 'index.html'; }
+
+    let dbCongTac = JSON.parse(localStorage.getItem('db_congtac') || '{}');
+    if (!dbCongTac[CT_ID]) { alert("Công tác không tồn tại!"); location.href = 'index.html'; }
+    let CT = dbCongTac[CT_ID];
+    const DC = CT.decuong || {}; // Đề cương cùng ID
+
     // ============ CẤU HÌNH ============
     const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxlM-814su7_q0yS7Qx1bdwC1j9CB18Km6UOdMcJW4ifZUecl633RmEhvxnsUIwerlE/exec";
-    const ID_TEMPLATE_DANHSACH = "1va7JNZN7OQsAtsZq6-SMbDN7eLJ-kyyf"; // Thay ID file Word mẫu
+    const ID_TEMPLATE_DANHSACH = "1va7JNZN7OQsAtsZq6-SMbDN7eLJ-kyyf";
+
     const DEFAULT_NV = [
         "Nguyễn Hữu Kính","Hoàng Trần Quản Trọng","Ngô Văn Quang","Trần Văn Hoàng",
         "Kim Văn Quỳnh","Hồ Văn Huy","Lê Hữu Anh","Trần Phúc Linh","Tạ Quốc Đạt",
@@ -99,115 +115,67 @@
         "Phan Đình Minh","Nguyễn Thanh Loan","Lê Thị Hoa","Trần Thị Mai",
         "Phạm Văn Bình","Hoàng Văn Nam"
     ];
-
     const DEFAULT_DRIVERS = ["Nguyễn Mạnh Hiệp", "Mai Văn Giáp"];
-
     const CHUC_VU_MAC_DINH = {
         "Nguyễn Hữu Kính":       "Tổ trưởng",
         "Hoàng Trần Quản Trọng": "Tổ phó",
         "Ngô Văn Quang":         "Tổ phó"
     };
+    const ROLE_LABEL = { 'NV': 'NV', 'CHT': 'Chỉ huy', 'LĐCV': 'LĐCV', 'LX': 'Lái xe' };
 
     // ============ STATE ============
     let dsNVGoc = [];
-    let dsDangChon = []; // [{ten, chucVu, tuNgay, denNgay}] — tuNgay/denNgay là dd/mm/yyyy
+    let dsDangChon = [];
 
     // ============ ĐỊNH DẠNG NGÀY ============
-    // Nhận vào giá trị bất kỳ (ISO datetime, ISO date, dd/mm/yyyy) → trả về dd/mm/yyyy
     function toDisplayDate(str) {
         if (!str) return "";
-        // ISO datetime: 2026-10-03T22:14
         if (str.includes('T')) str = str.split('T')[0];
-        // ISO date: 2026-10-03
         if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
             const [y, m, d] = str.split(' ')[0].split('-');
             return `${d}/${m}/${y}`;
         }
-        // Đã là dd/mm/yyyy
         return str;
-    }
-
-    // Nhận dd/mm/yyyy → trả về Date object (để hiển thị lịch nếu cần)
-    function fromDisplayDate(str) {
-        if (!str || !/^\d{2}\/\d{2}\/\d{4}$/.test(str)) return null;
-        const [d, m, y] = str.split('/');
-        return new Date(`${y}-${m}-${d}`);
     }
 
     // ============ KHỞI TẠO ============
     window.onload = function() {
         dsNVGoc = JSON.parse(localStorage.getItem('ds_nv_goc')) || DEFAULT_NV.slice();
 
-        // Ngày giấy = hôm nay dạng dd/mm/yyyy
+        document.getElementById('bannerId').innerText = CT_ID;
+        document.getElementById('bannerTen').innerText = CT.tenCongTac || '';
+
+        // Ngày giấy = hôm nay
         const today = new Date();
         document.getElementById('ngayGiay').value = toDisplayDate(
             `${today.getFullYear()}-${('0'+(today.getMonth()+1)).slice(-2)}-${('0'+today.getDate()).slice(-2)}`
         );
 
-        // Tự động đồng bộ từ Đề cương
-        const coDeCuong = localStorage.getItem('decuong_form_data');
-        if (coDeCuong) {
-            const d = JSON.parse(coDeCuong);
-            if (d.selectedRoles && Object.keys(d.selectedRoles).length > 0) {
-                dongBoTuDeCuong(true);
-            }
+        // ===== LOAD DỮ LIỆU =====
+        if (CT.danhsach && CT.danhsach.danhSach && CT.danhsach.danhSach.length > 0) {
+            // Đã lưu → load từ đó
+            document.getElementById('soGiay').value = CT.danhsach.soGiay || '301';
+            document.getElementById('ngayGiay').value = CT.danhsach.ngayGiay || document.getElementById('ngayGiay').value;
+            dsDangChon = CT.danhsach.danhSach;
+        } else {
+            // Chưa lưu → AUTO ĐIỀN từ Đề cương
+            autoFillFromDeCuong();
         }
 
         renderChips();
         renderBang();
     };
 
-    // ============ CHIP NHÂN SỰ ============
-    function getShortName(full) {
-        const parts = full.split(' ');
-        return parts[parts.length - 1];
-    }
-    function isFemale(name) {
-        return name.includes("Thị") || name.startsWith("Lê Thị") || name.startsWith("Trần Thị");
-    }
-    function isChosen(name) {
-        return dsDangChon.some(n => n.ten === name);
-    }
+    // ===== AUTO ĐIỀN TỪ ĐỀ CƯƠNG =====
+    function autoFillFromDeCuong() {
+        if (!DC.selectedRoles || Object.keys(DC.selectedRoles).length === 0) return;
 
-    function renderChips() {
-        const container = document.getElementById('nvChipContainer');
-        container.innerHTML = dsNVGoc.map(nv => {
-            const sel = isChosen(nv) ? 'selected' : '';
-            const prefix = isFemale(nv) ? "Mrs." : "Mr.";
-            const icon = DEFAULT_DRIVERS.includes(nv) ? `<span class="driver-icon">🚗</span>` : "";
-            return `<button type="button" class="chip ${sel}" onclick="toggleNguoi('${nv.replace(/'/g, "\\'")}')">${prefix}${getShortName(nv)}${icon}</button>`;
-        }).join('');
-    }
+        const tuNgay = toDisplayDate(DC.tgTu) || toDisplayDate(CT.ngayBatDau);
+        const denNgay = toDisplayDate(DC.tgDen) || toDisplayDate(CT.ngayKetThuc);
 
-    function toggleNguoi(ten) {
-        if (isChosen(ten)) {
-            dsDangChon = dsDangChon.filter(n => n.ten !== ten);
-        } else {
-            const decuong = JSON.parse(localStorage.getItem('decuong_form_data') || '{}');
-            dsDangChon.push({
-                ten: ten,
-                chucVu: CHUC_VU_MAC_DINH[ten] || "Nhân viên",
-                tuNgay: toDisplayDate(decuong.tgTu),
-                denNgay: toDisplayDate(decuong.tgDen)
-            });
-        }
-        renderChips();
-        renderBang();
-    }
-
-    // ============ ĐỒNG BỘ TỪ ĐỀ CƯƠNG ============
-    function dongBoTuDeCuong(silent) {
-        const decuong = JSON.parse(localStorage.getItem('decuong_form_data') || '{}');
-        if (!decuong.selectedRoles || Object.keys(decuong.selectedRoles).length === 0) {
-            if (!silent) alert("Chưa có dữ liệu nhân sự từ Đề cương. Vui lòng nhập Đề cương trước.");
-            return;
-        }
-
-        const tuNgay = toDisplayDate(decuong.tgTu);
-        const denNgay = toDisplayDate(decuong.tgDen);
-
+        // Sắp xếp: Tổ trưởng → Tổ phó → Nhân viên
         const order = { "Tổ trưởng": 1, "Tổ phó": 2, "Lãnh đạo": 3, "Nhân viên": 4 };
-        const dsNguoi = Object.keys(decuong.selectedRoles).sort((a, b) => {
+        const dsNguoi = Object.keys(DC.selectedRoles).sort((a, b) => {
             const cvA = CHUC_VU_MAC_DINH[a] || "Nhân viên";
             const cvB = CHUC_VU_MAC_DINH[b] || "Nhân viên";
             return (order[cvA] || 9) - (order[cvB] || 9);
@@ -219,10 +187,40 @@
             tuNgay: tuNgay,
             denNgay: denNgay
         }));
+    }
 
+    // ============ CHIP ============
+    function getShortName(full) { const p = full.split(' '); return p[p.length - 1]; }
+    function isFemale(name) { return name.includes("Thị") || name.startsWith("Lê Thị") || name.startsWith("Trần Thị"); }
+    function isChosen(name) { return dsDangChon.some(n => n.ten === name); }
+
+    function renderChips() {
+        const container = document.getElementById('nvChipContainer');
+        container.innerHTML = dsNVGoc.map(nv => {
+            const sel = isChosen(nv) ? 'selected' : '';
+            const prefix = isFemale(nv) ? "Mrs." : "Mr.";
+            const icon = DEFAULT_DRIVERS.includes(nv) ? `<span class="driver-icon">🚗</span>` : "";
+            const role = DC.selectedRoles && DC.selectedRoles[nv] ? DC.selectedRoles[nv] : '';
+            const badge = role ? `<span class="role-badge">${ROLE_LABEL[role] || role}</span>` : "";
+            return `<button type="button" class="chip ${sel}" onclick="toggleNguoi('${nv.replace(/'/g, "\\'")}')">${prefix}${getShortName(nv)}${icon}${badge}</button>`;
+        }).join('');
+    }
+
+    function toggleNguoi(ten) {
+        if (isChosen(ten)) {
+            dsDangChon = dsDangChon.filter(n => n.ten !== ten);
+        } else {
+            const tuNgay = toDisplayDate(DC.tgTu) || toDisplayDate(CT.ngayBatDau);
+            const denNgay = toDisplayDate(DC.tgDen) || toDisplayDate(CT.ngayKetThuc);
+            dsDangChon.push({
+                ten: ten,
+                chucVu: CHUC_VU_MAC_DINH[ten] || "Nhân viên",
+                tuNgay: tuNgay,
+                denNgay: denNgay
+            });
+        }
         renderChips();
         renderBang();
-        if (!silent) alert(`✅ Đã đồng bộ ${dsNguoi.length} người từ Đề cương.`);
     }
 
     // ============ BẢNG ============
@@ -242,58 +240,27 @@
         });
     }
 
-    function capNhatNgay(idx, field, val) {
-        dsDangChon[idx][field] = val;
-    }
+    function capNhatNgay(idx, field, val) { dsDangChon[idx][field] = val; }
     function xoaNguoi(ten) {
         dsDangChon = dsDangChon.filter(n => n.ten !== ten);
         renderChips();
         renderBang();
     }
 
-    // ============ THÊM NGƯỜI MỚI ============
-    function themNguoiMoi() {
-        const ten = prompt("Nhập họ tên người mới:");
-        if (!ten || !ten.trim()) return;
-        const t = ten.trim();
-        if (dsNVGoc.includes(t)) { alert("Người này đã có trong danh sách!"); return; }
-        dsNVGoc.push(t);
-        localStorage.setItem('ds_nv_goc', JSON.stringify(dsNVGoc));
-        renderChips();
-        alert(`✅ Đã thêm "${t}" vào danh sách gốc.`);
-    }
-
-    // ============ LƯU / TẢI FORM ============
+    // ============ LƯU ============
     function luuForm() {
-        localStorage.setItem('danhsach_form_data', JSON.stringify({
+        dbCongTac[CT_ID].danhsach = {
             soGiay: document.getElementById('soGiay').value,
             ngayGiay: document.getElementById('ngayGiay').value,
             danhSach: dsDangChon
-        }));
-        alert("✅ Đã lưu form!");
-    }
-
-    function taiForm() {
-        const saved = localStorage.getItem('danhsach_form_data');
-        if (!saved) { alert("Chưa có dữ liệu form được lưu."); return; }
-        const d = JSON.parse(saved);
-        document.getElementById('soGiay').value = d.soGiay || '';
-        document.getElementById('ngayGiay').value = d.ngayGiay || '';
-        dsDangChon = d.danhSach || [];
-        renderChips();
-        renderBang();
-        alert("✅ Đã tải form!");
-    }
-
-    function xoaForm() {
-        if (confirm("Xóa toàn bộ form đã lưu?")) {
-            localStorage.removeItem('danhsach_form_data');
-            alert("Đã xóa.");
-        }
+        };
+        localStorage.setItem('db_congtac', JSON.stringify(dbCongTac));
+        alert("✅ Đã lưu Danh sách!");
     }
 
     // ============ XUẤT WORD ============
     async function xuatWord() {
+        luuForm();
         document.getElementById("loading").style.display = "flex";
 
         if (dsDangChon.length === 0) {
@@ -302,7 +269,6 @@
             return;
         }
 
-        // Ngày giấy: dd/mm/yyyy → tách ra ngay/thang/nam
         const ngayGiayStr = document.getElementById('ngayGiay').value || '';
         let ngayObj = { ngay: "", thang: "", nam: "" };
         if (/^\d{2}\/\d{2}\/\d{4}$/.test(ngayGiayStr)) {
@@ -335,17 +301,14 @@
             for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
 
             const zip = new PizZip(bytes.buffer);
-            const doc = new window.docxtemplater(zip, {
-                paragraphLoop: true, linebreaks: true,
-                nullGetter: function() { return ""; }
-            });
+            const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true, nullGetter: () => "" });
             doc.render(data);
 
             const blob = doc.getZip().generate({
                 type: "blob",
                 mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             });
-            saveAs(blob, "Danh_sach_nhom_cong_tac.docx");
+            saveAs(blob, `Danh_sach_${CT_ID}.docx`);
             document.getElementById("loading").style.display = "none";
         } catch (e) {
             console.error(e);
