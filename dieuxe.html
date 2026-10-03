@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lệnh Điều Xe - TNĐLĐ</title>
+    <title>Lệnh Điều Xe</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.11/docxtemplater.js"></script>
@@ -11,10 +11,8 @@
         body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 10px; }
         .container { width: 100%; max-width: 620px; background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); margin: auto; box-sizing: border-box; }
         h2 { text-align: center; color: #c00; margin-top: 0; text-transform: uppercase; font-size: 20px; }
-        h3 { color: #0056b3; border-bottom: 2px solid #007bff; padding-bottom: 5px; margin-top: 20px; font-size: 15px; }
-        .form-group { margin-bottom: 12px; }
         label { font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px; color: #c00; }
-        input, select, textarea { width: 100%; padding: 9px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 15px; }
+        input, select { width: 100%; padding: 9px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 15px; }
         button { background: #28a745; color: #fff; border: none; padding: 11px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 8px; border-radius: 6px; font-size: 14px; }
         .btn-blue { background: #007bff; } .btn-orange { background: #fd7e14; } .btn-red { background: #dc3545; }
         .btn-gray { background: #6c757d; } .btn-purple { background: #6f42c1; }
@@ -29,27 +27,35 @@
         .xe-card .bien-so-text { flex: 1; font-size: 13px; color: #555; font-style: italic; background: #fff; padding: 7px; border-radius: 4px; border: 1px dashed #ccc; }
 
         .list-input { display: flex; gap: 5px; margin-bottom: 5px; align-items: center; }
-        .list-input input, .list-input select { flex: 1; }
+        .list-input input { flex: 1; }
         .list-input button { width: auto; margin: 0; padding: 6px 10px; font-size: 12px; }
 
-        .info-text { font-size: 12px; color: #666; font-style: italic; }
         #loading { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(255,255,255,.9); align-items: center; justify-content: center; color: #007bff; font-weight: bold; font-size: 18px; }
         .note { font-size: 11px; color: #666; font-style: italic; margin: 4px 0; }
         .header-actions { display: flex; gap: 6px; margin-bottom: 10px; }
         .header-actions button { margin: 0; padding: 8px; font-size: 12px; }
+
+        .ct-banner { background: linear-gradient(135deg, #007bff, #0056b3); color: #fff; padding: 12px; border-radius: 8px; margin-bottom: 12px; }
+        .ct-banner .ct-id { font-family: monospace; font-size: 11px; opacity: .85; }
+        .ct-banner .ct-ten { font-weight: bold; font-size: 14px; margin-top: 4px; }
+        .ct-banner .ct-back { display: inline-block; color: #fff; text-decoration: none; font-size: 12px; margin-bottom: 6px; opacity: .9; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header-actions">
-        <button class="btn-blue" onclick="luuForm()">💾 Lưu form</button>
-        <button class="btn-gray" onclick="taiForm()">📂 Tải form</button>
-        <button class="btn-red" onclick="xoaForm()">🗑️ Xóa form</button>
+        <button class="btn-blue" onclick="luuForm()">💾 Lưu</button>
+        <button class="btn-red" onclick="location.href='index.html'">← Trang chủ</button>
+    </div>
+
+    <div class="ct-banner">
+        <a href="index.html" class="ct-back">← Quay lại danh sách</a>
+        <div class="ct-id" id="bannerId"></div>
+        <div class="ct-ten" id="bannerTen"></div>
     </div>
 
     <h2>LỆNH ĐIỀU XE</h2>
-
     <p class="note">Mỗi xe là 1 lệnh điều xe riêng. Bấm "Xuất tất cả" để tạo nhiều file Word.</p>
 
     <div id="dsXeContainer"></div>
@@ -61,48 +67,69 @@
 <div id="loading">⏳ Đang xử lý, chờ xíu...</div>
 
 <script>
+    // ============ URL PARAM + DB ============
+    const CT_ID = new URLSearchParams(location.search).get('id');
+    if (!CT_ID) { alert("Thiếu ID công tác!"); location.href = 'index.html'; }
+
+    let dbCongTac = JSON.parse(localStorage.getItem('db_congtac') || '{}');
+    if (!dbCongTac[CT_ID]) { alert("Công tác không tồn tại!"); location.href = 'index.html'; }
+    let CT = dbCongTac[CT_ID];
+
     // ============ CẤU HÌNH ============
     const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxlM-814su7_q0yS7Qx1bdwC1j9CB18Km6UOdMcJW4ifZUecl633RmEhvxnsUIwerlE/exec";
-    const ID_TEMPLATE_DIEUXE = "1szpMtZw0Sj2ip7lKqgRs0F-G4NFP_WUx"; // Thay ID file Word mẫu Lệnh điều xe
+    const ID_TEMPLATE_DIEUXE = "1szpMtZw0Sj2ip7lKqgRs0F-G4NFP_WUx";
+
     const DEFAULT_XE = [
         { ten: "Ford Transit",   bienSo: "79B 332.11",  dinhMuc: 20 },
         { ten: "Ford Ranger",    bienSo: "79C 038.20",  dinhMuc: 15 },
         { ten: "Ford Fortuner",  bienSo: "79A 866.70",  dinhMuc: 19 }
     ];
-
-    // Người sử dụng xe cố định
     const NGUOI_SU_DUNG = "Tổ thí nghiệm điện Lâm Đồng";
 
     // ============ STATE ============
     let dsXeGoc = [];
-    let dsLaiXe = [];        // lấy từ Đề cương (vai trò LX)
-    let dsNoiDungGoiY = []; // LocalStorage gợi ý
-    let dsDiaDiemGoiY = []; // LocalStorage gợi ý
+    let dsLaiXe = [];
+    let dsNoiDungGoiY = [];
+    let dsDiaDiemGoiY = [];
 
     // ============ KHỞI TẠO ============
     window.onload = function() {
         dsXeGoc = JSON.parse(localStorage.getItem('ds_xe_goc')) || DEFAULT_XE.slice();
 
-        // Lấy danh sách lái xe từ form Đề cương đã lưu
-        const decuong = JSON.parse(localStorage.getItem('decuong_form_data') || '{}');
-        if (decuong.selectedRoles) {
-            dsLaiXe = Object.keys(decuong.selectedRoles).filter(n => decuong.selectedRoles[n] === 'LX');
-        }
-        // Nếu không có, dùng 2 lái xe mặc định
-        if (dsLaiXe.length === 0) {
-            dsLaiXe = ["Nguyễn Mạnh Hiệp", "Mai Văn Giáp"];
-        }
+        document.getElementById('bannerId').innerText = CT_ID;
+        document.getElementById('bannerTen').innerText = CT.tenCongTac || '';
 
-        // Lấy gợi ý đã lưu
-        dsNoiDungGoiY = JSON.parse(localStorage.getItem('goiy_noi_dung') || '[]');
-        dsDiaDiemGoiY = JSON.parse(localStorage.getItem('goiy_dia_diem') || '[]');
+        // Lấy lái xe từ Đề cương của CHÍNH công tác này
+        if (CT.decuong && CT.decuong.selectedRoles) {
+            dsLaiXe = Object.keys(CT.decuong.selectedRoles).filter(n => CT.decuong.selectedRoles[n] === 'LX');
+        }
+        if (dsLaiXe.length === 0) dsLaiXe = ["Nguyễn Mạnh Hiệp", "Mai Văn Giáp"];
 
-        // Thêm 1 xe mặc định
-        addXe();
+        // Gợi ý nội dung/địa điểm (từ tất cả công tác)
+        Object.values(dbCongTac).forEach(ct => {
+            if (ct.decuong) {
+                if (ct.decuong.ndCongTac && !dsNoiDungGoiY.includes(ct.decuong.ndCongTac)) dsNoiDungGoiY.push(ct.decuong.ndCongTac);
+                if (ct.decuong.diaDiem && !dsDiaDiemGoiY.includes(ct.decuong.diaDiem)) dsDiaDiemGoiY.push(ct.decuong.diaDiem);
+            }
+            if (ct.dieuxe && ct.dieuxe.xeList) {
+                ct.dieuxe.xeList.forEach(x => {
+                    (x.noiDung || []).forEach(nd => { if (nd && !dsNoiDungGoiY.includes(nd)) dsNoiDungGoiY.push(nd); });
+                    (x.diaDiem || []).forEach(dd => { if (dd && !dsDiaDiemGoiY.includes(dd)) dsDiaDiemGoiY.push(dd); });
+                });
+            }
+        });
+        renderDatalists();
+
+        // Load dữ liệu đã lưu
+        if (CT.dieuxe && CT.dieuxe.xeList && CT.dieuxe.xeList.length > 0) {
+            CT.dieuxe.xeList.forEach(x => addXe(x));
+        } else {
+            addXe();
+        }
     };
 
     // ============ QUẢN LÝ XE ============
-    function addXe() {
+    function addXe(xData = null) {
         const container = document.getElementById('dsXeContainer');
         const idx = container.children.length + 1;
         const card = document.createElement('div');
@@ -116,124 +143,102 @@
                 <label>Chọn xe:</label>
                 <select class="chon-xe" onchange="capNhatXe(this)">
                     <option value="">-- Chọn --</option>
-                    ${dsXeGoc.map((x, i) => `<option value="${i}">${x.ten}</option>`).join('')}
+                    ${dsXeGoc.map((x, i) => `<option value="${i}" ${xData && String(xData.xeIdx) === String(i) ? 'selected' : ''}>${x.ten}</option>`).join('')}
                 </select>
             </div>
-            <div class="row"><label>Biển số:</label><span class="bien-so-text">--</span></div>
+            <div class="row"><label>Biển số:</label><span class="bien-so-text">${xData && xData.bienSo ? xData.bienSo : '--'}</span></div>
             <div class="row">
                 <label>Lái xe:</label>
-                <input type="text" class="lai-xe" list="dsLaiXeList" placeholder="Gõ hoặc chọn...">
+                <input type="text" class="lai-xe" list="dsLaiXeList" placeholder="Gõ hoặc chọn..." value="${xData && xData.laiXe ? xData.laiXe : ''}">
             </div>
             <div class="row">
                 <label>Người sử dụng:</label>
-                <input type="text" class="nguoi-su-dung" value="${NGUOI_SU_DUNG}">
+                <input type="text" class="nguoi-su-dung" value="${xData && xData.nguoiSuDung ? xData.nguoiSuDung : NGUOI_SU_DUNG}">
             </div>
-
             <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #ccc;">
                 <label style="color:#c00;">Mục đích công tác:</label>
                 <div class="ds-noi-dung"></div>
                 <button class="btn-blue btn-sm" onclick="addNoiDung(this)">+ Thêm nội dung</button>
             </div>
-
             <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #ccc;">
                 <label style="color:#c00;">Địa điểm công tác:</label>
                 <div class="ds-dia-diem"></div>
                 <button class="btn-blue btn-sm" onclick="addDiaDiem(this)">+ Thêm địa điểm</button>
             </div>
-
             <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #ccc;">
                 <div class="row">
                     <label>Từ ngày:</label>
-                    <input type="date" class="tu-ngay">
+                    <input type="date" class="tu-ngay" value="${xData && xData.tuNgay ? xData.tuNgay : (CT.ngayBatDau || '')}">
                 </div>
                 <div class="row">
                     <label>Đến ngày:</label>
-                    <input type="date" class="den-ngay">
+                    <input type="date" class="den-ngay" value="${xData && xData.denNgay ? xData.denNgay : (CT.ngayKetThuc || '')}">
                 </div>
             </div>
         `;
         container.appendChild(card);
 
-        // Thêm 1 dòng nội dung và địa điểm mặc định
-        addNoiDung(card.querySelector('.btn-blue'));
-        addDiaDiem(card.querySelectorAll('.btn-blue')[1]);
+        // Thêm nội dung & địa điểm
+        const ndList = xData && xData.noiDung && xData.noiDung.length > 0 ? xData.noiDung : [''];
+        const ddList = xData && xData.diaDiem && xData.diaDiem.length > 0 ? xData.diaDiem : [''];
+
+        // Thêm nội dung trước
+        ndList.forEach(nd => {
+            const div = document.createElement('div');
+            div.className = 'list-input';
+            div.innerHTML = `<input type="text" class="noi-dung" list="dsNoiDungList" value="${(nd || '').replace(/"/g,'&quot;')}" placeholder="Nhập nội dung..."><button class="btn-red btn-sm" onclick="this.parentElement.remove()">X</button>`;
+            card.querySelector('.ds-noi-dung').appendChild(div);
+        });
+        ddList.forEach(dd => {
+            const div = document.createElement('div');
+            div.className = 'list-input';
+            div.innerHTML = `<input type="text" class="dia-diem" list="dsDiaDiemList" value="${(dd || '').replace(/"/g,'&quot;')}" placeholder="Nhập địa điểm..."><button class="btn-red btn-sm" onclick="this.parentElement.remove()">X</button>`;
+            card.querySelector('.ds-dia-diem').appendChild(div);
+        });
 
         capNhatSoXe();
     }
 
     function capNhatSoXe() {
-        const cards = document.querySelectorAll('.xe-card');
-        cards.forEach((card, i) => {
-            card.querySelector('.xe-title').innerText = `🚗 Xe ${i + 1}`;
-        });
+        document.querySelectorAll('.xe-card').forEach((c, i) => c.querySelector('.xe-title').innerText = `🚗 Xe ${i + 1}`);
     }
 
     function capNhatXe(select) {
         const idx = select.value;
         const card = select.closest('.xe-card');
-        if (idx === "") {
-            card.querySelector('.bien-so-text').innerText = "--";
-        } else {
-            const xe = dsXeGoc[idx];
-            card.querySelector('.bien-so-text').innerText = xe.bienSo;
-        }
+        if (idx === "") card.querySelector('.bien-so-text').innerText = "--";
+        else card.querySelector('.bien-so-text').innerText = dsXeGoc[idx].bienSo;
     }
 
-    // ============ DANH SÁCH ĐỘNG (Nội dung / Địa điểm) ============
     function addNoiDung(btn) {
         const card = btn.closest('.xe-card');
-        const container = card.querySelector('.ds-noi-dung');
         const div = document.createElement('div');
         div.className = 'list-input';
-        div.innerHTML = `
-            <input type="text" class="noi-dung" list="dsNoiDungList" placeholder="Nhập nội dung...">
-            <button class="btn-red btn-sm" onclick="this.parentElement.remove()">X</button>
-        `;
-        container.appendChild(div);
+        div.innerHTML = `<input type="text" class="noi-dung" list="dsNoiDungList" placeholder="Nhập nội dung..."><button class="btn-red btn-sm" onclick="this.parentElement.remove()">X</button>`;
+        card.querySelector('.ds-noi-dung').appendChild(div);
     }
-
     function addDiaDiem(btn) {
         const card = btn.closest('.xe-card');
-        const container = card.querySelector('.ds-dia-diem');
         const div = document.createElement('div');
         div.className = 'list-input';
-        div.innerHTML = `
-            <input type="text" class="dia-diem" list="dsDiaDiemList" placeholder="Nhập địa điểm...">
-            <button class="btn-red btn-sm" onclick="this.parentElement.remove()">X</button>
-        `;
-        container.appendChild(div);
+        div.innerHTML = `<input type="text" class="dia-diem" list="dsDiaDiemList" placeholder="Nhập địa điểm..."><button class="btn-red btn-sm" onclick="this.parentElement.remove()">X</button>`;
+        card.querySelector('.ds-dia-diem').appendChild(div);
     }
 
-    // ============ DATALIST GỢI Ý ============
+    // ============ DATALIST ============
     function renderDatalists() {
-        // Datalist cho lái xe
         let dl = document.getElementById('dsLaiXeList');
-        if (!dl) {
-            dl = document.createElement('datalist');
-            dl.id = 'dsLaiXeList';
-            document.body.appendChild(dl);
-        }
+        if (!dl) { dl = document.createElement('datalist'); dl.id = 'dsLaiXeList'; document.body.appendChild(dl); }
         dl.innerHTML = dsLaiXe.map(n => `<option value="${n}">`).join('');
 
-        // Datalist cho nội dung
         let dl2 = document.getElementById('dsNoiDungList');
-        if (!dl2) {
-            dl2 = document.createElement('datalist');
-            dl2.id = 'dsNoiDungList';
-            document.body.appendChild(dl2);
-        }
+        if (!dl2) { dl2 = document.createElement('datalist'); dl2.id = 'dsNoiDungList'; document.body.appendChild(dl2); }
         dl2.innerHTML = dsNoiDungGoiY.map(n => `<option value="${n.replace(/"/g,'&quot;')}">`).join('');
 
-        // Datalist cho địa điểm
         let dl3 = document.getElementById('dsDiaDiemList');
-        if (!dl3) {
-            dl3 = document.createElement('datalist');
-            dl3.id = 'dsDiaDiemList';
-            document.body.appendChild(dl3);
-        }
+        if (!dl3) { dl3 = document.createElement('datalist'); dl3.id = 'dsDiaDiemList'; document.body.appendChild(dl3); }
         dl3.innerHTML = dsDiaDiemGoiY.map(n => `<option value="${n.replace(/"/g,'&quot;')}">`).join('');
     }
-    renderDatalists();
 
     // ============ ĐỊNH DẠNG NGÀY ============
     function formatDate(str) {
@@ -242,12 +247,12 @@
         return `${('0'+d.getDate()).slice(-2)}/${('0'+(d.getMonth()+1)).slice(-2)}/${d.getFullYear()}`;
     }
 
-    // ============ LƯU / TẢI FORM ============
+    // ============ LƯU ============
     function luuForm() {
         const xeList = [];
         document.querySelectorAll('.xe-card').forEach(card => {
-            const noiDung = [...card.querySelectorAll('.noi-dung')].map(i => i.value).filter(v => v.trim());
-            const diaDiem = [...card.querySelectorAll('.dia-diem')].map(i => i.value).filter(v => v.trim());
+            const noiDung = [...card.querySelectorAll('.noi-dung')].map(i => i.value.trim()).filter(v => v);
+            const diaDiem = [...card.querySelectorAll('.dia-diem')].map(i => i.value.trim()).filter(v => v);
             xeList.push({
                 xeIdx: card.querySelector('.chon-xe').value,
                 bienSo: card.querySelector('.bien-so-text').innerText,
@@ -260,83 +265,19 @@
             });
         });
 
-        localStorage.setItem('dieuxe_form_data', JSON.stringify({ xeList }));
-        alert("✅ Đã lưu form Lệnh điều xe!");
-    }
-
-    function taiForm() {
-        const saved = localStorage.getItem('dieuxe_form_data');
-        if (!saved) { alert("Chưa có dữ liệu form được lưu."); return; }
-        const d = JSON.parse(saved);
-
-        const container = document.getElementById('dsXeContainer');
-        container.innerHTML = '';
-
-        (d.xeList || []).forEach(x => {
-            addXe();
-            const card = container.lastElementChild;
-            if (x.xeIdx !== '') {
-                card.querySelector('.chon-xe').value = x.xeIdx;
-                card.querySelector('.bien-so-text').innerText = x.bienSo;
-            }
-            card.querySelector('.lai-xe').value = x.laiXe || '';
-            card.querySelector('.nguoi-su-dung').value = x.nguoiSuDung || NGUOI_SU_DUNG;
-
-            // Xóa dòng mặc định, thêm lại theo dữ liệu đã lưu
-            card.querySelector('.ds-noi-dung').innerHTML = '';
-            (x.noiDung || []).forEach(nd => {
-                const div = document.createElement('div');
-                div.className = 'list-input';
-                div.innerHTML = `<input type="text" class="noi-dung" list="dsNoiDungList" value="${nd.replace(/"/g,'&quot;')}"><button class="btn-red btn-sm" onclick="this.parentElement.remove()">X</button>`;
-                card.querySelector('.ds-noi-dung').appendChild(div);
-            });
-            if ((x.noiDung || []).length === 0) addNoiDung(card.querySelectorAll('.btn-blue')[0]);
-
-            card.querySelector('.ds-dia-diem').innerHTML = '';
-            (x.diaDiem || []).forEach(dd => {
-                const div = document.createElement('div');
-                div.className = 'list-input';
-                div.innerHTML = `<input type="text" class="dia-diem" list="dsDiaDiemList" value="${dd.replace(/"/g,'&quot;')}"><button class="btn-red btn-sm" onclick="this.parentElement.remove()">X</button>`;
-                card.querySelector('.ds-dia-diem').appendChild(div);
-            });
-            if ((x.diaDiem || []).length === 0) addDiaDiem(card.querySelectorAll('.btn-blue')[1]);
-
-            card.querySelector('.tu-ngay').value = x.tuNgay || '';
-            card.querySelector('.den-ngay').value = x.denNgay || '';
-        });
-
-        capNhatSoXe();
-        alert("✅ Đã tải form Lệnh điều xe!");
-    }
-
-    function xoaForm() {
-        if (confirm("Xóa toàn bộ form Lệnh điều xe đã lưu?")) {
-            localStorage.removeItem('dieuxe_form_data');
-            alert("Đã xóa.");
-        }
-    }
-
-    // ============ LƯU GỢI Ý TỰ ĐỘNG ============
-    function luuGoiY(noiDungMoi, diaDiemMoi) {
-        // Gộp và loại trùng
-        const setND = new Set([...dsNoiDungGoiY, ...noiDungMoi.filter(v => v.trim())]);
-        const setDD = new Set([...dsDiaDiemGoiY, ...diaDiemMoi.filter(v => v.trim())]);
-        dsNoiDungGoiY = [...setND].slice(-50); // giữ tối đa 50
-        dsDiaDiemGoiY = [...setDD].slice(-50);
-        localStorage.setItem('goiy_noi_dung', JSON.stringify(dsNoiDungGoiY));
-        localStorage.setItem('goiy_dia_diem', JSON.stringify(dsDiaDiemGoiY));
-        renderDatalists();
+        dbCongTac[CT_ID].dieuxe = { xeList: xeList };
+        localStorage.setItem('db_congtac', JSON.stringify(dbCongTac));
+        alert("✅ Đã lưu Lệnh điều xe!");
     }
 
     // ============ XUẤT WORD ============
     async function xuatTatCa() {
+        luuForm(); // Tự lưu trước
+
         const cards = document.querySelectorAll('.xe-card');
         if (cards.length === 0) { alert("Chưa có xe nào!"); return; }
 
         document.getElementById("loading").style.display = "flex";
-
-        const allNoiDung = [];
-        const allDiaDiem = [];
         const danhSachXeData = [];
 
         cards.forEach(card => {
@@ -345,8 +286,6 @@
 
             const noiDung = [...card.querySelectorAll('.noi-dung')].map(i => i.value.trim()).filter(v => v);
             const diaDiem = [...card.querySelectorAll('.dia-diem')].map(i => i.value.trim()).filter(v => v);
-            allNoiDung.push(...noiDung);
-            allDiaDiem.push(...diaDiem);
 
             danhSachXeData.push({
                 ten_xe: card.querySelector('.chon-xe').selectedOptions[0]?.text || "",
@@ -366,10 +305,6 @@
             return;
         }
 
-        // Lưu gợi ý
-        luuGoiY(allNoiDung, allDiaDiem);
-
-        // Lấy file mẫu 1 lần
         try {
             const res = await fetch(`${GOOGLE_WEB_APP_URL}?action=getTemplate&fileId=${ID_TEMPLATE_DIEUXE}`);
             const result = await res.json();
@@ -377,37 +312,25 @@
             const bytes = new Uint8Array(binary.length);
             for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
 
-            // Xuất từng file
             for (let i = 0; i < danhSachXeData.length; i++) {
                 const data = danhSachXeData[i];
                 const zip = new PizZip(bytes.buffer);
-                const doc = new window.docxtemplater(zip, {
-                    paragraphLoop: true, linebreaks: true,
-                    nullGetter: function() { return ""; }
-                });
+                const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true, nullGetter: () => "" });
                 doc.render(data);
 
                 const blob = doc.getZip().generate({
                     type: "blob",
                     mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 });
-
-                // Đợi 1 chút giữa các file để tránh lỗi tải
                 await new Promise(r => setTimeout(r, 200));
                 saveAs(blob, `Lenh_dieu_xe_${data.bien_so.replace(/\s/g, '_')}.docx`);
             }
 
             document.getElementById("loading").style.display = "none";
-            alert(`✅ Đã xuất ${danhSachXeData.length} file Lệnh điều xe!`);
-
+            alert(`✅ Đã xuất ${danhSachXeData.length} file!`);
         } catch (e) {
             console.error(e);
-            let msg = "Lỗi: " + e.message;
-            if (e.properties && e.properties.errors) {
-                msg += "\n";
-                e.properties.errors.forEach(err => msg += "- " + err.message + "\n");
-            }
-            alert(msg);
+            alert("Lỗi: " + e.message);
             document.getElementById("loading").style.display = "none";
         }
     }
