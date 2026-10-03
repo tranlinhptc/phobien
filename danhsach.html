@@ -20,7 +20,6 @@
         .btn-gray { background: #6c757d; } .btn-purple { background: #6f42c1; }
         .btn-sm { padding: 5px 10px; font-size: 12px; width: auto; margin: 2px; }
 
-        /* Chips */
         .chip-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
         .chip { position: relative; padding: 8px 4px; border-radius: 18px; border: 2px solid #ccc; background: #f4f4f4; color: #666; font-size: 12px; cursor: pointer; text-align: center; font-weight: normal; transition: .15s; }
         .chip.selected { background: #007bff; color: #fff; border-color: #007bff; font-weight: bold; }
@@ -55,7 +54,7 @@
     </div>
     <div class="form-group">
         <label>Ngày giấy đi đường:</label>
-        <input type="date" id="ngayGiay">
+        <input type="text" id="ngayGiay" placeholder="dd/mm/yyyy">
     </div>
 
     <h3>Chọn nhân sự</h3>
@@ -74,9 +73,8 @@
                 <tr>
                     <th style="width:35px;">STT</th>
                     <th>Họ và Tên</th>
-                    <th style="width:110px;">Chức vụ</th>
-                    <th style="width:120px;">Từ ngày</th>
-                    <th style="width:120px;">Đến ngày</th>
+                    <th style="width:110px;">Từ ngày</th>
+                    <th style="width:110px;">Đến ngày</th>
                     <th style="width:35px;">X</th>
                 </tr>
             </thead>
@@ -111,27 +109,48 @@
         "Ngô Văn Quang":         "Tổ phó"
     };
 
-    const DS_CHUC_VU = ["Nhân viên", "Tổ trưởng", "Tổ phó", "Lãnh đạo"];
-
     // ============ STATE ============
-    let dsNVGoc = [];          // danh sách người gốc
-    let dsDangChon = [];       // [{ten, chucVu, tuNgay, denNgay}]
+    let dsNVGoc = [];
+    let dsDangChon = []; // [{ten, chucVu, tuNgay, denNgay}] — tuNgay/denNgay là dd/mm/yyyy
+
+    // ============ ĐỊNH DẠNG NGÀY ============
+    // Nhận vào giá trị bất kỳ (ISO datetime, ISO date, dd/mm/yyyy) → trả về dd/mm/yyyy
+    function toDisplayDate(str) {
+        if (!str) return "";
+        // ISO datetime: 2026-10-03T22:14
+        if (str.includes('T')) str = str.split('T')[0];
+        // ISO date: 2026-10-03
+        if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+            const [y, m, d] = str.split(' ')[0].split('-');
+            return `${d}/${m}/${y}`;
+        }
+        // Đã là dd/mm/yyyy
+        return str;
+    }
+
+    // Nhận dd/mm/yyyy → trả về Date object (để hiển thị lịch nếu cần)
+    function fromDisplayDate(str) {
+        if (!str || !/^\d{2}\/\d{2}\/\d{4}$/.test(str)) return null;
+        const [d, m, y] = str.split('/');
+        return new Date(`${y}-${m}-${d}`);
+    }
 
     // ============ KHỞI TẠO ============
     window.onload = function() {
         dsNVGoc = JSON.parse(localStorage.getItem('ds_nv_goc')) || DEFAULT_NV.slice();
 
-        // Ngày giấy = hôm nay
+        // Ngày giấy = hôm nay dạng dd/mm/yyyy
         const today = new Date();
-        document.getElementById('ngayGiay').value =
-            `${today.getFullYear()}-${('0'+(today.getMonth()+1)).slice(-2)}-${('0'+today.getDate()).slice(-2)}`;
+        document.getElementById('ngayGiay').value = toDisplayDate(
+            `${today.getFullYear()}-${('0'+(today.getMonth()+1)).slice(-2)}-${('0'+today.getDate()).slice(-2)}`
+        );
 
-        // Tự động đồng bộ từ Đề cương nếu có
+        // Tự động đồng bộ từ Đề cương
         const coDeCuong = localStorage.getItem('decuong_form_data');
         if (coDeCuong) {
             const d = JSON.parse(coDeCuong);
             if (d.selectedRoles && Object.keys(d.selectedRoles).length > 0) {
-                dongBoTuDeCuong(true); // im lặng
+                dongBoTuDeCuong(true);
             }
         }
 
@@ -163,16 +182,14 @@
 
     function toggleNguoi(ten) {
         if (isChosen(ten)) {
-            // Bỏ chọn
             dsDangChon = dsDangChon.filter(n => n.ten !== ten);
         } else {
-            // Thêm vào
             const decuong = JSON.parse(localStorage.getItem('decuong_form_data') || '{}');
             dsDangChon.push({
                 ten: ten,
                 chucVu: CHUC_VU_MAC_DINH[ten] || "Nhân viên",
-                tuNgay: decuong.tgTu || '',
-                denNgay: decuong.tgDen || ''
+                tuNgay: toDisplayDate(decuong.tgTu),
+                denNgay: toDisplayDate(decuong.tgDen)
             });
         }
         renderChips();
@@ -187,10 +204,9 @@
             return;
         }
 
-        const tuNgay = decuong.tgTu || '';
-        const denNgay = decuong.tgDen || '';
+        const tuNgay = toDisplayDate(decuong.tgTu);
+        const denNgay = toDisplayDate(decuong.tgDen);
 
-        // Sắp xếp: Tổ trưởng → Tổ phó → Nhân viên
         const order = { "Tổ trưởng": 1, "Tổ phó": 2, "Lãnh đạo": 3, "Nhân viên": 4 };
         const dsNguoi = Object.keys(decuong.selectedRoles).sort((a, b) => {
             const cvA = CHUC_VU_MAC_DINH[a] || "Nhân viên";
@@ -198,7 +214,6 @@
             return (order[cvA] || 9) - (order[cvB] || 9);
         });
 
-        // Reset và nạp lại
         dsDangChon = dsNguoi.map(ten => ({
             ten: ten,
             chucVu: CHUC_VU_MAC_DINH[ten] || "Nhân viên",
@@ -208,7 +223,6 @@
 
         renderChips();
         renderBang();
-
         if (!silent) alert(`✅ Đã đồng bộ ${dsNguoi.length} người từ Đề cương.`);
     }
 
@@ -221,22 +235,14 @@
             row.innerHTML = `
                 <td class="stt">${('0'+(i+1)).slice(-2)}</td>
                 <td><input type="text" class="ten-nv" value="${n.ten.replace(/"/g,'&quot;')}" readonly style="background:#f0f0f0; font-weight:bold;"></td>
-                <td>
-                    <select class="chuc-vu" onchange="capNhatChucVu(${i}, this.value)">
-                        ${DS_CHUC_VU.map(cv => `<option value="${cv}" ${cv === n.chucVu ? 'selected' : ''}>${cv}</option>`).join('')}
-                    </select>
-                </td>
-                <td><input type="date" class="tu-ngay" value="${n.tuNgay}" onchange="capNhatNgay(${i}, 'tuNgay', this.value)"></td>
-                <td><input type="date" class="den-ngay" value="${n.denNgay}" onchange="capNhatNgay(${i}, 'denNgay', this.value)"></td>
+                <td><input type="text" class="tu-ngay" value="${n.tuNgay}" placeholder="dd/mm/yyyy" onchange="capNhatNgay(${i}, 'tuNgay', this.value)"></td>
+                <td><input type="text" class="den-ngay" value="${n.denNgay}" placeholder="dd/mm/yyyy" onchange="capNhatNgay(${i}, 'denNgay', this.value)"></td>
                 <td><button class="btn-red btn-sm" onclick="xoaNguoi('${n.ten.replace(/'/g, "\\'")}')">X</button></td>
             `;
             tbody.appendChild(row);
         });
     }
 
-    function capNhatChucVu(idx, val) {
-        dsDangChon[idx].chucVu = val;
-    }
     function capNhatNgay(idx, field, val) {
         dsDangChon[idx][field] = val;
     }
@@ -256,22 +262,6 @@
         localStorage.setItem('ds_nv_goc', JSON.stringify(dsNVGoc));
         renderChips();
         alert(`✅ Đã thêm "${t}" vào danh sách gốc.`);
-    }
-
-    // ============ ĐỊNH DẠNG NGÀY ============
-    function formatDate(str) {
-        if (!str) return "";
-        const d = new Date(str);
-        return `${('0'+d.getDate()).slice(-2)}/${('0'+(d.getMonth()+1)).slice(-2)}/${d.getFullYear()}`;
-    }
-    function splitDate(str) {
-        if (!str) return { ngay: "", thang: "", nam: "" };
-        const d = new Date(str);
-        return {
-            ngay: ('0'+d.getDate()).slice(-2),
-            thang: ('0'+(d.getMonth()+1)).slice(-2),
-            nam: d.getFullYear()
-        };
     }
 
     // ============ LƯU / TẢI FORM ============
@@ -313,14 +303,20 @@
             return;
         }
 
-        const ngayObj = splitDate(document.getElementById('ngayGiay').value);
+        // Ngày giấy: dd/mm/yyyy → tách ra ngay/thang/nam
+        const ngayGiayStr = document.getElementById('ngayGiay').value || '';
+        let ngayObj = { ngay: "", thang: "", nam: "" };
+        if (/^\d{2}\/\d{2}\/\d{4}$/.test(ngayGiayStr)) {
+            const [d, m, y] = ngayGiayStr.split('/');
+            ngayObj = { ngay: d, thang: m, nam: y };
+        }
 
         const danhSach = dsDangChon.map((n, idx) => ({
             stt: ('0' + (idx + 1)).slice(-2),
             ho_ten: n.ten,
             chuc_vu: n.chucVu,
-            tu_ngay: formatDate(n.tuNgay),
-            den_ngay: formatDate(n.denNgay),
+            tu_ngay: n.tuNgay,
+            den_ngay: n.denNgay,
             ky_xac_nhan: ""
         }));
 
@@ -360,4 +356,4 @@
     }
 </script>
 </body>
-    </html>
+</html>
