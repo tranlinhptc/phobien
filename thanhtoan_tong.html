@@ -21,13 +21,18 @@
         .btn-sm { padding: 5px 10px; font-size: 12px; width: auto; margin: 2px; }
 
         .ct-selector { border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: #f9f9f9; margin-bottom: 12px; }
-        .ct-selector .item { display: flex; align-items: flex-start; padding: 8px; background: #fff; border-radius: 6px; margin-bottom: 6px; border: 1px solid #eee; }
-        .ct-selector .item input[type="checkbox"] { width: auto; margin-right: 10px; margin-top: 3px; }
+        .ct-selector .item { padding: 10px; background: #fff; border-radius: 6px; margin-bottom: 8px; border: 1px solid #eee; }
+        .ct-selector .item .row-top { display: flex; align-items: flex-start; gap: 10px; }
+        .ct-selector .item input[type="checkbox"] { width: auto; margin-top: 4px; flex: 0 0 auto; }
         .ct-selector .item .info { flex: 1; font-size: 13px; min-width: 0; }
         .ct-selector .item .info b { color: #0056b3; }
         .ct-selector .item .info span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .ct-selector .item .info small { color: #666; display: block; font-size: 11px; }
-        .ct-selector .item .cost { font-size: 11px; color: #d63384; font-weight: bold; text-align: right; flex: 0 0 110px; }
+        .ct-selector .item .cost { font-size: 11px; color: #d63384; font-weight: bold; text-align: right; flex: 0 0 120px; }
+        .ct-selector .item .btn-row { display: flex; gap: 6px; margin-top: 8px; margin-left: 26px; }
+        .ct-selector .item .btn-row button { flex: 1; padding: 6px 4px; font-size: 11px; font-weight: bold; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-xml-pn { background: #e83e8c; }
+        .btn-xml-cd { background: #6f42c1; }
 
         .warning-box { background: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; border-radius: 6px; margin-bottom: 12px; font-size: 12px; }
         .warning-box b { color: #856404; }
@@ -35,11 +40,10 @@
 
         .error-box { background: #f8d7da; border-left: 4px solid #dc3545; padding: 10px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; color: #721c24; }
 
-        .import-section { border: 1px dashed #6c757d; border-radius: 6px; padding: 10px; margin-bottom: 12px; background: #f8f9fa; }
-        .import-section .title { font-weight: bold; font-size: 13px; color: #0056b3; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
-        .import-section .title span.total { color: #d63384; }
-        .import-section .ct-target { margin: 6px 0; font-size: 12px; color: #666; }
-        .import-section select { padding: 6px; font-size: 13px; }
+        .bill-list { margin-top: 8px; margin-left: 26px; padding: 6px; background: #f8f9fa; border-radius: 4px; font-size: 11px; }
+        .bill-list .bill-row { display: flex; justify-content: space-between; padding: 3px 4px; border-bottom: 1px dashed #ddd; }
+        .bill-list .bill-row:last-child { border-bottom: none; }
+        .bill-list .bill-row .del { color: #dc3545; cursor: pointer; font-weight: bold; margin-left: 6px; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
         th, td { border: 1px solid #999; padding: 4px; text-align: center; }
@@ -75,40 +79,8 @@
     </div>
 
     <h3>Chọn công tác để thanh toán</h3>
+    <p class="note">Bấm 📥 nếu cần thêm hóa đơn phòng nghỉ / cước đường bộ cho từng công tác.</p>
     <div id="ctSelector"></div>
-
-    <h3>Import hóa đơn phát sinh (tùy chọn)</h3>
-    <p class="note">Chọn công tác đích trước, sau đó import XML. Có thể chọn nhiều file cùng lúc.</p>
-
-    <!-- Phòng nghỉ -->
-    <div class="import-section">
-        <div class="title">
-            <span>🏨 Phòng nghỉ</span>
-            <span class="total">Tổng: <b id="tongPhongNghi">0</b> đồng</span>
-        </div>
-        <div class="ct-target">
-            <label style="display:inline-block; color:#333; font-size:12px; margin-right:6px;">Nhập cho công tác:</label>
-            <select id="ctTargetPhongNghi" style="width:auto; min-width:200px;"></select>
-        </div>
-        <button class="btn-blue btn-sm" onclick="document.getElementById('filePhongNghi').click()">📥 Import XML phòng nghỉ (chọn nhiều file)</button>
-        <input type="file" id="filePhongNghi" multiple accept=".xml" style="display:none;">
-        <div id="dsPhongNghi" style="margin-top:8px;"></div>
-    </div>
-
-    <!-- Cước đường bộ -->
-    <div class="import-section">
-        <div class="title">
-            <span>🛣️ Cước đường bộ</span>
-            <span class="total">Tổng: <b id="tongCuocDuong">0</b> đồng</span>
-        </div>
-        <div class="ct-target">
-            <label style="display:inline-block; color:#333; font-size:12px; margin-right:6px;">Nhập cho công tác:</label>
-            <select id="ctTargetCuocDuong" style="width:auto; min-width:200px;"></select>
-        </div>
-        <button class="btn-blue btn-sm" onclick="document.getElementById('fileCuocDuong').click()">📥 Import XML cước đường bộ (chọn nhiều file)</button>
-        <input type="file" id="fileCuocDuong" multiple accept=".xml" style="display:none;">
-        <div id="dsCuocDuong" style="margin-top:8px;"></div>
-    </div>
 
     <h3>Xem trước chi phí</h3>
     <div id="preview"></div>
@@ -121,8 +93,9 @@
 <script>
     // ============ CẤU HÌNH ============
     const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxlM-814su7_q0yS7Qx1bdwC1j9CB18Km6UOdMcJW4ifZUecl633RmEhvxnsUIwerlE/exec";
-    const ID_TEMPLATE_TONG = "1uI0rtEA01OYJfKecfZnJEtMW56-4gVVx";
-    const MUC_CTP = 250000;
+    const ID_TEMPLATE_TONG = "THAY_ID_FILE_WORD_MAU_TONG";
+    const MUC_CTP_1_NGAY = 100000;
+    const MUC_CTP_NHIEU_NGAY = 250000;
     const KEY_PHONG_NGHI = 'db_phongnghi';
     const KEY_CUOC_DUONG = 'db_cuocduong';
 
@@ -130,157 +103,31 @@
     let dbCongTac = {};
     let dbPhongNghi = {};
     let dbCuocDuong = {};
+    let importTarget = { ctId: '', type: '' }; // Loại import: 'pn' hoặc 'cd'
 
     // ============ KHỞI TẠO ============
     window.onload = function() {
-        // Đọc dữ liệu an toàn
         try { dbCongTac = JSON.parse(localStorage.getItem('db_congtac') || '{}'); } catch (e) { dbCongTac = {}; }
         try { dbPhongNghi = JSON.parse(localStorage.getItem(KEY_PHONG_NGHI) || '{}'); } catch (e) { dbPhongNghi = {}; }
         try { dbCuocDuong = JSON.parse(localStorage.getItem(KEY_CUOC_DUONG) || '{}'); } catch (e) { dbCuocDuong = {}; }
 
-        // Ngày lập = hôm nay
         const today = new Date();
         document.getElementById('ngayLap').value =
             `${today.getFullYear()}-${('0'+(today.getMonth()+1)).slice(-2)}-${('0'+today.getDate()).slice(-2)}`;
 
-        // Gọi từng hàm riêng, có try/catch để 1 lỗi không chặn hết
         safeRun('renderNguoiDeNghi', renderNguoiDeNghi);
         safeRun('renderCTSelector', renderCTSelector);
-        safeRun('renderDropdownTarget', renderDropdownTarget);
-        safeRun('renderBangPhongNghi', renderBangPhongNghi);
-        safeRun('renderBangCuocDuong', renderBangCuocDuong);
         safeRun('updatePreview', updatePreview);
 
-        // Gắn sự kiện import
-        document.getElementById('filePhongNghi').onchange = (e) => xuLyXMLPhongNghi(e.target);
-        document.getElementById('fileCuocDuong').onchange = (e) => xuLyXMLCuocDuong(e.target);
+        // Gắn sự kiện import XML
+        document.getElementById('fileXmlInput').onchange = (e) => xuLyXML(e.target);
     };
 
     function safeRun(name, fn) {
         try { fn(); } catch (e) { console.error("Lỗi " + name + ":", e); }
     }
 
-    // ============ DROPDOWN NGƯỜI ĐỀ NGHỊ ============
-    function renderNguoiDeNghi() {
-        const dsNguoi = new Set();
-        Object.values(dbCongTac).forEach(ct => {
-            if (ct.decuong && ct.decuong.selectedRoles) {
-                Object.keys(ct.decuong.selectedRoles).forEach(n => dsNguoi.add(n));
-            }
-            if (ct.danhsach && ct.danhsach.danhSach) {
-                ct.danhsach.danhSach.forEach(n => { if (n.ten) dsNguoi.add(n.ten); });
-            }
-            if (ct.dieuxe && ct.dieuxe.xeList) {
-                ct.dieuxe.xeList.forEach(x => { if (x.laiXe) dsNguoi.add(x.laiXe); });
-            }
-        });
-
-        const arr = [...dsNguoi].sort();
-        const sel = document.getElementById('nguoiDeNghi');
-        if (arr.length === 0) {
-            sel.innerHTML = '<option value="">-- Chưa có nhân sự nào --</option>';
-            return;
-        }
-        sel.innerHTML = '<option value="">-- Chọn --</option>' +
-            arr.map(n => `<option value="${n.replace(/"/g,'&quot;')}">${n}</option>`).join('');
-        if (arr.includes('Nguyễn Xuân Khánh')) sel.value = 'Nguyễn Xuân Khánh';
-        else sel.value = arr[0];
-    }
-
-    // ============ DROPDOWN CÔNG TÁC ĐÍCH (cho import) ============
-    function renderDropdownTarget() {
-        const dsCT = Object.values(dbCongTac).sort((a, b) => (b.ngayBatDau || '').localeCompare(a.ngayBatDau || ''));
-        const opts = dsCT.map(ct => `<option value="${ct.id}">${ct.id} - ${escapeHtml(ct.tenCongTac || '')}</option>`).join('');
-
-        document.getElementById('ctTargetPhongNghi').innerHTML = opts || '<option value="">-- Không có CT --</option>';
-        document.getElementById('ctTargetCuocDuong').innerHTML = opts || '<option value="">-- Không có CT --</option>';
-    }
-
-    // ============ RENDER DANH SÁCH CT ============
-    function renderCTSelector() {
-        const container = document.getElementById('ctSelector');
-        const dsCT = Object.values(dbCongTac).sort((a, b) => (b.ngayBatDau || '').localeCompare(a.ngayBatDau || ''));
-
-        if (dsCT.length === 0) {
-            container.innerHTML = `<div class="error-box">
-                ⚠️ <b>Chưa có công tác nào.</b><br>Vào <a href="index.html">Trang chủ</a> tạo công tác trước.
-            </div>`;
-            return;
-        }
-
-        let html = '';
-        dsCT.forEach(ct => {
-            const cp = tinhChiPhiCT(ct);
-            const mods = [];
-            if (ct.decuong) mods.push('ĐC');
-            if (ct.dieuxe) mods.push('ĐX');
-            if (ct.danhsach) mods.push('DS');
-            if (ct.nhienlieu) mods.push('NL');
-            if (dbPhongNghi[ct.id] && dbPhongNghi[ct.id].length > 0) mods.push('PN');
-            if (dbCuocDuong[ct.id] && dbCuocDuong[ct.id].length > 0) mods.push('CĐ');
-            const modStr = mods.length > 0 ? `[${mods.join('+')}]` : '[trống]';
-
-            html += `<div class="item">
-                <input type="checkbox" class="ct-check" data-id="${ct.id}" checked onchange="safeRun('updatePreview', updatePreview)">
-                <div class="info">
-                    <b>${ct.id}</b> <small style="color:#28a745;">${modStr}</small>
-                    <span>${escapeHtml(ct.tenCongTac || '(chưa có tên)')}</span>
-                    <small>📅 ${formatDate(ct.ngayBatDau)}${ct.ngayKetThuc && ct.ngayKetThuc !== ct.ngayBatDau ? ' → ' + formatDate(ct.ngayKetThuc) : ''}</small>
-                </div>
-                <div class="cost">
-                    NL: ${cp.tongNhienLieu.toLocaleString('vi-VN')}<br>
-                    CTP: ${cp.tongCTP.toLocaleString('vi-VN')}<br>
-                    PN: ${cp.tongPhongNghi.toLocaleString('vi-VN')}<br>
-                    CĐ: ${cp.tongCuocDuong.toLocaleString('vi-VN')}<br>
-                    <b>Σ: ${cp.tong.toLocaleString('vi-VN')}</b>
-                </div>
-            </div>`;
-        });
-        container.innerHTML = html;
-    }
-
-    // ============ TÍNH CHI PHÍ ============
-    function tinhChiPhiCT(ct) {
-        let tongNhienLieu = 0;
-        if (ct.nhienlieu && ct.nhienlieu.xeList) {
-            ct.nhienlieu.xeList.forEach(xe => {
-                (xe.congTacList || []).forEach(congTac => {
-                    (congTac.hoaDon || []).forEach(hd => {
-                        tongNhienLieu += parseFloat(hd.thanh_tien) || 0;
-                    });
-                });
-            });
-        }
-
-        let tongCTP = 0, soNguoi = 0;
-        if (ct.danhsach && ct.danhsach.danhSach) {
-            soNguoi = ct.danhsach.danhSach.length;
-            ct.danhsach.danhSach.forEach(n => {
-                const soNgay = tinhSoNgay(n.tuNgay, n.denNgay);
-                tongCTP += soNgay * MUC_CTP;
-            });
-        }
-
-        let tongPhongNghi = 0;
-        if (dbPhongNghi[ct.id] && dbPhongNghi[ct.id].length > 0) {
-            dbPhongNghi[ct.id].forEach(hd => { tongPhongNghi += parseFloat(hd.so_tien) || 0; });
-        } else if (ct.decuong && ct.decuong.soPhong && ct.decuong.soDem && ct.decuong.giaPhong) {
-            tongPhongNghi = (parseFloat(ct.decuong.soPhong) || 0)
-                * (parseFloat(ct.decuong.soDem) || 0)
-                * (parseFloat(ct.decuong.giaPhong) || 0);
-        }
-
-        let tongCuocDuong = 0;
-        if (dbCuocDuong[ct.id] && dbCuocDuong[ct.id].length > 0) {
-            dbCuocDuong[ct.id].forEach(hd => { tongCuocDuong += parseFloat(hd.so_tien) || 0; });
-        }
-
-        return {
-            tongNhienLieu, tongCTP, tongPhongNghi, tongCuocDuong, soNguoi,
-            tong: tongNhienLieu + tongCTP + tongPhongNghi + tongCuocDuong
-        };
-    }
-
+    // ============ TÍNH SỐ NGÀY ============
     function tinhSoNgay(tuNgay, denNgay) {
         if (!tuNgay || !denNgay) return 0;
         const parse = (s) => {
@@ -293,7 +140,183 @@
         return diff > 0 ? diff : 1;
     }
 
-    // ============ IMPORT XML ============
+    // ============ TÍNH CTP 1 NGƯỜI ============
+    function tinhCTPChoNguoi(tuNgay, denNgay) {
+        const soNgay = tinhSoNgay(tuNgay, denNgay);
+        if (soNgay === 0) return 0;
+        if (soNgay === 1) return MUC_CTP_1_NGAY;
+        return soNgay * MUC_CTP_NHIEU_NGAY;
+    }
+
+    // ============ TÍNH CHI PHÍ ============
+    function tinhChiPhiCT(ct) {
+        // Nhiên liệu
+        let tongNhienLieu = 0;
+        if (ct.nhienlieu && ct.nhienlieu.xeList) {
+            ct.nhienlieu.xeList.forEach(xe => {
+                (xe.congTacList || []).forEach(congTac => {
+                    (congTac.hoaDon || []).forEach(hd => {
+                        tongNhienLieu += parseFloat(hd.thanh_tien) || 0;
+                    });
+                });
+            });
+        }
+
+        // CTP - tính theo quy tắc 1 ngày = 100k, >=2 ngày = 250k/ngày
+        let tongCTP = 0, soNguoi = 0;
+        if (ct.danhsach && ct.danhsach.danhSach) {
+            soNguoi = ct.danhsach.danhSach.length;
+            ct.danhsach.danhSach.forEach(n => {
+                tongCTP += tinhCTPChoNguoi(n.tuNgay, n.denNgay);
+            });
+        }
+
+        // Phòng nghỉ
+        let tongPhongNghi = 0;
+        if (dbPhongNghi[ct.id] && dbPhongNghi[ct.id].length > 0) {
+            dbPhongNghi[ct.id].forEach(hd => { tongPhongNghi += parseFloat(hd.so_tien) || 0; });
+        } else if (ct.decuong && ct.decuong.soPhong && ct.decuong.soDem && ct.decuong.giaPhong) {
+            tongPhongNghi = (parseFloat(ct.decuong.soPhong) || 0)
+                * (parseFloat(ct.decuong.soDem) || 0)
+                * (parseFloat(ct.decuong.giaPhong) || 0);
+        }
+
+        // Cước đường bộ
+        let tongCuocDuong = 0;
+        if (dbCuocDuong[ct.id] && dbCuocDuong[ct.id].length > 0) {
+            dbCuocDuong[ct.id].forEach(hd => { tongCuocDuong += parseFloat(hd.so_tien) || 0; });
+        }
+
+        return {
+            tongNhienLieu, tongCTP, tongPhongNghi, tongCuocDuong, soNguoi,
+            tong: tongNhienLieu + tongCTP + tongPhongNghi + tongCuocDuong
+        };
+    }
+
+    // ============ DROPDOWN NGƯỜI ĐỀ NGHỊ ============
+    function renderNguoiDeNghi() {
+        const dsNguoi = new Set();
+        Object.values(dbCongTac).forEach(ct => {
+            if (ct.decuong && ct.decuong.selectedRoles) Object.keys(ct.decuong.selectedRoles).forEach(n => dsNguoi.add(n));
+            if (ct.danhsach && ct.danhsach.danhSach) ct.danhsach.danhSach.forEach(n => { if (n.ten) dsNguoi.add(n.ten); });
+            if (ct.dieuxe && ct.dieuxe.xeList) ct.dieuxe.xeList.forEach(x => { if (x.laiXe) dsNguoi.add(x.laiXe); });
+        });
+        const arr = [...dsNguoi].sort();
+        const sel = document.getElementById('nguoiDeNghi');
+        if (arr.length === 0) { sel.innerHTML = '<option value="">-- Chưa có nhân sự nào --</option>'; return; }
+        sel.innerHTML = '<option value="">-- Chọn --</option>' +
+            arr.map(n => `<option value="${n.replace(/"/g,'&quot;')}">${n}</option>`).join('');
+        sel.value = arr.includes('Nguyễn Xuân Khánh') ? 'Nguyễn Xuân Khánh' : arr[0];
+    }
+
+    // ============ RENDER DANH SÁCH CT ============
+    function renderCTSelector() {
+        const container = document.getElementById('ctSelector');
+        const dsCT = Object.values(dbCongTac).sort((a, b) => (b.ngayBatDau || '').localeCompare(a.ngayBatDau || ''));
+
+        if (dsCT.length === 0) {
+            container.innerHTML = `<div class="error-box">⚠️ <b>Chưa có công tác nào.</b><br>Vào <a href="index.html">Trang chủ</a> tạo trước.</div>`;
+            return;
+        }
+
+        let html = '';
+        dsCT.forEach(ct => {
+            const cp = tinhChiPhiCT(ct);
+
+            // Bill lists
+            const pnHtml = renderBillList('pn', ct.id, dbPhongNghi[ct.id] || []);
+            const cdHtml = renderBillList('cd', ct.id, dbCuocDuong[ct.id] || []);
+
+            html += `<div class="item">
+                <div class="row-top">
+                    <input type="checkbox" class="ct-check" data-id="${ct.id}" checked onchange="safeRun('updatePreview', updatePreview)">
+                    <div class="info">
+                        <b>${ct.id}</b>
+                        <span>${escapeHtml(ct.tenCongTac || '(chưa có tên)')}</span>
+                        <small>📅 ${formatDate(ct.ngayBatDau)}${ct.ngayKetThuc && ct.ngayKetThuc !== ct.ngayBatDau ? ' → ' + formatDate(ct.ngayKetThuc) : ''}</small>
+                    </div>
+                    <div class="cost">
+                        NL: ${cp.tongNhienLieu.toLocaleString('vi-VN')}<br>
+                        CTP: ${cp.tongCTP.toLocaleString('vi-VN')}<br>
+                        PN: ${cp.tongPhongNghi.toLocaleString('vi-VN')}<br>
+                        CĐ: ${cp.tongCuocDuong.toLocaleString('vi-VN')}<br>
+                        <b>Σ: ${cp.tong.toLocaleString('vi-VN')}</b>
+                    </div>
+                </div>
+                <div class="btn-row">
+                    <button class="btn-xml-pn" onclick="openImport('${ct.id}', 'pn')">🏨 +XML Phòng nghỉ</button>
+                    <button class="btn-xml-cd" onclick="openImport('${ct.id}', 'cd')">🛣️ +XML Cước đường</button>
+                </div>
+                ${pnHtml}
+                ${cdHtml}
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function renderBillList(type, ctId, list) {
+        if (!list || list.length === 0) return '';
+        const tong = list.reduce((s, h) => s + (parseFloat(h.so_tien) || 0), 0);
+        const label = type === 'pn' ? 'PN' : 'CĐ';
+        let html = `<div class="bill-list">
+            <div style="font-weight:bold; font-size:11px; color:#0056b3; margin-bottom:4px;">${label} ${ctId} (${list.length} hóa đơn) - Tổng: ${tong.toLocaleString('vi-VN')} đ</div>`;
+        list.forEach((h, i) => {
+            html += `<div class="bill-row">
+                <span>HĐ ${h.so_hd} - ${h.ngay} - ${(parseFloat(h.so_tien) || 0).toLocaleString('vi-VN')}</span>
+                <span class="del" onclick="xoaHoaDon('${type}', '${ctId}', ${i})">✕</span>
+            </div>`;
+        });
+        html += `</div>`;
+        return html;
+    }
+
+    // ============ XÓA HÓA ĐƠN ============
+    function xoaHoaDon(type, ctId, idx) {
+        const db = type === 'pn' ? dbPhongNghi : dbCuocDuong;
+        const key = type === 'pn' ? KEY_PHONG_NGHI : KEY_CUOC_DUONG;
+        if (!db[ctId]) return;
+        db[ctId].splice(idx, 1);
+        if (db[ctId].length === 0) delete db[ctId];
+        localStorage.setItem(key, JSON.stringify(db));
+        renderCTSelector();
+        updatePreview();
+    }
+
+    // ============ MỞ IMPORT (tạo input file ẩn động) ============
+    function openImport(ctId, type) {
+        importTarget = { ctId: ctId, type: type };
+        document.getElementById('fileXmlInput').click();
+    }
+
+    // ============ XỬ LÝ FILE XML ============
+    async function xuLyXML(input) {
+        const files = input.files;
+        if (files.length === 0) return;
+
+        const { ctId, type } = importTarget;
+        if (!ctId || !type) return;
+
+        const db = type === 'pn' ? dbPhongNghi : dbCuocDuong;
+        const key = type === 'pn' ? KEY_PHONG_NGHI : KEY_CUOC_DUONG;
+        if (!db[ctId]) db[ctId] = [];
+
+        let count = 0;
+        for (const file of Array.from(files)) {
+            const hd = await docXMLFile(file);
+            if (hd) {
+                hd.noi_dung = type === 'pn' ? "Phòng nghỉ" : "Cước đường bộ";
+                db[ctId].push(hd);
+                count++;
+            }
+        }
+
+        localStorage.setItem(key, JSON.stringify(db));
+        renderCTSelector();
+        updatePreview();
+        input.value = '';
+        alert(`✅ Đã import ${count} file ${type === 'pn' ? 'phòng nghỉ' : 'cước đường'} vào ${ctId}`);
+    }
+
     function docXMLFile(file) {
         return new Promise((resolve) => {
             const reader = new FileReader();
@@ -305,124 +328,12 @@
                     const tongTien = parseFloat(xmlDoc.querySelector("TgTTTBSo")?.textContent || "0");
                     resolve({ so_hd: soHoaDon, ngay: ngayLap, so_tien: tongTien });
                 } catch (err) {
-                    console.error("Lỗi đọc XML:", file.name, err);
+                    console.error("Lỗi XML:", file.name, err);
                     resolve(null);
                 }
             };
             reader.readAsText(file);
         });
-    }
-
-    async function xuLyXMLPhongNghi(input) {
-        const files = input.files;
-        if (files.length === 0) return;
-
-        const ctId = document.getElementById('ctTargetPhongNghi').value;
-        if (!ctId) { alert("Vui lòng chọn công tác đích!"); input.value = ''; return; }
-
-        if (!dbPhongNghi[ctId]) dbPhongNghi[ctId] = [];
-
-        for (const file of Array.from(files)) {
-            const hd = await docXMLFile(file);
-            if (hd) {
-                hd.noi_dung = "Phòng nghỉ";
-                dbPhongNghi[ctId].push(hd);
-            }
-        }
-        localStorage.setItem(KEY_PHONG_NGHI, JSON.stringify(dbPhongNghi));
-        renderBangPhongNghi();
-        renderCTSelector();
-        updatePreview();
-        input.value = '';
-        alert(`✅ Đã import ${files.length} file phòng nghỉ vào ${ctId}`);
-    }
-
-    async function xuLyXMLCuocDuong(input) {
-        const files = input.files;
-        if (files.length === 0) return;
-
-        const ctId = document.getElementById('ctTargetCuocDuong').value;
-        if (!ctId) { alert("Vui lòng chọn công tác đích!"); input.value = ''; return; }
-
-        if (!dbCuocDuong[ctId]) dbCuocDuong[ctId] = [];
-
-        for (const file of Array.from(files)) {
-            const hd = await docXMLFile(file);
-            if (hd) {
-                hd.noi_dung = "Cước đường bộ";
-                dbCuocDuong[ctId].push(hd);
-            }
-        }
-        localStorage.setItem(KEY_CUOC_DUONG, JSON.stringify(dbCuocDuong));
-        renderBangCuocDuong();
-        renderCTSelector();
-        updatePreview();
-        input.value = '';
-        alert(`✅ Đã import ${files.length} file cước đường bộ vào ${ctId}`);
-    }
-
-    function renderBangPhongNghi() {
-        const container = document.getElementById('dsPhongNghi');
-        let html = '', tongAll = 0;
-        Object.keys(dbPhongNghi).forEach(ctId => {
-            const list = dbPhongNghi[ctId];
-            if (!list || list.length === 0) return;
-            const tong = list.reduce((s, h) => s + (parseFloat(h.so_tien) || 0), 0);
-            tongAll += tong;
-            html += `<div style="margin-bottom:8px; padding:6px; background:#fff; border-radius:4px; border:1px solid #ddd;">
-                <div style="font-weight:bold; font-size:12px; color:#0056b3;">${ctId} - Tổng: ${tong.toLocaleString('vi-VN')} đ</div>
-                <table><thead><tr><th>STT</th><th>Số HĐ</th><th>Ngày</th><th>Số tiền</th><th>X</th></tr></thead><tbody>
-                ${list.map((h, i) => `<tr>
-                    <td>${i+1}</td><td>${h.so_hd}</td><td>${h.ngay}</td>
-                    <td>${h.so_tien.toLocaleString('vi-VN')}</td>
-                    <td><button class="btn-red btn-sm" onclick="xoaPhongNghi('${ctId}', ${i})">X</button></td>
-                </tr>`).join('')}
-                </tbody></table>
-            </div>`;
-        });
-        container.innerHTML = html || '<p class="info-text">Chưa có hóa đơn phòng nghỉ.</p>';
-        document.getElementById('tongPhongNghi').innerText = tongAll.toLocaleString('vi-VN');
-    }
-
-    function xoaPhongNghi(ctId, idx) {
-        dbPhongNghi[ctId].splice(idx, 1);
-        if (dbPhongNghi[ctId].length === 0) delete dbPhongNghi[ctId];
-        localStorage.setItem(KEY_PHONG_NGHI, JSON.stringify(dbPhongNghi));
-        renderBangPhongNghi();
-        renderCTSelector();
-        updatePreview();
-    }
-
-    function renderBangCuocDuong() {
-        const container = document.getElementById('dsCuocDuong');
-        let html = '', tongAll = 0;
-        Object.keys(dbCuocDuong).forEach(ctId => {
-            const list = dbCuocDuong[ctId];
-            if (!list || list.length === 0) return;
-            const tong = list.reduce((s, h) => s + (parseFloat(h.so_tien) || 0), 0);
-            tongAll += tong;
-            html += `<div style="margin-bottom:8px; padding:6px; background:#fff; border-radius:4px; border:1px solid #ddd;">
-                <div style="font-weight:bold; font-size:12px; color:#0056b3;">${ctId} - Tổng: ${tong.toLocaleString('vi-VN')} đ</div>
-                <table><thead><tr><th>STT</th><th>Số HĐ</th><th>Ngày</th><th>Số tiền</th><th>X</th></tr></thead><tbody>
-                ${list.map((h, i) => `<tr>
-                    <td>${i+1}</td><td>${h.so_hd}</td><td>${h.ngay}</td>
-                    <td>${h.so_tien.toLocaleString('vi-VN')}</td>
-                    <td><button class="btn-red btn-sm" onclick="xoaCuocDuong('${ctId}', ${i})">X</button></td>
-                </tr>`).join('')}
-                </tbody></table>
-            </div>`;
-        });
-        container.innerHTML = html || '<p class="info-text">Chưa có hóa đơn cước đường bộ.</p>';
-        document.getElementById('tongCuocDuong').innerText = tongAll.toLocaleString('vi-VN');
-    }
-
-    function xoaCuocDuong(ctId, idx) {
-        dbCuocDuong[ctId].splice(idx, 1);
-        if (dbCuocDuong[ctId].length === 0) delete dbCuocDuong[ctId];
-        localStorage.setItem(KEY_CUOC_DUONG, JSON.stringify(dbCuocDuong));
-        renderBangCuocDuong();
-        renderCTSelector();
-        updatePreview();
     }
 
     // ============ XEM TRƯỚC ============
@@ -447,8 +358,9 @@
         let warningHtml = '';
         if (canhBao.length > 0) {
             warningHtml = `<div class="warning-box">
-                <b>⚠️ Cảnh báo trùng CTP (${canhBao.length} trường hợp):</b>
-                <ul>${canhBao.map(c => `<li>${c.ten} - ngày ${formatDate(c.ngay)} - CT: ${c.dsCT.join(', ')}</li>`).join('')}</ul>
+                <b>⚠️ Cảnh báo trùng ngày công tác (${canhBao.length} trường hợp):</b>
+                <ul>${canhBao.slice(0, 10).map(c => `<li>${c.ten} - ${formatDate(c.ngay)} - CT: ${c.dsCT.join(', ')}</li>`).join('')}</ul>
+                ${canhBao.length > 10 ? `<small>... và ${canhBao.length - 10} trường hợp khác</small>` : ''}
             </div>`;
         }
 
@@ -465,7 +377,7 @@
         `;
     }
 
-    // ============ CẢNH BÁO TRÙNG CTP ============
+    // ============ CẢNH BÁO TRÙNG NGÀY ============
     function kiemTraTrungCTP(dsCTChon) {
         const map = {};
         dsCTChon.forEach(ct => {
@@ -522,10 +434,12 @@
 
         const bangChiPhi = [];
         let tongToanBo = 0;
+
         dsCTChon.forEach((ct, idx) => {
             const cp = tinhChiPhiCT(ct);
             const chiTiet = [];
 
+            // Nhiên liệu
             if (ct.nhienlieu && ct.nhienlieu.xeList) {
                 ct.nhienlieu.xeList.forEach(xe => {
                     let tongXe = 0; const dsHD = [];
@@ -542,24 +456,32 @@
                 });
             }
 
+            // Phòng nghỉ
             if (dbPhongNghi[ct.id] && dbPhongNghi[ct.id].length > 0) {
-                const tong = dbPhongNghi[ct.id].reduce((s, h) => s + (parseFloat(h.so_tien) || 0), 0);
-                chiTiet.push({ ten: `Phòng nghỉ`, so_tien: tong.toLocaleString('vi-VN') });
+                const dsHD = dbPhongNghi[ct.id].map(h => h.so_hd).filter(v => v);
+                chiTiet.push({
+                    ten: `Phòng nghỉ${dsHD.length ? ' (HĐ ' + dsHD.join(', ') + ')' : ''}`,
+                    so_tien: cp.tongPhongNghi.toLocaleString('vi-VN')
+                });
             } else if (cp.tongPhongNghi > 0) {
                 chiTiet.push({ ten: `Phòng nghỉ`, so_tien: cp.tongPhongNghi.toLocaleString('vi-VN') });
             }
 
+            // Cước đường bộ
             if (dbCuocDuong[ct.id] && dbCuocDuong[ct.id].length > 0) {
-                const tong = dbCuocDuong[ct.id].reduce((s, h) => s + (parseFloat(h.so_tien) || 0), 0);
-                chiTiet.push({ ten: `Cước đường bộ`, so_tien: tong.toLocaleString('vi-VN') });
+                const dsHD = dbCuocDuong[ct.id].map(h => h.so_hd).filter(v => v);
+                chiTiet.push({
+                    ten: `Cước đường bộ${dsHD.length ? ' (HĐ ' + dsHD.join(', ') + ')' : ''}`,
+                    so_tien: cp.tongCuocDuong.toLocaleString('vi-VN')
+                });
             }
 
+            // CTP
             if (cp.tongCTP > 0) {
                 chiTiet.push({ ten: `Phụ cấp lưu trú (${cp.soNguoi} người)`, so_tien: cp.tongCTP.toLocaleString('vi-VN') });
             }
 
             tongToanBo += cp.tong;
-
             bangChiPhi.push({
                 stt_la_ma: ['I','II','III','IV','V','VI','VII','VIII','IX','X'][idx] || (idx + 1),
                 ten_cong_tac: ct.tenCongTac,
@@ -568,15 +490,17 @@
             });
         });
 
-        // Bảng CTP
+        // Bảng CTP chi tiết
         const bangCTP = [];
         const theoNguoi = {};
         dsCTChon.forEach(ct => {
             if (!ct.danhsach || !ct.danhsach.danhSach) return;
             ct.danhsach.danhSach.forEach(n => {
+                const tien = tinhCTPChoNguoi(n.tuNgay, n.denNgay);
                 const soNgay = tinhSoNgay(n.tuNgay, n.denNgay);
-                if (!theoNguoi[n.ten]) theoNguoi[n.ten] = { so_ngay: 0, ghi_chu: [] };
+                if (!theoNguoi[n.ten]) theoNguoi[n.ten] = { so_ngay: 0, thanh_tien: 0, ghi_chu: [] };
                 theoNguoi[n.ten].so_ngay += soNgay;
+                theoNguoi[n.ten].thanh_tien += tien;
                 theoNguoi[n.ten].ghi_chu.push(ct.id);
             });
         });
@@ -587,12 +511,12 @@
                 stt: ('0' + (idx + 1)).slice(-2),
                 ho_ten: ten,
                 so_ngay: info.so_ngay,
-                thanh_tien: (info.so_ngay * MUC_CTP).toLocaleString('vi-VN'),
+                thanh_tien: info.thanh_tien.toLocaleString('vi-VN'),
                 ghi_chu: info.ghi_chu.join(', ')
             });
         });
 
-        const tongCTP = Object.values(theoNguoi).reduce((s, x) => s + x.so_ngay * MUC_CTP, 0);
+        const tongCTP = Object.values(theoNguoi).reduce((s, x) => s + x.thanh_tien, 0);
 
         const data = {
             ngay_lap: ngayLapObj.ngay, thang_lap: ngayLapObj.thang, nam_lap: ngayLapObj.nam,
@@ -645,5 +569,9 @@
         return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
 </script>
+
+<!-- Input file ẩn dùng chung -->
+<input type="file" id="fileXmlInput" multiple accept=".xml" style="display:none;">
+
 </body>
 </html>
