@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Đề Cương Công Tác - TNĐLĐ</title>
+    <title>Đề Cương Công Tác</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.11/docxtemplater.js"></script>
@@ -45,7 +45,6 @@
         .xe-card .xe-title { font-weight: bold; color: #0056b3; font-size: 13px; margin-bottom: 6px; border-bottom: 1px dashed #ccc; padding-bottom: 4px; }
 
         .info-text { font-size: 12px; color: #666; font-style: italic; }
-
         table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
         th, td { border: 1px solid #ccc; padding: 5px; text-align: center; }
         th { background: #e9ecef; }
@@ -57,36 +56,44 @@
         .row-input input { flex: 1; }
         .header-actions { display: flex; gap: 6px; margin-bottom: 10px; }
         .header-actions button { margin: 0; padding: 8px; font-size: 12px; }
+
+        .ct-banner { background: linear-gradient(135deg, #007bff, #0056b3); color: #fff; padding: 12px; border-radius: 8px; margin-bottom: 12px; }
+        .ct-banner .ct-id { font-family: monospace; font-size: 11px; opacity: .85; }
+        .ct-banner .ct-ten { font-weight: bold; font-size: 14px; margin-top: 4px; }
+        .ct-banner .ct-back { display: inline-block; color: #fff; text-decoration: none; font-size: 12px; margin-bottom: 6px; opacity: .9; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header-actions">
-        <button class="btn-blue" onclick="luuForm()">💾 Lưu form</button>
-        <button class="btn-gray" onclick="taiForm()">📂 Tải form</button>
-        <button class="btn-red" onclick="xoaForm()">🗑️ Xóa form</button>
+        <button class="btn-blue" onclick="luuForm()">💾 Lưu</button>
+        <button class="btn-red" onclick="location.href='index.html'">← Trang chủ</button>
+    </div>
+
+    <div class="ct-banner">
+        <a href="index.html" class="ct-back">← Quay lại danh sách</a>
+        <div class="ct-id" id="bannerId"></div>
+        <div class="ct-ten" id="bannerTen"></div>
     </div>
 
     <h2>ĐỀ CƯƠNG CÔNG TÁC</h2>
 
     <h3>Căn cứ</h3>
-    <div id="canCuContainer">
-        <div class="row-input"><input type="text" class="can-cu" placehoder="Căn cứ....."><button class="btn-red btn-sm" onclick="this.parentElement.remove()">X</button></div>
-    </div>
-    <button class="btn-blue btn-sm" onclick="addCanCu()">+..</button>
+    <div id="canCuContainer"></div>
+    <button class="btn-blue btn-sm" onclick="addCanCu()">+ Thêm căn cứ</button>
 
     <h3>I. Thời gian xuất phát dự kiến</h3>
-    <div class="form-group"><input type="datetime-local" id="tgXuatPhat" value="2026-09-26T13:00"></div>
+    <div class="form-group"><input type="datetime-local" id="tgXuatPhat"></div>
 
     <h3>II. Nội dung công tác</h3>
-    <div class="form-group"><textarea id="ndCongTac" rows="3">Thí nghiệm định kỳ... </textarea></div>
+    <div class="form-group"><textarea id="ndCongTac" rows="3" placeholder="Nhập nội dung..."></textarea></div>
 
     <h3>III. Thời gian làm việc dự kiến</h3>
     <div class="form-group">Từ <input type="datetime-local" id="tgTu" style="width:48%; display:inline-block;"> Đến <input type="date" id="tgDen" style="width:48%; display:inline-block;"></div>
 
     <h3>IV. Địa điểm làm việc</h3>
-    <div class="form-group"><input type="text" id="diaDiem" placehoder="Trạm/Kho...."></div>
+    <div class="form-group"><input type="text" id="diaDiem" placeholder="Trạm/Kho..."></div>
 
     <h3>V. Danh sách nhóm công tác</h3>
     <p class="note">① Chọn chế độ vai trò → ② Bấm chip người để gán. Bấm lại cùng vai trò để bỏ.</p>
@@ -104,7 +111,7 @@
     <button class="btn-purple btn-sm" onclick="themXeMoi()">+ Xe cá nhân</button>
     <div id="dsXeContainer" style="margin-top:8px;"></div>
     <button class="btn-blue btn-sm" onclick="addXe()">+ Xe cơ quan</button>
-    
+
     <h3>VII. Dự trù kinh phí</h3>
     <div class="form-group">
         <label>Phòng nghỉ:</label>
@@ -121,13 +128,13 @@
     <div class="form-group">
         <label>Phụ cấp lưu trú:</label>
         <div class="row-input">
-            <input type="number" id="soNguoi" value="" readonly style="width:55px; background:#eee;">
+            <input type="number" id="soNguoi" readonly style="width:55px; background:#eee;">
             <span>x</span>
             <input type="number" id="soNgay" value="1" placeholder="Số ngày" style="width:55px;">
             <span>x</span>
             <input type="number" id="giaPhuCap" value="250000" placeholder="Đơn giá" style="width:90px;">
             <span>=</span>
-            <span id="tienPhuCap" class="money"></span>
+            <span id="tienPhuCap" class="money">0</span>
         </div>
         <p class="note">Số người tự động đếm từ danh sách nhóm công tác.</p>
     </div>
@@ -146,48 +153,66 @@
 <div id="loading">⏳ Đang xử lý, chờ xíu...</div>
 
 <script>
+    // ============ URL PARAM + DB ============
+    const CT_ID = new URLSearchParams(location.search).get('id');
+    if (!CT_ID) { alert("Thiếu ID công tác!"); location.href = 'index.html'; }
+
+    let dbCongTac = JSON.parse(localStorage.getItem('db_congtac') || '{}');
+    if (!dbCongTac[CT_ID]) { alert("Công tác không tồn tại!"); location.href = 'index.html'; }
+    let CT = dbCongTac[CT_ID];
+
     // ============ CẤU HÌNH ============
     const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxlM-814su7_q0yS7Qx1bdwC1j9CB18Km6UOdMcJW4ifZUecl633RmEhvxnsUIwerlE/exec";
-    const ID_TEMPLATE_DECUONG = "1GeIU57-WNr9XOgF5w8UInBMMZKdupfzv"; // Thay ID file Word mẫu
+    const ID_TEMPLATE_DECUONG = "1GeIU57-WNr9XOgF5w8UInBMMZKdupfzv";
 
     const DEFAULT_XE = [
         { ten: "Ford Transit",   bienSo: "79B 332.11",  dinhMuc: 20 },
         { ten: "Ford Ranger",    bienSo: "79C 038.20",  dinhMuc: 15 },
         { ten: "Ford Fortuner",  bienSo: "79A 866.70",  dinhMuc: 19 }
     ];
-
     const DEFAULT_NV = [
         "Nguyễn Hữu Kính","Hoàng Trần Quản Trọng","Ngô Văn Quang","Trần Văn Hoàng",
         "Kim Văn Quỳnh","Hồ Văn Huy","Lê Hữu Anh","Trần Phúc Linh","Tạ Quốc Đạt",
         "Võ Ngọc Sơn","Nguyễn Xuân Khánh","Đoàn Hoàng Quang Định","Võ Văn Sỹ",
         "Lưu Đức Minh","Nguyễn Mạnh Hiệp","Mai Văn Giáp","Nguyễn Thị Thanh Hương",
-        "Nguyễn Mạnh Hòa","Bùi Thị Thái","Bùi Thị Thu Thảo","Đinh Hồng Phi", "Mai Văn Hùng", "Lộc An Cường"
+        "Nguyễn Mạnh Hòa","Bùi Thị Thái","Bùi Thị Thu Thảo","Đinh Hồng Phi","Mai Văn Hùng","Lộc An Cường"
     ];
-
-    // 2 ông này LUÔN LUÔN là lái xe khi được chọn
     const DEFAULT_DRIVERS = ["Nguyễn Mạnh Hiệp", "Mai Văn Giáp"];
-
-    const ROLE_LABEL = {
-        'NV':   'NV',
-        'CHT':  'Chỉ huy',
-        'LĐCV': 'LĐCV',
-        'LX':   'Lái xe'
-    };
+    const ROLE_LABEL = { 'NV': 'NV', 'CHT': 'Chỉ huy', 'LĐCV': 'LĐCV', 'LX': 'Lái xe' };
 
     // ============ STATE ============
-    let dsNV = [];       // danh sách người gốc
-    let dsXeGoc = [];    // danh sách xe gốc
+    let dsNV = [];
+    let dsXeGoc = [];
     let currentMode = "NV";
-    let selectedRoles = {}; // { "Nguyễn Hữu Kính": "CHT", ... }
+    let selectedRoles = {};
 
     // ============ KHỞI TẠO ============
     window.onload = function() {
         dsNV = JSON.parse(localStorage.getItem('ds_nv_goc')) || DEFAULT_NV.slice();
         dsXeGoc = JSON.parse(localStorage.getItem('ds_xe_goc')) || DEFAULT_XE.slice();
+
+        // Hiển thị banner
+        document.getElementById('bannerId').innerText = CT_ID;
+        document.getElementById('bannerTen').innerText = CT.tenCongTac || '';
+
         renderChips();
-        addXe();
         tinhToan();
         document.querySelectorAll('input[type="number"]').forEach(i => i.addEventListener('input', tinhToan));
+
+        // Nếu đã có dữ liệu → load
+        if (CT.decuong) {
+            loadFormData(CT.decuong);
+        } else {
+            // Mặc định
+            addCanCu();
+            addXe();
+            // Điền sẵn thông tin từ CT gốc
+            document.getElementById('ndCongTac').value = CT.tenCongTac || '';
+            document.getElementById('diaDiem').value = CT.diaDiem || '';
+            if (CT.ngayBatDau) document.getElementById('tgTu').value = CT.ngayBatDau + 'T08:00';
+            if (CT.ngayKetThuc) document.getElementById('tgDen').value = CT.ngayKetThuc;
+            updateSoNguoi();
+        }
     };
 
     // ============ CHIP & VAI TRÒ ============
@@ -195,15 +220,8 @@
         currentMode = role;
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.role === role));
     }
-
-    function getShortName(full) {
-        const parts = full.split(' ');
-        return parts[parts.length - 1];
-    }
-
-    function isFemale(name) {
-        return name.includes("Thị") || name.startsWith("Bùi Thị") || name.startsWith("Trần Thị");
-    }
+    function getShortName(full) { const p = full.split(' '); return p[p.length - 1]; }
+    function isFemale(name) { return name.includes("Thị") || name.startsWith("Bùi Thị") || name.startsWith("Trần Thị"); }
 
     function renderChips() {
         const container = document.getElementById('nvChipContainer');
@@ -221,23 +239,14 @@
     function handleChipClick(name) {
         const isDefaultDriver = DEFAULT_DRIVERS.includes(name);
         if (selectedRoles[name]) {
-            // Đang có vai trò
             if (isDefaultDriver) {
-                // Lái xe mặc định: bấm lại để bỏ
-                if (selectedRoles[name] === 'LX' && currentMode === 'LX') {
-                    delete selectedRoles[name];
-                } else {
-                    selectedRoles[name] = 'LX'; // luôn giữ LX
-                }
+                if (selectedRoles[name] === 'LX' && currentMode === 'LX') delete selectedRoles[name];
+                else selectedRoles[name] = 'LX';
             } else {
-                if (selectedRoles[name] === currentMode) {
-                    delete selectedRoles[name]; // bỏ chọn
-                } else {
-                    selectedRoles[name] = currentMode; // đổi vai trò
-                }
+                if (selectedRoles[name] === currentMode) delete selectedRoles[name];
+                else selectedRoles[name] = currentMode;
             }
         } else {
-            // Chưa có vai trò
             selectedRoles[name] = isDefaultDriver ? 'LX' : currentMode;
         }
         renderChips();
@@ -257,42 +266,38 @@
         const ten = prompt("Nhập họ tên người mới:");
         if (!ten || !ten.trim()) return;
         const t = ten.trim();
-        if (dsNV.includes(t)) { alert("Người này đã có trong danh sách!"); return; }
+        if (dsNV.includes(t)) { alert("Người này đã có!"); return; }
         dsNV.push(t);
         localStorage.setItem('ds_nv_goc', JSON.stringify(dsNV));
         renderChips();
-        alert(`✅ Đã thêm "${t}" vào danh sách gốc.`);
+        alert(`✅ Đã thêm "${t}"`);
     }
-
     function themXeMoi() {
-        const ten = prompt("Nhập tên xe mới (VD: Hyundai):");
-        if (!ten || !ten.trim()) return;
-        const bienSo = prompt("Nhập biển số xe:");
-        if (!bienSo || !bienSo.trim()) return;
-        const dmStr = prompt("Nhập định mức nhiên liệu (L/100km):", "15");
-        const dinhMuc = parseFloat(dmStr) || 15;
-        dsXeGoc.push({ ten: ten.trim(), bienSo: bienSo.trim(), dinhMuc: dinhMuc });
+        const ten = prompt("Tên xe mới:");
+        if (!ten) return;
+        const bienSo = prompt("Biển số:");
+        if (!bienSo) return;
+        const dm = parseFloat(prompt("Định mức (L/100km):", "15")) || 15;
+        dsXeGoc.push({ ten: ten.trim(), bienSo: bienSo.trim(), dinhMuc: dm });
         localStorage.setItem('ds_xe_goc', JSON.stringify(dsXeGoc));
-        alert(`✅ Đã thêm xe "${ten}" vào danh sách gốc.`);
-        // Refresh dropdown trong các card hiện tại
+        alert(`✅ Đã thêm xe "${ten}"`);
         document.querySelectorAll('.chon-xe').forEach(sel => {
             const cur = sel.value;
-            sel.innerHTML = '<option value="">-- Chọn --</option>' +
-                dsXeGoc.map((x, i) => `<option value="${i}">${x.ten}</option>`).join('');
+            sel.innerHTML = '<option value="">-- Chọn --</option>' + dsXeGoc.map((x, i) => `<option value="${i}">${x.ten}</option>`).join('');
             sel.value = cur;
         });
     }
 
     // ============ CĂN CỨ ============
-    function addCanCu() {
+    function addCanCu(val = '') {
         const div = document.createElement('div');
         div.className = 'row-input';
-        div.innerHTML = `<input type="text" class="can-cu" placeholder="Nhập căn cứ..."><button class="btn-red btn-sm" onclick="this.parentElement.remove()">X</button>`;
+        div.innerHTML = `<input type="text" class="can-cu" value="${val.replace(/"/g,'&quot;')}" placeholder="Nhập căn cứ..."><button class="btn-red btn-sm" onclick="this.parentElement.remove()">X</button>`;
         document.getElementById('canCuContainer').appendChild(div);
     }
 
     // ============ XE ============
-    function addXe() {
+    function addXe(xeIdx = '', soKm = 0, donGia = 28000, laiXe = '') {
         const container = document.getElementById('dsXeContainer');
         const idx = container.children.length + 1;
         const card = document.createElement('div');
@@ -303,19 +308,26 @@
                 <label>Chọn xe:</label>
                 <select class="chon-xe" onchange="capNhatXe(this)">
                     <option value="">-- Chọn --</option>
-                    ${dsXeGoc.map((x, i) => `<option value="${i}">${x.ten}</option>`).join('')}
+                    ${dsXeGoc.map((x, i) => `<option value="${i}" ${String(i) === String(xeIdx) ? 'selected' : ''}>${x.ten}</option>`).join('')}
                 </select>
                 <button class="btn-red btn-sm" style="width:auto; margin:0;" onclick="this.closest('.xe-card').remove(); tinhToan();">X</button>
             </div>
             <div class="row"><label>Biển số:</label><span class="bien-so-text">--</span></div>
-            <div class="row"><label>Số KM:</label><input type="number" class="so-km" value="0" onchange="tinhToan()"></div>
+            <div class="row"><label>Số KM:</label><input type="number" class="so-km" value="${soKm}" onchange="tinhToan()"></div>
             <div class="row"><label>Định mức:</label><input type="number" class="dinh-muc" readonly style="background:#f0f0f0;"></div>
-            <div class="row"><label>Đơn giá (đ/L):</label><input type="number" class="don-gia" value="28000" onchange="tinhToan()"></div>
+            <div class="row"><label>Đơn giá (đ/L):</label><input type="number" class="don-gia" value="${donGia}" onchange="tinhToan()"></div>
             <div class="row"><label>Lái xe:</label><select class="lai-xe"></select></div>
             <div class="money-row">Tiền NL: <span class="tien-nl">0</span> đ</div>
         `;
         container.appendChild(card);
+        // Điền dữ liệu nếu có
+        if (xeIdx !== '') {
+            const xe = dsXeGoc[xeIdx];
+            card.querySelector('.bien-so-text').innerText = xe.bienSo;
+            card.querySelector('.dinh-muc').value = xe.dinhMuc;
+        }
         updateLaiXeDropdowns();
+        if (laiXe) setTimeout(() => card.querySelector('.lai-xe').value = laiXe, 50);
         tinhToan();
     }
 
@@ -334,12 +346,10 @@
     }
 
     function updateLaiXeDropdowns() {
-        // Lấy tất cả người có vai trò LX
         const drivers = Object.keys(selectedRoles).filter(n => selectedRoles[n] === "LX");
         document.querySelectorAll('.lai-xe').forEach(sel => {
             const cur = sel.value;
-            sel.innerHTML = '<option value="">-- Chọn lái xe --</option>' +
-                drivers.map(d => `<option value="${d}" ${d === cur ? "selected" : ""}>${d}</option>`).join('');
+            sel.innerHTML = '<option value="">-- Chọn lái xe --</option>' + drivers.map(d => `<option value="${d}" ${d === cur ? "selected" : ""}>${d}</option>`).join('');
         });
     }
 
@@ -348,8 +358,7 @@
         const soPhong = +document.getElementById('soPhong').value || 0;
         const soDem = +document.getElementById('soDem').value || 0;
         const giaPhong = +document.getElementById('giaPhong').value || 0;
-        const tienPhong = soPhong * soDem * giaPhong;
-        document.getElementById('tienPhong').innerText = tienPhong.toLocaleString('vi-VN');
+        document.getElementById('tienPhong').innerText = (soPhong * soDem * giaPhong).toLocaleString('vi-VN');
 
         const soNguoi = +document.getElementById('soNguoi').value || 0;
         const soNgay = +document.getElementById('soNgay').value || 0;
@@ -368,7 +377,7 @@
         });
         document.getElementById('tienNhienLieu').innerText = tongNL.toLocaleString('vi-VN');
 
-        const tong = tienPhong + tienPC + tongNL;
+        const tong = soPhong * soDem * giaPhong + tienPC + tongNL;
         document.getElementById('tongDuTru').value = tong.toLocaleString('vi-VN') + " đồng";
     }
 
@@ -384,13 +393,15 @@
         return `${('0'+d.getHours()).slice(-2)} giờ ${('0'+d.getMinutes()).slice(-2)} ngày ${formatDate(str)}`;
     }
 
-    // ============ LƯU / TẢI FORM ============
+    // ============ LƯU / LOAD ============
     function luuForm() {
         const xeList = [];
         document.querySelectorAll('.xe-card').forEach(card => {
+            const bienSo = card.querySelector('.bien-so-text').innerText;
+            if (!bienSo || bienSo === '--') return;
             xeList.push({
                 xeIdx: card.querySelector('.chon-xe').value,
-                bienSo: card.querySelector('.bien-so-text').innerText,
+                bienSo: bienSo,
                 dinhMuc: card.querySelector('.dinh-muc').value,
                 soKm: card.querySelector('.so-km').value,
                 donGia: card.querySelector('.don-gia').value,
@@ -399,7 +410,7 @@
         });
 
         const data = {
-            canCu: [...document.querySelectorAll('.can-cu')].map(i => i.value),
+            canCu: [...document.querySelectorAll('.can-cu')].map(i => i.value).filter(v => v.trim()),
             tgXuatPhat: document.getElementById('tgXuatPhat').value,
             ndCongTac: document.getElementById('ndCongTac').value,
             tgTu: document.getElementById('tgTu').value,
@@ -413,23 +424,24 @@
             soNgay: document.getElementById('soNgay').value,
             giaPhuCap: document.getElementById('giaPhuCap').value
         };
-        localStorage.setItem('decuong_form_data', JSON.stringify(data));
-        alert("✅ Đã lưu form!");
+
+        // Ghi vào db_congtac
+        dbCongTac[CT_ID].decuong = data;
+        // Cập nhật thông tin gốc để trang chủ hiển thị
+        dbCongTac[CT_ID].tenCongTac = data.ndCongTac || dbCongTac[CT_ID].tenCongTac;
+        dbCongTac[CT_ID].diaDiem = data.diaDiem || dbCongTac[CT_ID].diaDiem;
+        if (data.tgTu) dbCongTac[CT_ID].ngayBatDau = data.tgTu.split('T')[0];
+        if (data.tgDen) dbCongTac[CT_ID].ngayKetThuc = data.tgDen;
+
+        localStorage.setItem('db_congtac', JSON.stringify(dbCongTac));
+        alert("✅ Đã lưu vào công tác " + CT_ID);
     }
 
-    function taiForm() {
-        const saved = localStorage.getItem('decuong_form_data');
-        if (!saved) { alert("Chưa có dữ liệu form được lưu."); return; }
-        const d = JSON.parse(saved);
-
+    function loadFormData(d) {
+        // Căn cứ
         const cc = document.getElementById('canCuContainer');
         cc.innerHTML = '';
-        (d.canCu || []).forEach(v => {
-            const div = document.createElement('div');
-            div.className = 'row-input';
-            div.innerHTML = `<input type="text" class="can-cu" value="${v.replace(/"/g,'&quot;')}"><button class="btn-red btn-sm" onclick="this.parentElement.remove()">X</button>`;
-            cc.appendChild(div);
-        });
+        (d.canCu || []).forEach(v => addCanCu(v));
 
         document.getElementById('tgXuatPhat').value = d.tgXuatPhat || '';
         document.getElementById('ndCongTac').value = d.ndCongTac || '';
@@ -443,21 +455,9 @@
         const xc = document.getElementById('dsXeContainer');
         xc.innerHTML = '';
         (d.xeList || []).forEach(x => {
-            addXe();
-            const card = xc.lastElementChild;
-            if (x.xeIdx !== '') {
-                card.querySelector('.chon-xe').value = x.xeIdx;
-                card.querySelector('.bien-so-text').innerText = x.bienSo;
-                card.querySelector('.dinh-muc').value = x.dinhMuc;
-            }
-            card.querySelector('.so-km').value = x.soKm || 0;
-            card.querySelector('.don-gia').value = x.donGia || 28000;
+            addXe(x.xeIdx, x.soKm, x.donGia, x.laiXe);
         });
-        updateLaiXeDropdowns();
-        const cards = xc.querySelectorAll('.xe-card');
-        (d.xeList || []).forEach((x, i) => {
-            if (cards[i] && x.laiXe) cards[i].querySelector('.lai-xe').value = x.laiXe;
-        });
+        if ((d.xeList || []).length === 0) addXe();
 
         document.getElementById('soPhong').value = d.soPhong || 1;
         document.getElementById('soDem').value = d.soDem || 1;
@@ -465,35 +465,25 @@
         document.getElementById('soNgay').value = d.soNgay || 1;
         document.getElementById('giaPhuCap').value = d.giaPhuCap || 250000;
 
+        updateLaiXeDropdowns();
         tinhToan();
-        alert("✅ Đã tải form!");
-    }
-
-    function xoaForm() {
-        if (confirm("Xóa toàn bộ form đã lưu?")) {
-            localStorage.removeItem('decuong_form_data');
-            alert("Đã xóa.");
-        }
     }
 
     // ============ XUẤT WORD ============
     async function xuatWord() {
-        document.getElementById("loading").style.display = "flex";
+        // Tự lưu trước khi xuất
+        luuForm();
 
+        document.getElementById("loading").style.display = "flex";
         const canCu = [...document.querySelectorAll('.can-cu')].filter(i => i.value.trim()).map(i => ({ noi_dung: i.value }));
 
-        // Nhân sự theo thứ tự LĐCV → CHT → NV → LX
         const order = { 'LĐCV': 1, 'CHT': 2, 'NV': 3, 'LX': 4 };
         const nhanSu = Object.entries(selectedRoles)
             .sort((a, b) => (order[a[1]] || 9) - (order[b[1]] || 9))
             .map(([ten, vaiTro], i) => ({
-                stt: i + 1,
-                ho_ten: ten,
-                don_vi: "Tổ TNLĐ",
-                ghi_chu: ROLE_LABEL[vaiTro] || vaiTro
+                stt: i + 1, ho_ten: ten, don_vi: "Tổ TNLĐ", ghi_chu: ROLE_LABEL[vaiTro] || vaiTro
             }));
 
-        // Xe
         const danhSachXe = [];
         document.querySelectorAll('.xe-card').forEach(card => {
             const bienSo = card.querySelector('.bien-so-text').innerText;
@@ -506,16 +496,12 @@
                 ten_xe: card.querySelector('.chon-xe').selectedOptions[0]?.text || "",
                 bien_so: bienSo,
                 lai_xe: card.querySelector('.lai-xe').value || "",
-                so_km: soKm,
-                dinh_muc: dm,
-                don_gia: gia.toLocaleString('vi-VN'),
+                so_km: soKm, dinh_muc: dm, don_gia: gia.toLocaleString('vi-VN'),
                 tien_nhien_lieu: tien.toLocaleString('vi-VN')
             });
         });
-// Tạo chuỗi liệt kê xe: "xe A biển số X, xe B biển số Y, xe C biển số Z."
-const danhSachXeText = danhSachXe
-    .map(x => `xe ${x.ten_xe} biển số ${x.bien_so}`)
-    .join(', ') + '.';
+        const danhSachXeText = danhSachXe.map(x => `xe ${x.ten_xe} biển số ${x.bien_so}`).join(', ') + '.';
+
         const data = {
             can_cu: canCu,
             danh_sach_xe_text: danhSachXeText,
@@ -538,7 +524,6 @@ const danhSachXeText = danhSachXe
             tien_phu_cap: document.getElementById('tienPhuCap').innerText,
             tien_nhien_lieu: document.getElementById('tienNhienLieu').innerText,
             tong_du_tru: document.getElementById('tongDuTru').value
-            
         };
 
         try {
@@ -549,26 +534,18 @@ const danhSachXeText = danhSachXe
             for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
 
             const zip = new PizZip(bytes.buffer);
-            const doc = new window.docxtemplater(zip, {
-                paragraphLoop: true, linebreaks: true,
-                nullGetter: function() { return ""; }
-            });
+            const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true, nullGetter: () => "" });
             doc.render(data);
 
             const blob = doc.getZip().generate({
                 type: "blob",
                 mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             });
-            saveAs(blob, "De_cuong_cong_tac.docx");
+            saveAs(blob, `De_cuong_${CT_ID}.docx`);
             document.getElementById("loading").style.display = "none";
         } catch (e) {
             console.error(e);
-            let msg = "Lỗi: " + e.message;
-            if (e.properties && e.properties.errors) {
-                msg += "\n";
-                e.properties.errors.forEach(err => msg += "- " + err.message + "\n");
-            }
-            alert(msg);
+            alert("Lỗi: " + e.message);
             document.getElementById("loading").style.display = "none";
         }
     }
