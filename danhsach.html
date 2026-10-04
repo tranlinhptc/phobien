@@ -87,18 +87,19 @@
         <table id="tblNhanSu">
             <thead>
                 <tr>
-                    <th style="width:80px;">Họ và Tên</th>
-                    <th style="width:100px;">Từ ngày</th>
-                    <th style="width:100px;">Đến ngày</th>
-                    <th style="width:50px;">Số ngày</th>
-                    <th style="width:90px;">Tiền CTP</th>
+                    <th style="width:75px;">Họ và Tên</th>
+                    <th style="width:90px;">Từ ngày</th>
+                    <th style="width:90px;">Đến ngày</th>
+                    <th style="width:45px;">Số ngày</th>
+                    <th style="width:75px;">Đơn giá</th>
+                    <th style="width:80px;">Tiền CTP</th>
                     <th>Ghi chú</th>
                 </tr>
             </thead>
             <tbody></tbody>
             <tfoot>
                 <tr>
-                    <td colspan="4" style="text-align:right; font-weight:bold;">TỔNG CỘNG:</td>
+                    <td colspan="5" style="text-align:right; font-weight:bold;">TỔNG CỘNG:</td>
                     <td id="tongCTP" style="font-weight:bold; color:#d63384;">0</td>
                     <td></td>
                 </tr>
@@ -158,8 +159,6 @@
         }
         return str;
     }
-
-    // Parse về Date để tính toán
     function parseDate(str) {
         if (!str) return null;
         if (str.includes('/')) {
@@ -167,6 +166,9 @@
             return new Date(`${y}-${m}-${d}`);
         }
         return new Date(str);
+    }
+    function isoDate(date) {
+        return `${date.getFullYear()}-${('0'+(date.getMonth()+1)).slice(-2)}-${('0'+date.getDate()).slice(-2)}`;
     }
 
     // ============ TÍNH SỐ NGÀY ============
@@ -178,11 +180,9 @@
         return diff > 0 ? diff : 1;
     }
 
-    // ============ TÍNH CTP 1 NGƯỜI ============
-    function tinhCTP(soNgay) {
-        if (soNgay === 0) return 0;
-        if (soNgay === 1) return MUC_CTP_1_NGAY;
-        return soNgay * MUC_CTP_NHIEU_NGAY;
+    // ============ ĐƠN GIÁ (dựa trên tổng ngày của CT) ============
+    function donGiaCT(soNgay) {
+        return soNgay >= 2 ? MUC_CTP_NHIEU_NGAY : MUC_CTP_1_NGAY;
     }
 
     // ============ LIỆT KÊ NGÀY ============
@@ -193,29 +193,72 @@
         const list = [];
         const cur = new Date(d1);
         while (cur <= d2) {
-            list.push(`${cur.getFullYear()}-${('0'+(cur.getMonth()+1)).slice(-2)}-${('0'+cur.getDate()).slice(-2)}`);
+            list.push(isoDate(cur));
             cur.setDate(cur.getDate() + 1);
         }
         return list;
     }
 
-    // ============ KIỂM TRA TRÙNG NGÀY (với các CT khác) ============
+    // ============ SO SÁNH ƯU TIÊN: CT nào được tính trước ============
+    // Trả về true nếu CT A được ưu tiên hơn CT B (A tính trước)
+    function uuTienHon(ctA, ctB) {
+        const dA = ctA.ngayBatDau || '';
+        const dB = ctB.ngayBatDau || '';
+        if (dA !== dB) return dA < dB; // Bắt đầu sớm hơn → ưu tiên
+        return ctA.id < ctB.id; // Cùng ngày → ID nhỏ hơn → ưu tiên
+    }
+
+    // ============ KIỂM TRA TRÙNG NGÀY ============
+    // Trả về { soNgayTrung, dsCTTrung: [{ctId, dsNgay: [...]}] }
     function kiemTraTrungNgay(ten, ngayList) {
-        // Tìm trong tất cả công tác KHÁC
-        const dsTrung = [];
+        const dsCTTrung = [];
+        let soNgayTrung = 0;
+
         Object.keys(dbCongTac).forEach(otherId => {
             if (otherId === CT_ID) return;
             const other = dbCongTac[otherId];
             if (!other.danhsach || !other.danhsach.danhSach) return;
+
+            // Chỉ check với CT ưu tiên hơn (được tính trước)
+            if (!uuTienHon(other, CT)) return;
+
             const otherNguoi = other.danhsach.danhSach.find(n => n.ten === ten);
             if (!otherNguoi) return;
+
             const otherNgayList = lietKeNgay(otherNguoi.tuNgay, otherNguoi.denNgay);
-            const trungNgay = ngayList.filter(ng => otherNgayList.includes(ng));
-            if (trungNgay.length > 0) {
-                dsTrung.push({ ctId: otherId, soNgayTrung: trungNgay.length });
+            const ngayTrung = ngayList.filter(ng => otherNgayList.includes(ng));
+            if (ngayTrung.length > 0) {
+                dsCTTrung.push({ ctId: otherId, dsNgay: ngayTrung });
+                soNgayTrung += ngayTrung.length;
             }
         });
-        return dsTrung;
+
+        return { soNgayTrung, dsCTTrung };
+    }
+
+    // ============ TÍNH CTP CHO 1 NGƯỜI ============
+    function tinhCTPChoNguoi(n) {
+        const soNgay = tinhSoNgay(n.tuNgay, n.denNgay);
+        const donGia = donGiaCT(soNgay);
+        const ngayList = lietKeNgay(n.tuNgay, n.denNgay);
+        const { soNgayTrung, dsCTTrung } = kiemTraTrungNgay(n.ten, ngayList);
+        const soNgayTinh = soNgay - soNgayTrung;
+        const tienCTP = soNgayTinh * donGia;
+
+        // Ghi chú tự động
+        let autoGhiChu = "";
+        if (dsCTTrung.length > 0) {
+            const parts = dsCTTrung.map(x => {
+                const ngayStr = x.dsNgay.map(ng => {
+                    const [y, m, d] = ng.split('-');
+                    return `${d}/${m}`;
+                }).join(', ');
+                return `Ngày ${ngayStr} đã tính ở ${x.ctId}`;
+            });
+            autoGhiChu = parts.join('; ');
+        }
+
+        return { soNgay, donGia, soNgayTrung, soNgayTinh, tienCTP, autoGhiChu, dsCTTrung };
     }
 
     // ============ KHỞI TẠO ============
@@ -225,13 +268,9 @@
         document.getElementById('bannerId').innerText = CT_ID;
         document.getElementById('bannerTen').innerText = CT.tenCongTac || '';
 
-        // Ngày giấy = hôm nay
         const today = new Date();
-        document.getElementById('ngayGiay').value = toDisplayDate(
-            `${today.getFullYear()}-${('0'+(today.getMonth()+1)).slice(-2)}-${('0'+today.getDate()).slice(-2)}`
-        );
+        document.getElementById('ngayGiay').value = toDisplayDate(isoDate(today));
 
-        // Load dữ liệu đã lưu hoặc auto-fill
         if (CT.danhsach && CT.danhsach.danhSach && CT.danhsach.danhSach.length > 0) {
             document.getElementById('soGiay').value = CT.danhsach.soGiay || '301';
             document.getElementById('ngayGiay').value = CT.danhsach.ngayGiay || document.getElementById('ngayGiay').value;
@@ -244,7 +283,6 @@
         renderBang();
     };
 
-    // ===== AUTO ĐIỀN TỪ ĐỀ CƯƠNG =====
     function autoFillFromDeCuong() {
         if (!DC.selectedRoles || Object.keys(DC.selectedRoles).length === 0) return;
 
@@ -267,16 +305,9 @@
     }
 
     // ============ CHIP ============
-    function getShortName(full) {
-        const p = full.split(' ');
-        return p[p.length - 1];
-    }
-    function isFemale(name) {
-        return name.includes("Thị") || name.startsWith("Lê Thị") || name.startsWith("Trần Thị");
-    }
-    function isChosen(name) {
-        return dsDangChon.some(n => n.ten === name);
-    }
+    function getShortName(full) { const p = full.split(' '); return p[p.length - 1]; }
+    function isFemale(name) { return name.includes("Thị") || name.startsWith("Lê Thị") || name.startsWith("Trần Thị"); }
+    function isChosen(name) { return dsDangChon.some(n => n.ten === name); }
 
     function renderChips() {
         const container = document.getElementById('nvChipContainer');
@@ -296,12 +327,7 @@
         } else {
             const tuNgay = toDisplayDate(DC.tgTu) || toDisplayDate(CT.ngayBatDau);
             const denNgay = toDisplayDate(DC.tgDen) || toDisplayDate(CT.ngayKetThuc);
-            dsDangChon.push({
-                ten: ten,
-                tuNgay: tuNgay,
-                denNgay: denNgay,
-                ghiChu: ""
-            });
+            dsDangChon.push({ ten, tuNgay, denNgay, ghiChu: "" });
         }
         renderChips();
         renderBang();
@@ -314,34 +340,26 @@
         let tongCTP = 0;
 
         dsDangChon.forEach((n, i) => {
-            const soNgay = tinhSoNgay(n.tuNgay, n.denNgay);
-            let ctp = tinhCTP(soNgay);
-
-            // Kiểm tra trùng ngày với CT khác → CTP = 0 + ghi chú
-            const ngayList = lietKeNgay(n.tuNgay, n.denNgay);
-            const dsTrung = kiemTraTrungNgay(n.ten, ngayList);
-            let autoGhiChu = "";
-            let ctpDisplay = ctp;
-
-            if (dsTrung.length > 0) {
-                autoGhiChu = `Đã tính ở ${dsTrung.map(x => x.ctId).join(', ')}`;
-                ctpDisplay = 0; // A2: CTP = 0
-            }
-
-            tongCTP += ctpDisplay;
+            const kq = tinhCTPChoNguoi(n);
+            tongCTP += kq.tienCTP;
             const displayName = (isFemale(n.ten) ? "Mrs." : "Mr.") + getShortName(n.ten);
+            const ghiChuHienThi = n.ghiChu ? `${n.ghiChu}${kq.autoGhiChu ? ' | ' + kq.autoGhiChu : ''}` : kq.autoGhiChu;
 
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td><b>${displayName}</b></td>
                 <td><input type="text" class="tu-ngay" value="${n.tuNgay}" placeholder="dd/mm/yyyy" onchange="capNhatNgay(${i}, 'tuNgay', this.value)"></td>
                 <td><input type="text" class="den-ngay" value="${n.denNgay}" placeholder="dd/mm/yyyy" onchange="capNhatNgay(${i}, 'denNgay', this.value)"></td>
-                <td><b>${soNgay}</b></td>
+                <td><b>${kq.soNgay}</b></td>
+                <td style="color:#0056b3;">${kq.donGia.toLocaleString('vi-VN')}</td>
                 <td style="color:#d63384; font-weight:bold;">
-                    ${ctpDisplay.toLocaleString('vi-VN')}
-                    ${dsTrung.length > 0 ? '<br><span class="trung-badge">TRÙNG</span>' : ''}
+                    ${kq.tienCTP.toLocaleString('vi-VN')}
+                    ${kq.soNgayTrung > 0 ? '<br><span class="trung-badge">-' + kq.soNgayTrung + ' ngày</span>' : ''}
                 </td>
-                <td><input type="text" class="ghi-chu" value="${(n.ghiChu || '').replace(/"/g,'&quot;')}" placeholder="${autoGhiChu || 'Ghi chú...'}" onchange="capNhatGhiChu(${i}, this.value)"></td>
+                <td>
+                    <input type="text" class="ghi-chu-user" value="${(n.ghiChu || '').replace(/"/g,'&quot;')}" placeholder="Ghi chú..." onchange="capNhatGhiChu(${i}, this.value)">
+                    ${kq.autoGhiChu ? `<div style="font-size:10px; color:#dc3545; margin-top:2px;">⚠️ ${kq.autoGhiChu}</div>` : ''}
+                </td>
             `;
             tbody.appendChild(row);
         });
@@ -353,12 +371,12 @@
     function renderWarning() {
         const dsCanhBao = [];
         dsDangChon.forEach(n => {
-            const ngayList = lietKeNgay(n.tuNgay, n.denNgay);
-            const dsTrung = kiemTraTrungNgay(n.ten, ngayList);
-            if (dsTrung.length > 0) {
+            const kq = tinhCTPChoNguoi(n);
+            if (kq.soNgayTrung > 0) {
                 dsCanhBao.push({
                     ten: n.ten,
-                    dsCT: dsTrung.map(x => `${x.ctId} (${x.soNgayTrung} ngày)`)
+                    soNgayTrung: kq.soNgayTrung,
+                    dsCT: kq.dsCTTrung.map(x => x.ctId)
                 });
             }
         });
@@ -367,9 +385,9 @@
         if (dsCanhBao.length === 0) { box.innerHTML = ''; return; }
 
         box.innerHTML = `<div class="warning-box">
-            <b>⚠️ Cảnh báo trùng ngày công tác (${dsCanhBao.length} người):</b>
+            <b>⚠️ Cảnh báo trùng ngày (${dsCanhBao.length} người):</b>
             <ul>
-                ${dsCanhBao.map(c => `<li><b>${c.ten}</b>: Đã tính CTP ở ${c.dsCT.join(', ')} → CT này tính 0đ</li>`).join('')}
+                ${dsCanhBao.map(c => `<li><b>${c.ten}</b>: ${c.soNgayTrung} ngày đã tính ở ${c.dsCT.join(', ')}</li>`).join('')}
             </ul>
         </div>`;
     }
@@ -412,24 +430,19 @@
         }
 
         const danhSach = dsDangChon.map((n, idx) => {
-            const soNgay = tinhSoNgay(n.tuNgay, n.denNgay);
-            let ctp = tinhCTP(soNgay);
-            const ngayList = lietKeNgay(n.tuNgay, n.denNgay);
-            const dsTrung = kiemTraTrungNgay(n.ten, ngayList);
-            let autoGhiChu = n.ghiChu || "";
-            if (dsTrung.length > 0) {
-                if (!autoGhiChu) autoGhiChu = `Đã tính ở ${dsTrung.map(x => x.ctId).join(', ')}`;
-                ctp = 0;
-            }
+            const kq = tinhCTPChoNguoi(n);
+            const ghiChuFull = [n.ghiChu, kq.autoGhiChu].filter(v => v).join(' | ');
             return {
                 stt: ('0' + (idx + 1)).slice(-2),
                 ho_ten: n.ten,
                 chuc_vu: CHUC_VU_MAC_DINH[n.ten] || "Nhân viên",
                 tu_ngay: n.tuNgay,
                 den_ngay: n.denNgay,
-                so_ngay: soNgay,
-                tien_ctp: ctp.toLocaleString('vi-VN'),
-                ghi_chu: autoGhiChu,
+                so_ngay: kq.soNgay,
+                don_gia: kq.donGia.toLocaleString('vi-VN'),
+                so_ngay_tinh: kq.soNgayTinh,
+                tien_ctp: kq.tienCTP.toLocaleString('vi-VN'),
+                ghi_chu: ghiChuFull,
                 ky_xac_nhan: ""
             };
         });
