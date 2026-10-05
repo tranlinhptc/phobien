@@ -539,7 +539,7 @@
             });
         });
         const danhSachXeText = danhSachXe.map(x => `xe ${x.ten_xe} biển số ${x.bien_so}`).join(', ') + '.';
-        const soDem = tinhSoDem();
+
         const data = {
             can_cu: canCu,
             danh_sach_xe_text: danhSachXeText,
@@ -563,8 +563,6 @@
             tien_phu_cap: document.getElementById('tienPhuCap').innerText,
             tien_nhien_lieu: document.getElementById('tienNhienLieu').innerText,
             tong_du_tru: document.getElementById('tongDuTru').value
-
-    
         };
 
         try {
