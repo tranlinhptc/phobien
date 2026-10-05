@@ -130,9 +130,8 @@
         "Nguyễn Hữu Kính","Hoàng Trần Quản Trọng","Ngô Văn Quang","Trần Văn Hoàng",
         "Kim Văn Quỳnh","Hồ Văn Huy","Lê Hữu Anh","Trần Phúc Linh","Tạ Quốc Đạt",
         "Võ Ngọc Sơn","Nguyễn Xuân Khánh","Đoàn Hoàng Quang Định","Võ Văn Sỹ",
-        "Lưu Đức Minh","Nguyễn Mạnh Hiệp","Mai Văn Giáp","Nguyễn Thị Thanh Hương",
-        "Phan Đình Minh","Nguyễn Thanh Loan","Lê Thị Hoa","Trần Thị Mai",
-        "Phạm Văn Bình","Hoàng Văn Nam"
+        "Lưu Đức Minh","Nguyễn Mạnh Hiệp","Mai Văn Giáp","Nguyễn Thị Thanh Hương","Nguyễn Hữu Đạt",
+        "Nguyễn Mạnh Hòa","Bùi Thị Thái","Bùi Thị Thu Thảo","Đinh Hồng Phi","Mai Văn Hùng","Lộc An Cường"
     ];
     const DEFAULT_DRIVERS = ["Nguyễn Mạnh Hiệp", "Mai Văn Giáp"];
     const CHUC_VU_MAC_DINH = {
@@ -308,7 +307,16 @@
     function getShortName(full) { const p = full.split(' '); return p[p.length - 1]; }
     function isFemale(name) { return name.includes("Thị") || name.startsWith("Lê Thị") || name.startsWith("Trần Thị"); }
     function isChosen(name) { return dsDangChon.some(n => n.ten === name); }
-
+    function getShortName(full) {
+        const p = full.split(' ');
+        let ten = p[p.length - 1];
+        if (ten === "Đạt") {
+            if (full.includes("Tạ")) ten = "Đạt (TQ)";
+            else if (full.includes("Nguyễn Hữu")) ten = "Đạt (NH)";
+        }
+        return ten;
+    }
+    
     function renderChips() {
         const container = document.getElementById('nvChipContainer');
         container.innerHTML = dsNVGoc.map(nv => {
