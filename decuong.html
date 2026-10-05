@@ -61,6 +61,8 @@
         .ct-banner .ct-id { font-family: monospace; font-size: 11px; opacity: .85; }
         .ct-banner .ct-ten { font-weight: bold; font-size: 14px; margin-top: 4px; }
         .ct-banner .ct-back { display: inline-block; color: #fff; text-decoration: none; font-size: 12px; margin-bottom: 6px; opacity: .9; }
+
+        .auto-badge { display: inline-block; background: #e7f1ff; color: #0056b3; font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: bold; margin-left: 4px; }
     </style>
 </head>
 <body>
@@ -84,13 +86,13 @@
     <button class="btn-blue btn-sm" onclick="addCanCu()">+ Thêm căn cứ</button>
 
     <h3>I. Thời gian xuất phát dự kiến</h3>
-    <div class="form-group"><input type="datetime-local" id="tgXuatPhat"></div>
+    <div class="form-group"><input type="datetime-local" id="tgXuatPhat" onchange="tinhToan()"></div>
 
     <h3>II. Nội dung công tác</h3>
     <div class="form-group"><textarea id="ndCongTac" rows="3" placeholder="Nhập nội dung..."></textarea></div>
 
     <h3>III. Thời gian làm việc dự kiến</h3>
-    <div class="form-group">Từ <input type="datetime-local" id="tgTu" style="width:48%; display:inline-block;"> Đến <input type="date" id="tgDen" style="width:48%; display:inline-block;"></div>
+    <div class="form-group">Từ <input type="datetime-local" id="tgTu" style="width:48%; display:inline-block;"> Đến <input type="date" id="tgDen" style="width:48%; display:inline-block;" onchange="tinhToan()"></div>
 
     <h3>IV. Địa điểm làm việc</h3>
     <div class="form-group"><input type="text" id="diaDiem" placeholder="Trạm/Kho..."></div>
@@ -114,29 +116,30 @@
 
     <h3>VII. Dự trù kinh phí</h3>
     <div class="form-group">
-        <label>Phòng nghỉ:</label>
+        <label>Phòng nghỉ: <span class="auto-badge">tự tính = ceil(số người/2)</span></label>
         <div class="row-input">
-            <input type="number" id="soPhong" placeholder="Số phòng" style="width:55px;">
+            <input type="number" id="soPhong" readonly style="width:55px; background:#eee;">
             <span>x</span>
-            <input type="number" id="soDem" placeholder="Số đêm" style="width:55px;">
+            <input type="number" id="soDem" readonly style="width:55px; background:#eee;">
             <span>x</span>
-            <input type="number" id="giaPhong" value="700000" placeholder="Đơn giá" style="width:90px;">
+            <input type="number" id="giaPhong" value="700000" placeholder="Đơn giá" style="width:90px;" onchange="tinhToan()">
             <span>=</span>
             <span id="tienPhong" class="money">0</span>
         </div>
+        <p class="note">Số đêm = ngày kết thúc - ngày xuất phát.</p>
     </div>
     <div class="form-group">
         <label>Phụ cấp lưu trú:</label>
         <div class="row-input">
             <input type="number" id="soNguoi" readonly style="width:55px; background:#eee;">
             <span>x</span>
-            <input type="number" id="soNgay" value="1" placeholder="Số ngày" style="width:55px;">
+            <input type="number" id="soNgay" readonly style="width:55px; background:#eee;">
             <span>x</span>
-            <input type="number" id="giaPhuCap" value="250000" placeholder="Đơn giá" style="width:90px;">
+            <input type="number" id="giaPhuCap" value="250000" placeholder="Đơn giá" style="width:90px;" onchange="tinhToan()">
             <span>=</span>
             <span id="tienPhuCap" class="money">0</span>
         </div>
-        <p class="note">Số người tự động đếm từ danh sách nhóm công tác.</p>
+        <p class="note">Số người tự đếm. Số ngày = (ngày kết thúc - ngày xuất phát) + 1.</p>
     </div>
     <div class="form-group">
         <label>Tổng nhiên liệu các xe:</label>
@@ -191,7 +194,6 @@
         dsNV = JSON.parse(localStorage.getItem('ds_nv_goc')) || DEFAULT_NV.slice();
         dsXeGoc = JSON.parse(localStorage.getItem('ds_xe_goc')) || DEFAULT_XE.slice();
 
-        // Hiển thị banner
         document.getElementById('bannerId').innerText = CT_ID;
         document.getElementById('bannerTen').innerText = CT.tenCongTac || '';
 
@@ -199,17 +201,15 @@
         tinhToan();
         document.querySelectorAll('input[type="number"]').forEach(i => i.addEventListener('input', tinhToan));
 
-        // Nếu đã có dữ liệu → load
         if (CT.decuong) {
             loadFormData(CT.decuong);
         } else {
-            // Mặc định
             addCanCu();
             addXe();
-            // Điền sẵn thông tin từ CT gốc
             document.getElementById('ndCongTac').value = CT.tenCongTac || '';
             document.getElementById('diaDiem').value = CT.diaDiem || '';
             if (CT.ngayBatDau) document.getElementById('tgTu').value = CT.ngayBatDau + 'T08:00';
+            if (CT.ngayBatDau) document.getElementById('tgXuatPhat').value = CT.ngayBatDau + 'T07:00';
             if (CT.ngayKetThuc) document.getElementById('tgDen').value = CT.ngayKetThuc;
             updateSoNguoi();
         }
@@ -220,7 +220,19 @@
         currentMode = role;
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.role === role));
     }
-    function getShortName(full) { const p = full.split(' '); return p[p.length - 1]; }
+
+    function getShortName(full) {
+        const p = full.split(' ');
+        let ten = p[p.length - 1];
+
+        // Xử lý 2 ông Đạt: thêm hậu tố (TQ) hoặc (NH)
+        if (ten === "Đạt") {
+            if (full.includes("Tạ")) ten = "Đạt (TQ)";
+            else if (full.includes("Nguyễn Hữu")) ten = "Đạt (NH)";
+        }
+        return ten;
+    }
+
     function isFemale(name) { return name.includes("Thị") || name.startsWith("Bùi Thị") || name.startsWith("Trần Thị"); }
 
     function renderChips() {
@@ -297,7 +309,7 @@
     }
 
     // ============ XE ============
-    function addXe(xeIdx = '', soKm = '', donGia = 28000, laiXe = '') {
+    function addXe(xeIdx = '', soKm = '', donGia = '', laiXe = '') {
         const container = document.getElementById('dsXeContainer');
         const idx = container.children.length + 1;
         const card = document.createElement('div');
@@ -315,12 +327,11 @@
             <div class="row"><label>Biển số:</label><span class="bien-so-text">--</span></div>
             <div class="row"><label>Số KM:</label><input type="number" class="so-km" value="${soKm}" onchange="tinhToan()"></div>
             <div class="row"><label>Định mức:</label><input type="number" class="dinh-muc" readonly style="background:#f0f0f0;"></div>
-            <div class="row"><label>Đơn giá (đ/L):</label><input type="number" class="don-gia" value="${donGia}" onchange="tinhToan()"></div>
+            <div class="row"><label>Đơn giá (đ/L):</label><input type="number" class="don-gia" value="${donGia}" placeholder="Nhập..." onchange="tinhToan()"></div>
             <div class="row"><label>Lái xe:</label><select class="lai-xe"></select></div>
             <div class="money-row">Tiền NL: <span class="tien-nl">0</span> đ</div>
         `;
         container.appendChild(card);
-        // Điền dữ liệu nếu có
         if (xeIdx !== '') {
             const xe = dsXeGoc[xeIdx];
             card.querySelector('.bien-so-text').innerText = xe.bienSo;
@@ -353,19 +364,53 @@
         });
     }
 
+    // ============ TÍNH SỐ ĐÊM = tgDen - tgXuatPhat ============
+    function tinhSoDem() {
+        const tgXP = document.getElementById('tgXuatPhat').value;
+        const tgDen = document.getElementById('tgDen').value;
+        if (!tgXP || !tgDen) return 0;
+
+        const d1 = new Date(tgXP);
+        const d2 = new Date(tgDen);
+        d2.setHours(0, 0, 0, 0);
+        d1.setHours(0, 0, 0, 0);
+        const diff = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+        return diff > 0 ? diff : 0;
+    }
+
+    // ============ TÍNH SỐ NGÀY PHỤ CẤP = (tgDen - tgXuatPhat) + 1 ============
+    function tinhSoNgayPhuCap() {
+        const soDem = tinhSoDem();
+        return soDem + 1;
+    }
+
     // ============ TÍNH TOÁN ============
     function tinhToan() {
-        const soPhong = +document.getElementById('soPhong').value || 0;
-        const soDem = +document.getElementById('soDem').value || 0;
-        const giaPhong = +document.getElementById('giaPhong').value || 0;
-        document.getElementById('tienPhong').innerText = (soPhong * soDem * giaPhong).toLocaleString('vi-VN');
-
         const soNguoi = +document.getElementById('soNguoi').value || 0;
-        const soNgay = +document.getElementById('soNgay').value || 0;
+
+        // Số phòng = ceil(số người / 2)
+        const soPhong = Math.ceil(soNguoi / 2);
+        document.getElementById('soPhong').value = soPhong;
+
+        // Số đêm = tgDen - tgXuatPhat
+        const soDem = tinhSoDem();
+        document.getElementById('soDem').value = soDem;
+
+        // Số ngày phụ cấp = số đêm + 1
+        const soNgayPC = tinhSoNgayPhuCap();
+        document.getElementById('soNgay').value = soNgayPC;
+
+        // Tiền phòng
+        const giaPhong = +document.getElementById('giaPhong').value || 0;
+        const tienPhong = soPhong * soDem * giaPhong;
+        document.getElementById('tienPhong').innerText = tienPhong.toLocaleString('vi-VN');
+
+        // Tiền phụ cấp
         const giaPC = +document.getElementById('giaPhuCap').value || 0;
-        const tienPC = soNguoi * soNgay * giaPC;
+        const tienPC = soNguoi * soNgayPC * giaPC;
         document.getElementById('tienPhuCap').innerText = tienPC.toLocaleString('vi-VN');
 
+        // Nhiên liệu
         let tongNL = 0;
         document.querySelectorAll('.xe-card').forEach(card => {
             const km = +card.querySelector('.so-km').value || 0;
@@ -377,7 +422,7 @@
         });
         document.getElementById('tienNhienLieu').innerText = tongNL.toLocaleString('vi-VN');
 
-        const tong = soPhong * soDem * giaPhong + tienPC + tongNL;
+        const tong = tienPhong + tienPC + tongNL;
         document.getElementById('tongDuTru').value = tong.toLocaleString('vi-VN') + " đồng";
     }
 
@@ -425,9 +470,7 @@
             giaPhuCap: document.getElementById('giaPhuCap').value
         };
 
-        // Ghi vào db_congtac
         dbCongTac[CT_ID].decuong = data;
-        // Cập nhật thông tin gốc để trang chủ hiển thị
         dbCongTac[CT_ID].tenCongTac = data.ndCongTac || dbCongTac[CT_ID].tenCongTac;
         dbCongTac[CT_ID].diaDiem = data.diaDiem || dbCongTac[CT_ID].diaDiem;
         if (data.tgTu) dbCongTac[CT_ID].ngayBatDau = data.tgTu.split('T')[0];
@@ -438,7 +481,6 @@
     }
 
     function loadFormData(d) {
-        // Căn cứ
         const cc = document.getElementById('canCuContainer');
         cc.innerHTML = '';
         (d.canCu || []).forEach(v => addCanCu(v));
@@ -459,10 +501,7 @@
         });
         if ((d.xeList || []).length === 0) addXe();
 
-        document.getElementById('soPhong').value = d.soPhong || 1;
-        document.getElementById('soDem').value = d.soDem || 1;
         document.getElementById('giaPhong').value = d.giaPhong || 700000;
-        document.getElementById('soNgay').value = d.soNgay || 1;
         document.getElementById('giaPhuCap').value = d.giaPhuCap || 250000;
 
         updateLaiXeDropdowns();
@@ -471,7 +510,6 @@
 
     // ============ XUẤT WORD ============
     async function xuatWord() {
-        // Tự lưu trước khi xuất
         luuForm();
 
         document.getElementById("loading").style.display = "flex";
@@ -501,6 +539,12 @@
             });
         });
         const danhSachXeText = danhSachXe.map(x => `xe ${x.ten_xe} biển số ${x.bien_so}`).join(', ') + '.';
+        const soDem = tinhSoDem();
+const soNguoi = +document.getElementById('soNguoi').value || 0;
+const soNgayPC = tinhSoNgayPhuCap();
+const tienPhong = soDem > 0 ? (soPhong * soDem * giaPhong) : 0;
+const tienPC = soNguoi * soNgayPC * giaPC;
+const tongNL = ...; // tổng tiền nhiên liệu
 
         const data = {
             can_cu: canCu,
@@ -525,6 +569,9 @@
             tien_phu_cap: document.getElementById('tienPhuCap').innerText,
             tien_nhien_lieu: document.getElementById('tienNhienLieu').innerText,
             tong_du_tru: document.getElementById('tongDuTru').value
+            co_phong: soDem > 0,
+    co_phu_cap: soNguoi > 0 && soNgayPC > 0,
+    co_nhien_lieu: tongNL > 0
         };
 
         try {
