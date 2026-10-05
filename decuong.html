@@ -540,12 +540,6 @@
         });
         const danhSachXeText = danhSachXe.map(x => `xe ${x.ten_xe} biển số ${x.bien_so}`).join(', ') + '.';
         const soDem = tinhSoDem();
-const soNguoi = +document.getElementById('soNguoi').value || 0;
-const soNgayPC = tinhSoNgayPhuCap();
-const tienPhong = soDem > 0 ? (soPhong * soDem * giaPhong) : 0;
-const tienPC = soNguoi * soNgayPC * giaPC;
-const tongNL = ...; // tổng tiền nhiên liệu
-
         const data = {
             can_cu: canCu,
             danh_sach_xe_text: danhSachXeText,
@@ -569,9 +563,8 @@ const tongNL = ...; // tổng tiền nhiên liệu
             tien_phu_cap: document.getElementById('tienPhuCap').innerText,
             tien_nhien_lieu: document.getElementById('tienNhienLieu').innerText,
             tong_du_tru: document.getElementById('tongDuTru').value
-            co_phong: soDem > 0,
-    co_phu_cap: soNguoi > 0 && soNgayPC > 0,
-    co_nhien_lieu: tongNL > 0
+
+    
         };
 
         try {
