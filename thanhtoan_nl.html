@@ -26,25 +26,17 @@
         .xe-card .row { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; }
         .xe-card .row label { flex: 0 0 105px; color: #333; font-size: 12px; margin: 0; font-weight: bold; }
         .xe-card .row input, .xe-card .row select { flex: 1; padding: 7px; font-size: 13px; }
-        .xe-card .bien-so-text, .xe-card .dinh-muc-text { flex: 1; font-size: 13px; color: #555; font-style: italic; background: #fff; padding: 7px; border-radius: 4px; border: 1px dashed #ccc; }
+        .xe-card .bien-so-text, .xe-card .dinh-muc-text, .xe-card .nhien-lieu-text { flex: 1; font-size: 13px; color: #555; font-style: italic; background: #fff; padding: 7px; border-radius: 4px; border: 1px dashed #ccc; }
 
         .cong-tac-card { border: 1px solid #28a745; border-radius: 8px; padding: 10px; margin: 10px 0; background: #f0fff4; }
         .cong-tac-card .ct-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .cong-tac-card .ct-title { font-weight: bold; color: #155724; font-size: 13px; }
         .cong-tac-card .row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
-        .cong-tac-card .row label { flex: 0 0 130px; color: #333; font-size: 12px; margin: 0; font-weight: bold; }
+        .cong-tac-card .row label { flex: 0 0 140px; color: #333; font-size: 12px; margin: 0; font-weight: bold; }
         .cong-tac-card .row input { flex: 1; padding: 6px; font-size: 13px; }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
-        th, td { border: 1px solid #999; padding: 4px; text-align: center; }
-        th { background: #e9ecef; font-size: 11px; }
-        .money { font-weight: bold; color: #d63384; }
-        .total-row { background: #fff3cd; font-weight: bold; }
+        .cong-tac-card .kq { background: #fff; padding: 6px; border-radius: 4px; border: 1px dashed #28a745; font-size: 12px; margin-top: 6px; }
 
         .info-text { font-size: 12px; color: #666; font-style: italic; }
-        .alert-ok { color: #155724; background: #d4edda; padding: 4px 8px; border-radius: 4px; font-size: 12px; display: inline-block; margin-top: 4px; }
-        .alert-warn { color: #856404; background: #fff3cd; padding: 4px 8px; border-radius: 4px; font-size: 12px; display: inline-block; margin-top: 4px; }
-
         #loading { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(255,255,255,.9); align-items: center; justify-content: center; color: #007bff; font-weight: bold; font-size: 18px; }
         .note { font-size: 11px; color: #666; font-style: italic; margin: 4px 0; }
         .header-actions { display: flex; gap: 6px; margin-bottom: 10px; }
@@ -101,9 +93,9 @@
     const ID_TEMPLATE_THANHTOAN = "1y1HLSa4oSuZ-siop03b9XL14azE8pVHC";
 
     const DEFAULT_XE = [
-        { ten: "Ford Transit",   bienSo: "79B 877.43",  dinhMuc: 19},
-        { ten: "Ford Ranger",    bienSo: "79C 038.20",  dinhMuc: 15},
-        { ten: "Toyota Fortuner",  bienSo: "79A 686.17",  dinhMuc: 19}
+        { ten: "Ford Transit",   bienSo: "79B 877.43",  dinhMuc: 19, nhienLieu: "Dầu" },
+        { ten: "Ford Ranger",    bienSo: "79C 038.20",  dinhMuc: 15, nhienLieu: "Dầu" },
+        { ten: "Toyota Fortuner",  bienSo: "79A 686.17",  dinhMuc: 19, nhienLieu: "Xăng" }
     ];
 
     // ============ STATE ============
@@ -150,16 +142,17 @@
             if (!xeDC) { addXe(); continue; }
             const xeGoc = dsXeGoc.find(x => x.bienSo === xeDC.bienSo);
             const dinhMuc = xeGoc ? xeGoc.dinhMuc : 15;
+            const nhienLieu = xeGoc ? xeGoc.nhienLieu : 'Dầu';
             const congTacAuto = [{
                 ten_ct: DC.ndCongTac || '',
                 so_km_dau: 0,
-                so_km: xeDC.soKm || 0,
-                hoaDon: []
+                so_km: xeDC.soKm || 0
             }];
             addXe({
                 xeIdx: xeDC.xeIdx || '',
                 bienSo: xeDC.bienSo || '',
                 dinhMuc: dinhMuc,
+                nhienLieu: nhienLieu,
                 laiXe: xeDC.laiXe || (dsLaiXe[i] || ''),
                 congTacList: congTacAuto
             });
@@ -186,6 +179,7 @@
             </div>
             <div class="row"><label>Biển số:</label><span class="bien-so-text">${xData && xData.bienSo ? xData.bienSo : '--'}</span></div>
             <div class="row"><label>Định mức:</label><span class="dinh-muc-text">${xData && xData.dinhMuc ? xData.dinhMuc + ' L/100km' : '--'}</span></div>
+            <div class="row"><label>Nhiên liệu:</label><span class="nhien-lieu-text">${xData && xData.nhienLieu ? xData.nhienLieu : '--'}</span></div>
             <div class="row">
                 <label>Lái xe:</label>
                 <input type="text" class="lai-xe" list="dsLaiXeList" placeholder="Gõ hoặc chọn..." value="${xData && xData.laiXe ? xData.laiXe : ''}">
@@ -195,10 +189,6 @@
                 <label style="color:#155724;">▼ Danh sách công tác:</label>
                 <div class="ds-cong-tac"></div>
                 <button class="btn-green btn-sm" onclick="addCongTac(this)">+ Thêm công tác</button>
-            </div>
-
-            <div style="margin-top:10px; padding-top:10px; border-top:2px solid #007bff; text-align:right;">
-                <b>TỔNG XE: <span class="tong-xe-tien money">0</span> đồng / <span class="tong-xe-lit">0,0</span> lít</b>
             </div>
         `;
         container.appendChild(card);
@@ -210,7 +200,6 @@
         }
 
         capNhatSoXe();
-        setTimeout(() => tinhToanXe(card), 50);
     }
 
     function capNhatSoXe() {
@@ -223,10 +212,12 @@
         if (idx === "") {
             card.querySelector('.bien-so-text').innerText = "--";
             card.querySelector('.dinh-muc-text').innerText = "--";
+            card.querySelector('.nhien-lieu-text').innerText = "--";
         } else {
             const xe = dsXeGoc[idx];
             card.querySelector('.bien-so-text').innerText = xe.bienSo;
             card.querySelector('.dinh-muc-text').innerText = xe.dinhMuc + " L/100km";
+            card.querySelector('.nhien-lieu-text').innerText = xe.nhienLieu || "Dầu";
         }
         tinhToanXe(card);
     }
@@ -240,7 +231,7 @@
         ctCard.innerHTML = `
             <div class="ct-header">
                 <span class="ct-title">Công tác</span>
-                <button class="btn-red btn-sm" onclick="this.closest('.cong-tac-card').remove(); tinhToanXe(this);">Xóa</button>
+                <button class="btn-red btn-sm" onclick="this.closest('.cong-tac-card').remove();">Xóa</button>
             </div>
             <div class="row">
                 <label>Tên công tác:</label>
@@ -254,25 +245,9 @@
                 <label>Số km di chuyển:</label>
                 <input type="number" class="so-km" value="${ctData ? ctData.so_km : 0}" onchange="tinhToanXe(this)">
             </div>
-            <div class="row">
-                <label>Định mức (lít):</label>
-                <span class="so-lit-dm-text info-text">0,0</span>
-            </div>
-            <button class="btn-blue btn-sm">📥 Import XML hóa đơn</button>
-            <input type="file" class="file-input" multiple accept=".xml" style="display:none;">
-            <div class="ds-hoa-don-wrap" style="margin-top:8px; overflow-x:auto;"></div>
-            <div class="doi-chieu" style="margin-top:6px;"></div>
+            <div class="kq"></div>
         `;
         container.appendChild(ctCard);
-
-        if (ctData && ctData.hoaDon) ctCard._hoaDonList = JSON.parse(JSON.stringify(ctData.hoaDon));
-        else ctCard._hoaDonList = [];
-
-        const fileInput = ctCard.querySelector('.file-input');
-        ctCard.querySelector('button.btn-blue').onclick = () => fileInput.click();
-        fileInput.onchange = (e) => xuLyFileXML(e.target, ctCard);
-
-        renderBangHoaDon(ctCard);
         capNhatSoCongTac(xeCard);
         tinhToanXe(ctCard);
     }
@@ -283,116 +258,6 @@
         });
     }
 
-    // ============ XỬ LÝ FILE XML ============
-    function xuLyFileXML(input, ctCard) {
-        const files = input.files;
-        if (files.length === 0) return;
-
-        if (!ctCard._hoaDonList) ctCard._hoaDonList = [];
-
-        let pending = files.length;
-        Array.from(files).forEach(file => {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const xmlString = e.target.result;
-                    const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(xmlString, "text/xml");
-
-                    const soHoaDon = xmlDoc.querySelector("SHDon")?.textContent || "N/A";
-                    const ngayLap = xmlDoc.querySelector("NLap")?.textContent || "";
-
-                    const items = xmlDoc.querySelectorAll("HHDVu");
-                    items.forEach(item => {
-                        const tenHang = item.querySelector("THHDVu")?.textContent || "";
-                        const soLit = parseFloat(item.querySelector("SLuong")?.textContent || "0");
-                        const donGia = parseFloat(item.querySelector("DGia")?.textContent || "0");
-                        const thanhTien = parseFloat(item.querySelector("ThTien")?.textContent || "0");
-
-                        const lower = tenHang.toLowerCase();
-                        if (!lower.includes("xăng") && !lower.includes("dầu") && !lower.includes("diesel") && !lower.includes("do ")) return;
-
-                        let loai = "Khác";
-                        if (lower.includes("xăng")) loai = "Xăng";
-                        else if (lower.includes("dầu") || lower.includes("diesel")) loai = "Dầu";
-
-                        ctCard._hoaDonList.push({
-                            so_hd: soHoaDon,
-                            ngay: ngayLap,
-                            loai: loai,
-                            ten_hang: tenHang,
-                            so_lit: soLit,
-                            don_gia: donGia,
-                            thanh_tien: thanhTien,
-                            thue: 0
-                        });
-                    });
-
-                    pending--;
-                    if (pending === 0) {
-                        renderBangHoaDon(ctCard);
-                        tinhToanXe(ctCard);
-                    }
-                } catch (err) {
-                    console.error("Lỗi đọc XML:", err);
-                    pending--;
-                    if (pending === 0) {
-                        renderBangHoaDon(ctCard);
-                        tinhToanXe(ctCard);
-                    }
-                }
-            };
-            reader.readAsText(file);
-        });
-        input.value = '';
-    }
-
-    function renderBangHoaDon(ctCard) {
-        const wrap = ctCard.querySelector('.ds-hoa-don-wrap');
-        const list = ctCard._hoaDonList || [];
-        if (list.length === 0) { wrap.innerHTML = '<p class="info-text">Chưa có hóa đơn.</p>'; return; }
-
-        let html = `<table><thead><tr>
-            <th>STT</th><th>Số HĐ</th><th>Nhiên liệu</th><th>Số lít</th>
-            <th>Đơn giá</th><th>Trước thuế</th><th>Thuế</th><th>Tổng cộng</th><th></th>
-        </tr></thead><tbody>`;
-
-        list.forEach((hd, i) => {
-            html += `<tr>
-                <td>${i + 1}</td>
-                <td>${hd.so_hd}</td>
-                <td>${hd.loai}</td>
-                <td>${hd.so_lit.toLocaleString('vi-VN', {minimumFractionDigits:1, maximumFractionDigits:1})}</td>
-                <td>${hd.don_gia.toLocaleString('vi-VN')}</td>
-                <td>${hd.thanh_tien.toLocaleString('vi-VN')}</td>
-                <td>0</td>
-                <td>${hd.thanh_tien.toLocaleString('vi-VN')}</td>
-                <td><button class="btn-red btn-sm" onclick="xoaHoaDon(this, ${i})">X</button></td>
-            </tr>`;
-        });
-
-        const tongLit = list.reduce((s, h) => s + h.so_lit, 0);
-        const tongTien = list.reduce((s, h) => s + h.thanh_tien, 0);
-        html += `<tr class="total-row">
-            <td colspan="3">Tổng cộng</td>
-            <td>${tongLit.toLocaleString('vi-VN', {minimumFractionDigits:1, maximumFractionDigits:1})}</td>
-            <td></td>
-            <td>${tongTien.toLocaleString('vi-VN')}</td>
-            <td></td>
-            <td>${tongTien.toLocaleString('vi-VN')}</td>
-            <td></td>
-        </tr>`;
-        html += `</tbody></table>`;
-        wrap.innerHTML = html;
-    }
-
-    function xoaHoaDon(btn, idx) {
-        const ctCard = btn.closest('.cong-tac-card');
-        ctCard._hoaDonList.splice(idx, 1);
-        renderBangHoaDon(ctCard);
-        tinhToanXe(ctCard);
-    }
-
     // ============ TÍNH TOÁN ============
     function tinhToanXe(el) {
         const xeCard = el.closest ? el.closest('.xe-card') : el;
@@ -400,35 +265,18 @@
 
         const dinhMucText = xeCard.querySelector('.dinh-muc-text').innerText;
         const dinhMuc = parseFloat(dinhMucText) || 0;
-        let tongXeTien = 0;
-        let tongXeLit = 0;
 
         xeCard.querySelectorAll('.cong-tac-card').forEach(ct => {
+            const soKmDau = +ct.querySelector('.so-km-dau').value || 0;
             const soKm = +ct.querySelector('.so-km').value || 0;
-            const soLitDM = (soKm * dinhMuc) / 100;
-            ct.querySelector('.so-lit-dm-text').innerText = soLitDM.toLocaleString('vi-VN', {minimumFractionDigits:1, maximumFractionDigits:1});
+            const soKmSau = soKmDau + soKm;
+            const soLit = Math.round((soKm * dinhMuc / 100) * 10) / 10; // Làm tròn 1 chữ số
 
-            const list = ct._hoaDonList || [];
-            const tongLitHD = list.reduce((s, h) => s + h.so_lit, 0);
-            const tongTienHD = list.reduce((s, h) => s + h.thanh_tien, 0);
-            tongXeTien += tongTienHD;
-            tongXeLit += tongLitHD;
-
-            const dc = ct.querySelector('.doi-chieu');
-            if (list.length > 0) {
-                const chenh = tongLitHD - soLitDM;
-                if (Math.abs(chenh) <= 0.5) {
-                    dc.innerHTML = `<span class="alert-ok">✅ Định mức ${soLitDM.toLocaleString('vi-VN',{minimumFractionDigits:1,maximumFractionDigits:1})} lít ≈ Hóa đơn ${tongLitHD.toLocaleString('vi-VN',{minimumFractionDigits:1,maximumFractionDigits:1})} lít - OK</span>`;
-                } else {
-                    dc.innerHTML = `<span class="alert-warn">⚠️ Định mức ${soLitDM.toLocaleString('vi-VN',{minimumFractionDigits:1,maximumFractionDigits:1})} lít ≠ Hóa đơn ${tongLitHD.toLocaleString('vi-VN',{minimumFractionDigits:1,maximumFractionDigits:1})} lít (lệch ${chenh.toFixed(1)})</span>`;
-                }
-            } else {
-                dc.innerHTML = '';
-            }
+            ct.querySelector('.kq').innerHTML = `
+                Km sau: <b>${soKmSau.toLocaleString('vi-VN')}</b> km |
+                Tiêu thụ: <b>${soLit.toLocaleString('vi-VN', {minimumFractionDigits:1, maximumFractionDigits:1})}</b> lít
+            `;
         });
-
-        xeCard.querySelector('.tong-xe-tien').innerText = tongXeTien.toLocaleString('vi-VN');
-        xeCard.querySelector('.tong-xe-lit').innerText = tongXeLit.toLocaleString('vi-VN', {minimumFractionDigits:1, maximumFractionDigits:1});
     }
 
     // ============ DATALIST ============
@@ -467,14 +315,14 @@
                 congTacList.push({
                     ten_ct: ct.querySelector('.ten-ct').value,
                     so_km_dau: ct.querySelector('.so-km-dau').value,
-                    so_km: ct.querySelector('.so-km').value,
-                    hoaDon: ct._hoaDonList || []
+                    so_km: ct.querySelector('.so-km').value
                 });
             });
             xeList.push({
                 xeIdx: card.querySelector('.chon-xe').value,
                 bienSo: card.querySelector('.bien-so-text').innerText,
                 dinhMuc: card.querySelector('.dinh-muc-text').innerText,
+                nhienLieu: card.querySelector('.nhien-lieu-text').innerText,
                 laiXe: card.querySelector('.lai-xe').value,
                 congTacList: congTacList
             });
@@ -505,68 +353,37 @@
             const dinhMuc = parseFloat(card.querySelector('.dinh-muc-text').innerText) || 0;
             const tenXe = card.querySelector('.chon-xe').selectedOptions[0]?.text || "";
             const laiXe = card.querySelector('.lai-xe').value;
-            let tongToanBoTien = 0;
+            const nhienLieu = card.querySelector('.nhien-lieu-text').innerText;
 
-            // ===== BUILD MẢNG DÒNG CHI TIẾT CHO BẢNG =====
             const dongChiTiet = [];
 
             card.querySelectorAll('.cong-tac-card').forEach(ct => {
                 const tenCT = ct.querySelector('.ten-ct').value;
-                const soKm = +ct.querySelector('.so-km').value || 0;
                 const soKmDau = +ct.querySelector('.so-km-dau').value || 0;
-                const soLitDM = (soKm * dinhMuc) / 100;
-                const list = ct._hoaDonList || [];
+                const soKm = +ct.querySelector('.so-km').value || 0;
+                const soKmSau = soKmDau + soKm;
+                const soLit = Math.round((soKm * dinhMuc / 100) * 10) / 10;
 
-                // Tính tổng hóa đơn của công tác này
-                let tongTienCT = 0;
-                list.forEach(hd => { tongTienCT += hd.thanh_tien; });
-                tongToanBoTien += tongTienCT;
-
-                if (list.length === 0) {
-                    // Chưa có hóa đơn → 1 dòng trống
-                    dongChiTiet.push({
-                        ten_cong_tac: tenCT,
-                        so_km_dau: soKmDau.toLocaleString('vi-VN'),
-                        so_km: soKm.toLocaleString('vi-VN'),
-                        so_lit_dinh_muc: soLitDM.toLocaleString('vi-VN', {minimumFractionDigits:1, maximumFractionDigits:1}),
-                        so_hd: '',
-                        nhien_lieu: '',
-                        so_lit: '',
-                        don_gia: '',
-                        tien_truoc_thue: '',
-                        thue: '',
-                        tong_cong: ''
-                    });
-                } else {
-                    // Mỗi hóa đơn 1 dòng, các thông tin công tác chỉ hiện ở dòng đầu
-                    list.forEach((hd, idx) => {
-                        dongChiTiet.push({
-                            ten_cong_tac: idx === 0 ? tenCT : '',
-                            so_km_dau: idx === 0 ? soKmDau.toLocaleString('vi-VN') : '',
-                            so_km: idx === 0 ? soKm.toLocaleString('vi-VN') : '',
-                            so_lit_dinh_muc: idx === 0 ? soLitDM.toLocaleString('vi-VN', {minimumFractionDigits:1, maximumFractionDigits:1}) : '',
-                            so_hd: hd.so_hd,
-                            nhien_lieu: hd.loai,
-                            so_lit: hd.so_lit.toLocaleString('vi-VN', {minimumFractionDigits:1, maximumFractionDigits:1}),
-                            don_gia: hd.don_gia.toLocaleString('vi-VN'),
-                            tien_truoc_thue: hd.thanh_tien.toLocaleString('vi-VN'),
-                            thue: 0,
-                            tong_cong: hd.thanh_tien.toLocaleString('vi-VN')
-                        });
-                    });
-                }
+                dongChiTiet.push({
+                    ten_cong_tac: tenCT,
+                    so_km_dau: soKmDau.toLocaleString('vi-VN'),
+                    so_km: soKm.toLocaleString('vi-VN'),
+                    so_km_sau: soKmSau.toLocaleString('vi-VN'),
+                    dinh_muc: dinhMuc,
+                    so_lit: soLit.toLocaleString('vi-VN', {minimumFractionDigits:1, maximumFractionDigits:1})
+                });
             });
 
             danhSachXeData.push({
                 bien_so: bienSo,
                 ten_xe: tenXe,
                 lai_xe: laiXe,
+                nhien_lieu: nhienLieu,
                 ngay_tt: ngayObj.ngay,
                 thang_tt: ngayObj.thang,
                 nam_tt: ngayObj.nam,
                 dia_diem_tong_hop: DC.diaDiem || "các trạm biến áp theo lệnh điều xe",
-                dong_chi_tiet: dongChiTiet,
-                tong_cong_toan_bo: tongToanBoTien.toLocaleString('vi-VN')
+                dong_chi_tiet: dongChiTiet
             });
         });
 
@@ -586,7 +403,12 @@
             for (let i = 0; i < danhSachXeData.length; i++) {
                 const data = danhSachXeData[i];
                 const zip = new PizZip(bytes.buffer);
-                const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true, nullGetter: () => "" });
+                const doc = new window.docxtemplater(zip, {
+                    paragraphLoop: true,
+                    linebreaks: true,
+                    delimiters: { start: '{', end: '}' },  // ← 1 NGOẶC
+                    nullGetter: () => ""
+                });
                 doc.render(data);
 
                 const blob = doc.getZip().generate({
