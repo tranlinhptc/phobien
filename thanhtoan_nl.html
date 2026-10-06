@@ -380,40 +380,42 @@
             const bienSo = card.querySelector('.bien-so-text').innerText;
             if (!bienSo || bienSo === '--') return;
 
-            const dinhMuc = parseFloat(card.querySelector('.dinh-muc-text').innerText) || 0;
-            const tenXe = card.querySelector('.chon-xe').selectedOptions[0]?.text || "";
-            const laiXe = card.querySelector('.lai-xe').value;
-            const nhienLieu = card.querySelector('.nhien-lieu-text').innerText;
-            const soLenh = card.querySelector('.so-lenh').value;
-            const ngayLenh = card.querySelector('.ngay-lenh').value;
-// Trong code, thêm biến
-const tenCongTacNgoai = dongChiTiet.map(x => x.ten_cong_tac).filter(v => v).join(', ');
-// data: ten_cong_tac_ngoai: tenCongTacNgoai
+           const dinhMuc = parseFloat(card.querySelector('.dinh-muc-text').innerText) || 0;
+const tenXe = card.querySelector('.chon-xe').selectedOptions[0]?.text || "";
+const laiXe = card.querySelector('.lai-xe').value;
+const nhienLieu = card.querySelector('.nhien-lieu-text').innerText;
+const soLenh = card.querySelector('.so-lenh').value;
+const ngayLenh = card.querySelector('.ngay-lenh').value;
 
-            const dongChiTiet = [];
-            let tongKmDi = 0, tongKmSau = 0, tongLit = 0;
+const dongChiTiet = [];        // ← khai báo TRƯỚC
+let tongKmDi = 0, tongKmSau = 0, tongLit = 0;
 
-            card.querySelectorAll('.cong-tac-card').forEach(ct => {
-                const tenCT = ct.querySelector('.ten-ct').value;
-                const soKmDau = +ct.querySelector('.so-km-dau').value || 0;
-                const soKm = +ct.querySelector('.so-km').value || 0;
-                const soKmSau = soKmDau + soKm;
-                const soLit = Math.round((soKm * dinhMuc / 100) * 10) / 10;
+card.querySelectorAll('.cong-tac-card').forEach(ct => {
+    const tenCT = ct.querySelector('.ten-ct').value;
+    const soKmDau = +ct.querySelector('.so-km-dau').value || 0;
+    const soKm = +ct.querySelector('.so-km').value || 0;
+    const soKmSau = soKmDau + soKm;
+    const soLit = Math.round((soKm * dinhMuc / 100) * 10) / 10;
 
-                tongKmDi += soKm;
-                tongKmSau += soKmSau;
-                tongLit += soLit;
+    tongKmDi += soKm;
+    tongKmSau += soKmSau;
+    tongLit += soLit;
 
-                dongChiTiet.push({
-                    ten_cong_tac: tenCT,
-                    ten_cong_tac_ngoai: tenCongTacNgoai,
-                    so_km_dau: soKmDau.toLocaleString('vi-VN'),
-                    so_km: soKm.toLocaleString('vi-VN'),
-                    so_km_sau: soKmSau.toLocaleString('vi-VN'),
-                    dinh_muc: dinhMuc,
-                    so_lit: soLit.toLocaleString('vi-VN', {minimumFractionDigits:1, maximumFractionDigits:1})
-                });
-            });
+    dongChiTiet.push({
+        ten_cong_tac: tenCT,
+        so_km_dau: soKmDau.toLocaleString('vi-VN'),
+        so_km: soKm.toLocaleString('vi-VN'),
+        so_km_sau: soKmSau.toLocaleString('vi-VN'),
+        dinh_muc: dinhMuc,
+        so_lit: soLit.toLocaleString('vi-VN', {minimumFractionDigits:1, maximumFractionDigits:1})
+    });
+});
+
+// ← SAU KHI vòng lặp xong mới tính tenCongTacNgoai
+const tenCongTacNgoai = dongChiTiet
+    .map(x => x.ten_cong_tac)
+    .filter(v => v)
+    .join(', ');
 
             danhSachXeData.push({
                 bien_so: bienSo,
@@ -427,6 +429,7 @@ const tenCongTacNgoai = dongChiTiet.map(x => x.ten_cong_tac).filter(v => v).join
                 nam_tt: ngayObj.nam,
                 dia_diem_tong_hop: DC.diaDiem || "các trạm biến áp theo lệnh điều xe",
                 dong_chi_tiet: dongChiTiet,
+                ten_cong_tac_ngoai: tenCongTacNgoai,   // ← THÊM DÒNG NÀY
                 tong_km_di: tongKmDi.toLocaleString('vi-VN'),
                 tong_km_sau: tongKmSau.toLocaleString('vi-VN'),
                 tong_so_lit: tongLit.toLocaleString('vi-VN', {minimumFractionDigits:1, maximumFractionDigits:1})
