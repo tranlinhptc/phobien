@@ -101,9 +101,9 @@
     const ID_TEMPLATE_THANHTOAN = "1y1HLSa4oSuZ-siop03b9XL14azE8pVHC";
 
     const DEFAULT_XE = [
-        { ten: "Ford Transit",   bienSo: "79B 332.11",  dinhMuc: 20 },
-        { ten: "Ford Ranger",    bienSo: "79C 038.20",  dinhMuc: 15 },
-        { ten: "Ford Fortuner",  bienSo: "79A 866.70",  dinhMuc: 19 }
+        { ten: "Ford Transit",   bienSo: "79B 877.43",  dinhMuc: 19},
+        { ten: "Ford Ranger",    bienSo: "79C 038.20",  dinhMuc: 15},
+        { ten: "Toyota Fortuner",  bienSo: "79A 686.17",  dinhMuc: 19}
     ];
 
     // ============ STATE ============
@@ -527,6 +527,7 @@
 
             card.querySelectorAll('.cong-tac-card').forEach(ct => {
                 const soKm = +ct.querySelector('.so-km').value || 0;
+                const soKmdau = +ct.querySelector('.so-km-dau').value || 0;
                 const soLitDM = (soKm * dinhMuc) / 100;
                 const list = ct._hoaDonList || [];
                 let tongLit = 0, tongTien = 0;
@@ -550,6 +551,7 @@
                 congTacList.push({
                     ten_cong_tac: ct.querySelector('.ten-ct').value,
                     so_km: soKm,
+                    so_km_dau: soKmdau,
                     dinh_muc: dinhMuc,
                     so_lit_dinh_muc: soLitDM.toLocaleString('vi-VN', {minimumFractionDigits:1, maximumFractionDigits:1}),
                     danh_sach_hoa_don: hoaDonData,
