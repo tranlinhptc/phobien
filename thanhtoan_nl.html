@@ -386,6 +386,9 @@
             const nhienLieu = card.querySelector('.nhien-lieu-text').innerText;
             const soLenh = card.querySelector('.so-lenh').value;
             const ngayLenh = card.querySelector('.ngay-lenh').value;
+// Trong code, thêm biến
+const tenCongTacNgoai = dongChiTiet.map(x => x.ten_cong_tac).filter(v => v).join(', ');
+// data: ten_cong_tac_ngoai: tenCongTacNgoai
 
             const dongChiTiet = [];
             let tongKmDi = 0, tongKmSau = 0, tongLit = 0;
@@ -403,6 +406,7 @@
 
                 dongChiTiet.push({
                     ten_cong_tac: tenCT,
+                    ten_cong_tac_ngoai: tenCongTacNgoai,
                     so_km_dau: soKmDau.toLocaleString('vi-VN'),
                     so_km: soKm.toLocaleString('vi-VN'),
                     so_km_sau: soKmSau.toLocaleString('vi-VN'),
