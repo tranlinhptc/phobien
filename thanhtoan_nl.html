@@ -260,6 +260,14 @@
                 <label>Tên công tác:</label>
                 <input type="text" class="ten-ct" list="dsCongTacList" placeholder="Nhập hoặc chọn..." value="${ctData ? (ctData.ten_ct || '').replace(/"/g,'&quot;') : ''}">
             </div>
+            
+            <div class="row">
+                <label>Số km đầu:</label>
+                <input type="number" class="so-km-dau" value="${ctData ? ctData.so_km_dau : 0}" onchange="tinhToanXe(this)">
+            </div>
+
+
+            
             <div class="row">
                 <label>Số km di chuyển:</label>
                 <input type="number" class="so-km" value="${ctData ? ctData.so_km : 0}" onchange="tinhToanXe(this)">
