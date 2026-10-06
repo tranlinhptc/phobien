@@ -24,7 +24,7 @@
         .xe-card .xe-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px dashed #007bff; }
         .xe-card .xe-title { font-weight: bold; color: #0056b3; font-size: 14px; }
         .xe-card .row { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; }
-        .xe-card .row label { flex: 0 0 105px; color: #333; font-size: 12px; margin: 0; font-weight: bold; }
+        .xe-card .row label { flex: 0 0 125px; color: #333; font-size: 12px; margin: 0; font-weight: bold; }
         .xe-card .row input, .xe-card .row select { flex: 1; padding: 7px; font-size: 13px; }
         .xe-card .bien-so-text, .xe-card .dinh-muc-text, .xe-card .nhien-lieu-text { flex: 1; font-size: 13px; color: #555; font-style: italic; background: #fff; padding: 7px; border-radius: 4px; border: 1px dashed #ccc; }
 
@@ -35,6 +35,8 @@
         .cong-tac-card .row label { flex: 0 0 140px; color: #333; font-size: 12px; margin: 0; font-weight: bold; }
         .cong-tac-card .row input { flex: 1; padding: 6px; font-size: 13px; }
         .cong-tac-card .kq { background: #fff; padding: 6px; border-radius: 4px; border: 1px dashed #28a745; font-size: 12px; margin-top: 6px; }
+
+        .xe-tong { background: #e7f1ff; padding: 8px; border-radius: 6px; margin-top: 10px; font-weight: bold; color: #0056b3; text-align: right; font-size: 13px; }
 
         .info-text { font-size: 12px; color: #666; font-style: italic; }
         #loading { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(255,255,255,.9); align-items: center; justify-content: center; color: #007bff; font-weight: bold; font-size: 18px; }
@@ -184,11 +186,25 @@
                 <label>Lái xe:</label>
                 <input type="text" class="lai-xe" list="dsLaiXeList" placeholder="Gõ hoặc chọn..." value="${xData && xData.laiXe ? xData.laiXe : ''}">
             </div>
+            <div class="row">
+                <label>Số lệnh điều xe:</label>
+                <input type="text" class="so-lenh" placeholder="VD: 301" value="${xData && xData.soLenh ? xData.soLenh : ''}">
+            </div>
+            <div class="row">
+                <label>Ngày lệnh điều xe:</label>
+                <input type="date" class="ngay-lenh" value="${xData && xData.ngayLenh ? xData.ngayLenh : ''}">
+            </div>
 
             <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #28a745;">
                 <label style="color:#155724;">▼ Danh sách công tác:</label>
                 <div class="ds-cong-tac"></div>
                 <button class="btn-green btn-sm" onclick="addCongTac(this)">+ Thêm công tác</button>
+            </div>
+
+            <div class="xe-tong">
+                Tổng km di chuyển: <span class="tong-km-di">0</span> |
+                Tổng km sau: <span class="tong-km-sau">0</span> |
+                Tổng lít: <span class="tong-lit">0,0</span>
             </div>
         `;
         container.appendChild(card);
@@ -231,7 +247,7 @@
         ctCard.innerHTML = `
             <div class="ct-header">
                 <span class="ct-title">Công tác</span>
-                <button class="btn-red btn-sm" onclick="this.closest('.cong-tac-card').remove();">Xóa</button>
+                <button class="btn-red btn-sm" onclick="this.closest('.cong-tac-card').remove(); tinhToanXe(this);">Xóa</button>
             </div>
             <div class="row">
                 <label>Tên công tác:</label>
@@ -266,17 +282,29 @@
         const dinhMucText = xeCard.querySelector('.dinh-muc-text').innerText;
         const dinhMuc = parseFloat(dinhMucText) || 0;
 
+        let tongKmDi = 0;
+        let tongKmSau = 0;
+        let tongLit = 0;
+
         xeCard.querySelectorAll('.cong-tac-card').forEach(ct => {
             const soKmDau = +ct.querySelector('.so-km-dau').value || 0;
             const soKm = +ct.querySelector('.so-km').value || 0;
             const soKmSau = soKmDau + soKm;
-            const soLit = Math.round((soKm * dinhMuc / 100) * 10) / 10; // Làm tròn 1 chữ số
+            const soLit = Math.round((soKm * dinhMuc / 100) * 10) / 10;
+
+            tongKmDi += soKm;
+            tongKmSau += soKmSau;
+            tongLit += soLit;
 
             ct.querySelector('.kq').innerHTML = `
                 Km sau: <b>${soKmSau.toLocaleString('vi-VN')}</b> km |
                 Tiêu thụ: <b>${soLit.toLocaleString('vi-VN', {minimumFractionDigits:1, maximumFractionDigits:1})}</b> lít
             `;
         });
+
+        xeCard.querySelector('.tong-km-di').innerText = tongKmDi.toLocaleString('vi-VN');
+        xeCard.querySelector('.tong-km-sau').innerText = tongKmSau.toLocaleString('vi-VN');
+        xeCard.querySelector('.tong-lit').innerText = tongLit.toLocaleString('vi-VN', {minimumFractionDigits:1, maximumFractionDigits:1});
     }
 
     // ============ DATALIST ============
@@ -324,6 +352,8 @@
                 dinhMuc: card.querySelector('.dinh-muc-text').innerText,
                 nhienLieu: card.querySelector('.nhien-lieu-text').innerText,
                 laiXe: card.querySelector('.lai-xe').value,
+                soLenh: card.querySelector('.so-lenh').value,
+                ngayLenh: card.querySelector('.ngay-lenh').value,
                 congTacList: congTacList
             });
         });
@@ -354,8 +384,11 @@
             const tenXe = card.querySelector('.chon-xe').selectedOptions[0]?.text || "";
             const laiXe = card.querySelector('.lai-xe').value;
             const nhienLieu = card.querySelector('.nhien-lieu-text').innerText;
+            const soLenh = card.querySelector('.so-lenh').value;
+            const ngayLenh = card.querySelector('.ngay-lenh').value;
 
             const dongChiTiet = [];
+            let tongKmDi = 0, tongKmSau = 0, tongLit = 0;
 
             card.querySelectorAll('.cong-tac-card').forEach(ct => {
                 const tenCT = ct.querySelector('.ten-ct').value;
@@ -363,6 +396,10 @@
                 const soKm = +ct.querySelector('.so-km').value || 0;
                 const soKmSau = soKmDau + soKm;
                 const soLit = Math.round((soKm * dinhMuc / 100) * 10) / 10;
+
+                tongKmDi += soKm;
+                tongKmSau += soKmSau;
+                tongLit += soLit;
 
                 dongChiTiet.push({
                     ten_cong_tac: tenCT,
@@ -379,11 +416,16 @@
                 ten_xe: tenXe,
                 lai_xe: laiXe,
                 nhien_lieu: nhienLieu,
+                so_lenh: soLenh,
+                ngay_lenh: ngayLenh ? formatDate(ngayLenh) : '',
                 ngay_tt: ngayObj.ngay,
                 thang_tt: ngayObj.thang,
                 nam_tt: ngayObj.nam,
                 dia_diem_tong_hop: DC.diaDiem || "các trạm biến áp theo lệnh điều xe",
-                dong_chi_tiet: dongChiTiet
+                dong_chi_tiet: dongChiTiet,
+                tong_km_di: tongKmDi.toLocaleString('vi-VN'),
+                tong_km_sau: tongKmSau.toLocaleString('vi-VN'),
+                tong_so_lit: tongLit.toLocaleString('vi-VN', {minimumFractionDigits:1, maximumFractionDigits:1})
             });
         });
 
@@ -406,7 +448,7 @@
                 const doc = new window.docxtemplater(zip, {
                     paragraphLoop: true,
                     linebreaks: true,
-                    delimiters: { start: '{', end: '}' },  // ← 1 NGOẶC
+                    delimiters: { start: '{', end: '}' },
                     nullGetter: () => ""
                 });
                 doc.render(data);
