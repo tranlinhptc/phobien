@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -10,41 +9,39 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.11/docxtemplater.js"></script>
 <style>
 body { 
-            font-family: Arial, sans-serif; 
-            background-color: #f4f6f9; 
-            margin: 0; 
-            padding: 10px; /* Giảm padding trên điện thoại cho rộng */
-        }
-        
-        .container { 
-            width: 100%; /* Tràn viền màn hình di động */
-            max-width: 600px; /* Vẫn giữ giới hạn đẹp khi mở trên máy tính / iPad */
-            background: #ffffff; 
-            padding: 15px; /* Thu gọn padding bên trong cho thoáng */
-            border-radius: 12px; 
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); 
-            margin: auto; 
-            box-sizing: border-box; /* Đảm bảo padding không làm tràn viền */
-        }
-        .form-group { margin-bottom: 15px; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px }
-        .chip-group {
+    font-family: Arial, sans-serif; 
+    background-color: #f4f6f9; 
+    margin: 0; 
+    padding: 10px;
+}
+.container { 
+    width: 100%;
+    max-width: 600px;
+    background: #ffffff; 
+    padding: 15px;
+    border-radius: 12px; 
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); 
+    margin: auto; 
+    box-sizing: border-box;
+}
+.form-group { margin-bottom: 15px; }
+input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px }
+.chip-group {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4 cột */
+    grid-template-columns: repeat(4, 1fr);
     gap: 8px;
     margin-top: 10px;
-        }
-    .chip-item input { display: none; }
-        .chip-item label { padding: 5px 10px; background: #eee; border-radius: 15px; cursor: pointer; font-size: 13px; }
-        .chip-item input:checked + label { background: #007bff; color: white; }
-        button { background: #28a745; color: white; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
-    /* ================Them d bao hieu load ding 02 dong duoi*/
-#loading {        display: none;    position: fixed;    inset: 0;    z-index: 99999;    background: rgba(255, 255, 255, 0.8);    align-items: center;    justify-content: center;
-    color: #007bff;    font-weight: bold;    font-size: 18px;
 }
-
-    
-    </style>
+.chip-item input { display: none; }
+.chip-item label { padding: 5px 10px; background: #eee; border-radius: 15px; cursor: pointer; font-size: 13px; }
+.chip-item input:checked + label { background: #007bff; color: white; }
+button { background: #28a745; color: white; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
+#loading { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(255, 255, 255, 0.8); align-items: center; justify-content: center; color: #007bff; font-weight: bold; font-size: 18px; }
+/* Hiển thị ngày dạng dd/mm/yyyy */
+input[type="datetime-local"] {
+    font-family: Arial, sans-serif;
+}
+</style>
 </head>
 <body>
 <div class="container">
@@ -63,20 +60,26 @@ body {
     <div class="form-group"><label>Nhân viên đơn vị công tác:</label><div class="chip-group" id="nvContainer"></div></div>
     <div class="form-group"><input type="number" id="stt" placeholder="Số GĐKCT..."></div>
     <div class="form-group"><textarea id="noiDung" placeholder="Nội dung..."></textarea></div>
-    <div class="form-group"><input type="text" id="diaDiem" placeholder="Địa điểm..."></div>
+    <div class="form-group">
+        <input type="text" id="diaDiem" placeholder="Địa điểm..." list="diaDiemSuggestions">
+        <datalist id="diaDiemSuggestions"></datalist>
+    </div>
     <div class="form-group"><label>Time PATC:</label><input type="datetime-local" id="startBB1"></div>
     <div class="form-group"><label>Time Hiện trường:</label><input type="datetime-local" id="startBB2"></div>
     <button style="background: #0056b3;" onclick="xuatFile('bb1')">Xuất 02 Biên bản</button>
     <button style="background: #28a745;" onclick="xuatFile('bb2')">Xuất BB H.Trường</button>
 </div>
-<!-- ======================================Them d bao hieu load ding 01 dong duoi -->
-    <div id="loading">⏳ Đang gõ, chờ xíu...</div>
+<div id="loading">⏳ Đang gõ, chờ xíu...</div>
 <script>
     const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxlM-814su7_q0yS7Qx1bdwC1j9CB18Km6UOdMcJW4ifZUecl633RmEhvxnsUIwerlE/exec";
     const ID_TEMPLATE_BB1 = "1Gj1PDFAHWeKG_2PCod4dLKHvXxq5xf6u"; 
     const ID_TEMPLATE_BB2 = "1AN9tE1UvR1KV3YNcs5P9RFxmcnsxwkBd";
-    const dsNV = ["Hoàng Trần Quản Trọng", "Trần Văn Hoàng", "Kim Văn Quỳnh", "Hồ Văn Huy", "Lê Hữu Anh", "Trần Phúc Linh", "Tạ Quốc Đạt", "Ngô Văn Quang", "Võ Ngọc Sơn", "Nguyễn Xuân Khánh", "Đoàn Hoàng Quang Định", "Võ Văn Sỹ", "Lưu Đức Minh", "Nguyễn Hữu Kính"];
+    const dsNV = ["Nguyễn Hữu Kính", "Hoàng Trần Quản Trọng", "Ngô Văn Quang", "Trần Văn Hoàng", "Kim Văn Quỳnh", "Hồ Văn Huy", "Lê Hữu Anh", "Trần Phúc Linh", "Tạ Quốc Đạt", "Võ Ngọc Sơn", "Nguyễn Xuân Khánh", "Đoàn Hoàng Quang Định", "Võ Văn Sỹ", "Lưu Đức Minh"];
 
+    // Hàm lấy năm hiện tại
+    const currentYear = new Date().getFullYear();
+
+    // Khởi tạo form
     window.onload = () => {
         let html = '';
         dsNV.forEach((nv, idx) => {
@@ -84,26 +87,134 @@ body {
             html += `<div class="chip-item"><input type="checkbox" id="nv${idx}" value="${nv}"><label for="nv${idx}">${tenRutGon}</label></div>`;
         });
         document.getElementById('nvContainer').innerHTML = html;
+
+        // Tự động co giãn textarea
+        let noiDung = document.getElementById('noiDung');
+        noiDung.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+            updateDiaDiemSuggestions();
+        });
+
+        // Gợi ý địa điểm từ nội dung
+        const diaDiemInput = document.getElementById('diaDiem');
+        diaDiemInput.addEventListener('input', updateDiaDiemSuggestions);
+
+        // Khôi phục dữ liệu từ localStorage (nếu có)
+        restoreFromLocalStorage();
+
+        // Thiết lập năm mặc định cho datetime-local nếu chưa có
+        setDefaultYear();
+    }
+
+    // Hàm thiết lập năm mặc định cho datetime-local
+    function setDefaultYear() {
+        const now = new Date();
+        const defaultDate = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}T${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
         
+        const start1 = document.getElementById('startBB1');
+        const start2 = document.getElementById('startBB2');
+        
+        // Nếu chưa có giá trị thì đặt mặc định là thời gian hiện tại (với năm hiện tại)
+        if (!start1.value) start1.value = defaultDate;
+        if (!start2.value) start2.value = defaultDate;
+    }
 
-    let noiDung = document.getElementById('noiDung');
-    noiDung.addEventListener('input', function() {
-        this.style.height = 'auto';
-        this.style.height = this.scrollHeight + 'px';
-    });
+    // Cập nhật gợi ý địa điểm từ nội dung
+    function updateDiaDiemSuggestions() {
+        const noiDung = document.getElementById('noiDung').value;
+        const datalist = document.getElementById('diaDiemSuggestions');
+        datalist.innerHTML = '';
 
+        if (!noiDung.trim()) return;
+
+        // Tách nội dung thành các dòng, lọc các dòng có vẻ là địa điểm (bắt đầu bằng "tại", "ở", hoặc có dấu phẩy)
+        const lines = noiDung.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        const suggestions = new Set();
+
+        lines.forEach(line => {
+            // Nếu dòng bắt đầu bằng "tại" hoặc "ở" thì lấy phần sau
+            const match = line.match(/^(?:tại|ở|địa điểm|nơi)\s+(.+)/i);
+            if (match) {
+                suggestions.add(match[1].trim());
+            } else if (line.includes(',')) {
+                // Nếu có dấu phẩy, có thể là địa chỉ
+                suggestions.add(line);
+            } else if (line.length > 5 && line.length < 100 && !line.includes(':')) {
+                // Thêm dòng có vẻ là địa điểm (không quá dài, không có dấu hai chấm)
+                suggestions.add(line);
+            }
+        });
+
+        suggestions.forEach(s => {
+            const option = document.createElement('option');
+            option.value = s;
+            datalist.appendChild(option);
+        });
+    }
+
+    // Lưu dữ liệu vào localStorage (không thông báo)
+    function saveToLocalStorage() {
+        const data = {
+            chiHuy: document.getElementById('chiHuy').value,
+            nhanVien: Array.from(document.querySelectorAll('#nvContainer input:checked')).map(cb => cb.value),
+            stt: document.getElementById('stt').value,
+            noiDung: document.getElementById('noiDung').value,
+            diaDiem: document.getElementById('diaDiem').value,
+            startBB1: document.getElementById('startBB1').value,
+            startBB2: document.getElementById('startBB2').value
+        };
+        localStorage.setItem('bienBanData', JSON.stringify(data));
+    }
+
+    // Khôi phục dữ liệu từ localStorage
+    function restoreFromLocalStorage() {
+        const saved = localStorage.getItem('bienBanData');
+        if (!saved) return;
+        
+        try {
+            const data = JSON.parse(saved);
+            if (data.chiHuy) document.getElementById('chiHuy').value = data.chiHuy;
+            if (data.stt) document.getElementById('stt').value = data.stt;
+            if (data.noiDung) document.getElementById('noiDung').value = data.noiDung;
+            if (data.diaDiem) document.getElementById('diaDiem').value = data.diaDiem;
+            if (data.startBB1) document.getElementById('startBB1').value = data.startBB1;
+            if (data.startBB2) document.getElementById('startBB2').value = data.startBB2;
+            
+            // Khôi phục checkbox nhân viên
+            if (data.nhanVien && Array.isArray(data.nhanVien)) {
+                data.nhanVien.forEach(ten => {
+                    const idx = dsNV.indexOf(ten);
+                    if (idx !== -1) {
+                        const cb = document.getElementById(`nv${idx}`);
+                        if (cb) cb.checked = true;
+                    }
+                });
+            }
+        } catch(e) {
+            console.warn('Lỗi khôi phục dữ liệu:', e);
+        }
     }
 
     async function xuatFile(type) {
-// ======================================Them d bao hieu load ding 02 dong duoi
         document.getElementById("loading").style.display = "flex";
         
-        const noiDung = document.getElementById('noiDung').value;
+        const noiDungRaw = document.getElementById('noiDung').value;
+        // Loại bỏ ký tự xuống dòng
+        const noiDung = noiDungRaw.replace(/\n/g, ' ').replace(/\r/g, '');
+        
         const start1 = document.getElementById('startBB1').value;
         const start2 = document.getElementById('startBB2').value;
         const stt = document.getElementById('stt').value;
 
-        if(!noiDung || !start1 || !start2) { alert("Vui lòng điền đủ thông tin!"); return; }
+        if(!noiDung || !start1 || !start2) { 
+            alert("Vui lòng điền đủ thông tin!"); 
+            document.getElementById("loading").style.display = "none";
+            return; 
+        }
+
+        // Tự động lưu vào localStorage (không thông báo)
+        saveToLocalStorage();
     
         let tv = [];
         document.querySelectorAll('#nvContainer input:checked').forEach((cb, idx) => tv.push({ stt: idx+1, ho_ten: cb.value, nhiem_vu: noiDung }));
@@ -119,7 +230,7 @@ body {
             thoi_gian_bat_dau1: formatDT(start1),
             thoi_gian_ket_thuc1: formatTime(new Date(new Date(start1).getTime() + 30*60000)),
             ngay_pho_bien: formatDate(start1),
-            // Nhét thêm thời gian Hiện trường vào đây
+            // Thời gian Hiện trường
             thoi_gian_bat_dau2: formatDT(start2),
             thoi_gian_ket_thuc2: formatTime(new Date(new Date(start2).getTime() + 10*60000))
         };
@@ -133,30 +244,50 @@ body {
             const doc = new window.docxtemplater(new PizZip(bytes.buffer), {paragraphLoop:true, linebreaks:true});
             doc.render(data);
 
-            // saveAs(doc.getZip().generate({type:"blob"}), `${stt}.${type === 'bb1' ? ' Pho bien truoc cong tac' : ' Pho bien tai hien truong'}.docx` TAM LUU DAY; cCAI NAY XUAT TREN SSUNG BI ZIP
             const blob = doc.getZip().generate({
-    type: "blob",
-    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-});
+                type: "blob",
+                mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            });
 
-saveAs(
-    blob,
-    `${stt}.${type === 'bb1' ? ' Pho bien truoc cong tac' : ' Pho bien tai hien truong'}.docx`
-            // ===============================
-);
-// ======================================Them d bao hieu load ding 01 dong duoi
-    document.getElementById("loading").style.display = "none";
+            saveAs(
+                blob,
+                `${stt}.${type === 'bb1' ? ' Pho bien truoc cong tac' : ' Pho bien tai hien truong'}.docx`
+            );
             
-        } catch(e) { alert("Lỗi: " + e.message); }
+            document.getElementById("loading").style.display = "none";
+            
+        } catch(e) { 
+            alert("Lỗi: " + e.message); 
+            document.getElementById("loading").style.display = "none";
+        }
     }
 
-    
-const formatDT = (s) => { 
+    // Định dạng ngày giờ: "HH giờ mm ngày dd/mm/yyyy"
+    const formatDT = (s) => { 
         let d = new Date(s); 
-        // Ép kiểu sang chuỗi rồi mới padStart
-    let h = ('0' + d.getHours()).slice(-2);let m = ('0' + d.getMinutes()).slice(-2);let day = ('0' + d.getDate()).slice(-2);let month = ('0' + (d.getMonth() + 1)).slice(-2);let year = d.getFullYear();return `${h} giờ ${m} ngày ${day}/${month}/${year}`;};
-    const formatTime = (d) => {let h = ('0' + d.getHours()).slice(-2);let m = ('0' + d.getMinutes()).slice(-2);return `${h} giờ ${m}`};
-    const formatDate = (s) => { let d = new Date(s); let day = ('0' + d.getDate()).slice(-2);let month = ('0' + (d.getMonth() + 1)).slice(-2);let year = d.getFullYear();return `ngày ${day} tháng ${month} năm ${year}`;};
+        let h = ('0' + d.getHours()).slice(-2);
+        let m = ('0' + d.getMinutes()).slice(-2);
+        let day = ('0' + d.getDate()).slice(-2);
+        let month = ('0' + (d.getMonth() + 1)).slice(-2);
+        let year = d.getFullYear();
+        return `${h} giờ ${m} ngày ${day}/${month}/${year}`;
+    };
+    
+    // Định dạng giờ: "HH giờ mm"
+    const formatTime = (d) => {
+        let h = ('0' + d.getHours()).slice(-2);
+        let m = ('0' + d.getMinutes()).slice(-2);
+        return `${h} giờ ${m}`;
+    };
+    
+    // Định dạng ngày: "ngày dd tháng mm năm yyyy"
+    const formatDate = (s) => { 
+        let d = new Date(s); 
+        let day = ('0' + d.getDate()).slice(-2);
+        let month = ('0' + (d.getMonth() + 1)).slice(-2);
+        let year = d.getFullYear();
+        return `ngày ${day} tháng ${month} năm ${year}`;
+    };
 </script>
 </body>
 </html>
