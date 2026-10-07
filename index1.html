@@ -245,9 +245,10 @@ input[type="datetime-local"] {
             doc.render(data);
 
             const blob = doc.getZip().generate({
-                type: "blob",
-                mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            });
+    type: "blob",
+    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    compression: "DEFLATE"
+});
 
             saveAs(
                 blob,
