@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quản Lý Thu Chi Công Tác</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  * { box-sizing: border-box; font-family: Arial, sans-serif; }
+  body { background: #f0f2f5; margin: 0; padding: 10px; }
+  .container { max-width: 100%; background: #fff; border-radius: 10px; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+  h1 { color: #c00; text-align: center; font-size: 20px; margin: 0 0 10px; text-transform: uppercase; }
+  h3 { color: #0056b3; border-bottom: 2px solid #007bff; padding-bottom: 4px; margin: 15px 0 8px; font-size: 15px; }
+  .tabs { display: flex; gap: 5px; margin-bottom: 10px; }
+  .tab-btn { flex: 1; padding: 10px; background: #e9ecef; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
+  .tab-btn.active { background: #007bff; color: #fff; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .form-group { margin-bottom: 10px; }
+  label { font-weight: bold; font-size: 12px; display: block; margin-bottom: 3px; color: #c00; }
+  input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+  button { background: #28a745; color: #fff; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; margin: 2px 0; }
+  .btn-blue { background: #007bff; } .btn-red { background: #dc3545; } .btn-orange { background: #fd7e14; } .btn-gray { background: #6c757d; }
+  .btn-sm { padding: 5px 10px; font-size: 11px; width: auto; }
+
+  .chip-group { display: flex; flex-wrap: wrap; gap: 5px; margin: 5px 0; }
+  .chip { padding: 6px 10px; border-radius: 15px; border: 2px solid #ccc; background: #f4f4f4; color: #666; font-size: 12px; cursor: pointer; font-weight: normal; }
+  .chip.selected { background: #007bff; color: #fff; border-color: #007bff; font-weight: bold; }
+  .chip.driver { border-color: #fd7e14; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 5px; }
+  th, td { border: 1px solid #999; padding: 4px; text-align: center; }
+  th { background: #e9ecef; font-size: 11px; }
+  td input { padding: 3px; font-size: 12px; border: 1px solid #ddd; width: 100%; }
+  .thu { color: #28a745; font-weight: bold; }
+  .chi { color: #dc3545; font-weight: bold; }
+  .money-input { width: 80px; text-align: right; }
+
+  .ct-item { border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 8px; background: #fafafa; }
+  .ct-item h4 { margin: 0 0 5px; color: #0056b3; font-size: 14px; }
+  .ct-item .info { font-size: 12px; color: #666; }
+  .ct-item .actions { margin-top: 5px; }
+
+  .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+  .badge-thu { background: #d4edda; color: #155724; }
+  .badge-chi { background: #f8d7da; color: #721c24; }
+
+  .warning-box { background: #fff3cd; border-left: 4px solid #ffc107; padding: 8px; border-radius: 6px; margin: 8px 0; font-size: 12px; color: #856404; }
+
+  #loading { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 9999; align-items: center; justify-content: center; font-size: 18px; color: #007bff; font-weight: bold; }
+
+  .scroll-x { overflow-x: auto; }
+  .summary-table td { min-width: 60px; }
+  .summary-table .name-col { min-width: 100px; text-align: left; font-weight: bold; }
+  .summary-table .stt-col { min-width: 30px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📋 QUẢN LÝ THU CHI CÔNG TÁC</h1>
+
+  <!-- TAB BUTTONS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(0)">📁 Công tác</button>
+    <button class="tab-btn" onclick="switchTab(1)">💰 Thu/Chi</button>
+    <button class="tab-btn" onclick="switchTab(2)">📊 Tổng hợp</button>
+  </div>
+
+  <!-- TAB 1: DANH SÁCH CÔNG TÁC -->
+  <div class="tab-content active" id="tab0">
+    <h3>Tạo công tác mới</h3>
+    <div class="form-group">
+      <label>Tên công tác:</label>
+      <input type="text" id="ctTen" placeholder="VD: Vĩnh Tân">
+    </div>
+    <div class="form-group">
+      <label>Từ ngày:</label>
+      <input type="text" id="ctTuNgay" placeholder="dd/mm/yyyy">
+    </div>
+    <div class="form-group">
+      <label>Đến ngày:</label>
+      <input type="text" id="ctDenNgay" placeholder="dd/mm/yyyy">
+    </div>
+    <div class="form-group">
+      <label>Chọn người tham gia công tác:</label>
+      <div class="chip-group" id="ctNguoiChips"></div>
+      <button class="btn-sm btn-gray" onclick="chonTatCaNguoi()">Chọn tất cả</button>
+      <button class="btn-sm btn-gray" onclick="boChonTatCa()">Bỏ chọn tất cả</button>
+    </div>
+    <button class="btn-blue" onclick="taoCongTac()">➕ Tạo công tác</button>
+
+    <h3>Danh sách công tác</h3>
+    <div id="dsCongTac"></div>
+    <button class="btn-orange" onclick="luuLenSheet()">💾 Lưu lên Google Sheet</button>
+    <button class="btn-gray" onclick="taiTuSheet()">🔄 Tải từ Google Sheet</button>
+  </div>
+
+  <!-- TAB 2: THU/CHI -->
+  <div class="tab-content" id="tab1">
+    <h3>Chọn công tác</h3>
+    <select id="chonCT" onchange="hienThiChiTietCT()">
+      <option value="">-- Chọn công tác --</option>
+    </select>
+    <div id="chiTietCT"></div>
+  </div>
+
+  <!-- TAB 3: TỔNG HỢP -->
+  <div class="tab-content" id="tab2">
+    <h3>Bảng tổng hợp Thu/Chi</h3>
+    <div class="scroll-x" id="bangTongHop"></div>
+    <button class="btn-orange" onclick="xuatExcel()">📥 Xuất Excel</button>
+  </div>
+</div>
+ 
+
+<div id="loading">⏳ Đang xử lý...</div>
+
+<script>
+// ========== CẤU HÌNH ==========
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzNy9XraPEoGZdIEkvJ2Vm1RKjkvB9Q2V1KP6MugkiRuca3Y9ivNA7zOPqJHrB6aZLG/exec";
+const DS_NV = [
+  "Nguyễn Hữu Kính","Hoàng Trần Quản Trọng","Ngô Văn Quang","Trần Văn Hoàng",
+  "Kim Văn Quỳnh","Hồ Văn Huy","Lê Hữu Anh","Trần Phúc Linh","Tạ Quốc Đạt",
+  "Võ Ngọc Sơn","Nguyễn Xuân Khánh","Đoàn Hoàng Quang Định","Võ Văn Sỹ",
+  "Lưu Đức Minh","Nguyễn Mạnh Hiệp","Mai Văn Giáp","Nguyễn Thị Thanh Hương","Nguyễn Hữu Đạt",
+  "Nguyễn Mạnh Hòa","Bùi Thị Thái"
+];
+const LAI_XE = ["Nguyễn Mạnh Hiệp", "Mai Văn Giáp"];
+
+// ========== STATE ==========
+let db = JSON.parse(localStorage.getItem('db_thuchi') || '{}');
+// Cấu trúc: { "CT_ID": { ten, tuNgay, denNgay, nguoi: [ten...], hoatDong: [ { id, ngay, noiDung, loai: 'thu'|'chi', nguoi: [ten...], soTien: {ten: amount} } ] } }
+
+let ctDangChon = null;
+let nguoiTam = [];
+
+// ========== HELPERS ==========
+function getShortName(full) {
+  const p = full.split(' ');
+  let ten = p[p.length - 1];
+  if (ten === "Đạt") {
+    if (full.includes("Tạ")) ten = "Đạt (TQ)";
+    else if (full.includes("Nguyễn Hữu")) ten = "Đạt (NH)";
+  }
+  return ten;
+}
+function isFemale(name) { return name.includes("Thị"); }
+function displayName(full) { return (isFemale(full) ? "Mrs." : "Mr.") + getShortName(full); }
+function formatMoney(n) { return n ? n.toLocaleString('vi-VN') : '0'; }
+function genId() { return 'ct_' + Date.now() + '_' + Math.random().toString(36).substr(2,5); }
+
+// ========== TAB ==========
+function switchTab(idx) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+  document.querySelectorAll('.tab-content').forEach((c,i) => c.classList.toggle('active', i===idx));
+  if (idx === 2) renderBangTongHop();
+}
+
+// ========== TAB 1: CÔNG TÁC ==========
+function renderChipsCT() {
+  const container = document.getElementById('ctNguoiChips');
+  container.innerHTML = DS_NV.map(nv => {
+    const sel = nguoiTam.includes(nv) ? 'selected' : '';
+    const driver = LAI_XE.includes(nv) ? 'driver' : '';
+    return `<div class="chip ${sel} ${driver}" onclick="toggleNguoiCT('${nv.replace(/'/g,"\\'")}')">${displayName(nv)}${LAI_XE.includes(nv)?' 🚗':''}</div>`;
+  }).join('');
+}
+function toggleNguoiCT(ten) {
+  if (nguoiTam.includes(ten)) nguoiTam = nguoiTam.filter(n => n !== ten);
+  else nguoiTam.push(ten);
+  renderChipsCT();
+}
+function chonTatCaNguoi() { nguoiTam = [...DS_NV]; renderChipsCT(); }
+function boChonTatCa() { nguoiTam = []; renderChipsCT(); }
+
+function taoCongTac() {
+  const ten = document.getElementById('ctTen').value.trim();
+  const tuNgay = document.getElementById('ctTuNgay').value.trim();
+  const denNgay = document.getElementById('ctDenNgay').value.trim();
+  if (!ten) { alert("Nhập tên công tác!"); return; }
+  if (!tuNgay) { alert("Nhập từ ngày!"); return; }
+  if (nguoiTam.length === 0) { alert("Chọn ít nhất 1 người!"); return; }
+  const id = genId();
+  db[id] = { id, ten, tuNgay, denNgay: denNgay || tuNgay, nguoi: [...nguoiTam], hoatDong: [] };
+  localStorage.setItem('db_thuchi', JSON.stringify(db));
+  document.getElementById('ctTen').value = '';
+  nguoiTam = [];
+  renderChipsCT();
+  renderDsCongTac();
+  renderChonCT();
+  alert("✅ Đã tạo công tác: " + ten);
+}
+
+function renderDsCongTac() {
+  const container = document.getElementById('dsCongTac');
+  const list = Object.values(db);
+  if (list.length === 0) { container.innerHTML = '<p style="color:#999;">Chưa có công tác nào.</p>'; return; }
+  container.innerHTML = list.map(ct => `
+    <div class="ct-item">
+      <h4>${ct.ten}</h4>
+      <div class="info">📅 ${ct.tuNgay} → ${ct.denNgay} | 👥 ${ct.nguoi.length} người | 📝 ${ct.hoatDong.length} hoạt động</div>
+      <div class="actions">
+        <button class="btn-sm btn-red" onclick="xoaCT('${ct.id}')">🗑️ Xóa</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function xoaCT(id) {
+  if (!confirm("Xóa công tác này?")) return;
+  delete db[id];
+  localStorage.setItem('db_thuchi', JSON.stringify(db));
+  renderDsCongTac(); renderChonCT();
+}
+
+function renderChonCT() {
+  const sel = document.getElementById('chonCT');
+  sel.innerHTML = '<option value="">-- Chọn công tác --</option>' +
+    Object.values(db).map(ct => `<option value="${ct.id}">${ct.ten} (${ct.tuNgay})</option>`).join('');
+}
+
+// ========== TAB 2: CHI TIẾT THU/CHI ==========
+function hienThiChiTietCT() {
+  const id = document.getElementById('chonCT').value;
+  ctDangChon = id ? db[id] : null;
+  const container = document.getElementById('chiTietCT');
+  if (!ctDangChon) { container.innerHTML = ''; return; }
+
+  let html = `<h3>${ctDangChon.ten} (${ctDangChon.tuNgay} → ${ctDangChon.denNgay})</h3>`;
+  html += `<p style="font-size:12px; color:#666;">👥 Người tham gia CT: ${ctDangChon.nguoi.map(displayName).join(', ')}</p>`;
+
+  // Form thêm hoạt động
+  html += `
+    <div style="border:1px solid #007bff; border-radius:6px; padding:10px; margin:10px 0; background:#f0f8ff;">
+      <h4 style="margin:0 0 8px; color:#0056b3;">➕ Thêm hoạt động Thu/Chi</h4>
+      <div class="form-group">
+        <label>Ngày:</label>
+        <input type="text" id="hdNgay" placeholder="dd/mm/yyyy">
+      </div>
+      <div class="form-group">
+        <label>Nội dung:</label>
+        <input type="text" id="hdNoiDung" placeholder="VD: Ăn tối, Thu tiền...">
+      </div>
+      <div class="form-group">
+        <label>Loại:</label>
+        <select id="hdLoai">
+          <option value="chi">Chi</option>
+          <option value="thu">Thu</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Chọn người tham gia hoạt động này (chỉ những người trong CT):</label>
+        <div class="chip-group" id="hdNguoiChips"></div>
+      </div>
+      <button class="btn-blue" onclick="themHoatDong()">Thêm hoạt động</button>
+    </div>
+  `;
+
+  // Danh sách hoạt động
+  if (ctDangChon.hoatDong.length === 0) {
+    html += '<p style="color:#999;">Chưa có hoạt động nào.</p>';
+  } else {
+    html += '<h3>Danh sách hoạt động</h3>';
+    ctDangChon.hoatDong.forEach((hd, idx) => {
+      const badge = hd.loai === 'thu' ? '<span class="badge badge-thu">THU</span>' : '<span class="badge badge-chi">CHI</span>';
+      html += `
+        <div class="ct-item">
+          <h4>${badge} ${hd.ngay} - ${hd.noiDung}</h4>
+          <div class="info">👥 ${hd.nguoi.length} người tham gia</div>
+          <div class="scroll-x" style="margin-top:5px;">
+            <table>
+              <thead><tr><th>STT</th><th>Tên</th><th>Số tiền</th></tr></thead>
+              <tbody>
+                ${hd.nguoi.map((ten, i) => `
+                  <tr>
+                    <td>${i+1}</td>
+                    <td>${displayName(ten)}</td>
+                    <td><input type="number" class="money-input" value="${hd.soTien[ten] || 0}" onchange="capNhatTien('${hd.id}','${ten.replace(/'/g,"\\'")}',this.value)"></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+          <div class="actions">
+            <button class="btn-sm btn-orange" onclick="copyTuNguoiDau('${hd.id}')">📋 Copy tiền từ người đầu</button>
+            <button class="btn-sm btn-red" onclick="xoaHoatDong('${hd.id}')">🗑️ Xóa</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  container.innerHTML = html;
+  renderChipsHoatDong();
+}
+
+function renderChipsHoatDong() {
+  if (!ctDangChon) return;
+  const container = document.getElementById('hdNguoiChips');
+  if (!container) return;
+  container.innerHTML = ctDangChon.nguoi.map(nv => {
+    const sel = (window._hdNguoiTam || []).includes(nv) ? 'selected' : '';
+    return `<div class="chip ${sel}" onclick="toggleNguoiHD('${nv.replace(/'/g,"\\'")}')">${displayName(nv)}</div>`;
+  }).join('');
+}
+function toggleNguoiHD(ten) {
+  if (!window._hdNguoiTam) window._hdNguoiTam = [];
+  if (window._hdNguoiTam.includes(ten)) window._hdNguoiTam = window._hdNguoiTam.filter(n => n !== ten);
+  else window._hdNguoiTam.push(ten);
+  renderChipsHoatDong();
+}
+
+function themHoatDong() {
+  if (!ctDangChon) return;
+  const ngay = document.getElementById('hdNgay').value.trim();
+  const noiDung = document.getElementById('hdNoiDung').value.trim();
+  const loai = document.getElementById('hdLoai').value;
+  const nguoi = window._hdNguoiTam || [];
+  if (!ngay) { alert("Nhập ngày!"); return; }
+  if (!noiDung) { alert("Nhập nội dung!"); return; }
+  if (nguoi.length === 0) { alert("Chọn ít nhất 1 người!"); return; }
+  const soTien = {};
+  nguoi.forEach(n => soTien[n] = 0);
+  ctDangChon.hoatDong.push({ id: genId(), ngay, noiDung, loai, nguoi: [...nguoi], soTien });
+  window._hdNguoiTam = [];
+  document.getElementById('hdNgay').value = '';
+  document.getElementById('hdNoiDung').value = '';
+  localStorage.setItem('db_thuchi', JSON.stringify(db));
+  hienThiChiTietCT();
+}
+
+function capNhatTien(hdId, ten, val) {
+  if (!ctDangChon) return;
+  const hd = ctDangChon.hoatDong.find(h => h.id === hdId);
+  if (!hd) return;
+  hd.soTien[ten] = Number(val) || 0;
+  localStorage.setItem('db_thuchi', JSON.stringify(db));
+}
+
+function copyTuNguoiDau(hdId) {
+  if (!ctDangChon) return;
+  const hd = ctDangChon.hoatDong.find(h => h.id === hdId);
+  if (!hd || hd.nguoi.length === 0) return;
+  const nguoiDau = hd.nguoi[0];
+  const tien = hd.soTien[nguoiDau] || 0;
+  hd.nguoi.forEach(n => hd.soTien[n] = tien);
+  localStorage.setItem('db_thuchi', JSON.stringify(db));
+  hienThiChiTietCT();
+  alert(`✅ Đã copy ${formatMoney(tien)}đ từ ${displayName(nguoiDau)} cho ${hd.nguoi.length - 1} người khác.`);
+}
+
+function xoaHoatDong(hdId) {
+  if (!ctDangChon) return;
+  if (!confirm("Xóa hoạt động này?")) return;
+  ctDangChon.hoatDong = ctDangChon.hoatDong.filter(h => h.id !== hdId);
+  localStorage.setItem('db_thuchi', JSON.stringify(db));
+  hienThiChiTietCT();
+}
+
+// ========== TAB 3: TỔNG HỢP ==========
+function renderBangTongHop() {
+  const container = document.getElementById('bangTongHop');
+  if (Object.keys(db).length === 0) { container.innerHTML = '<p style="color:#999;">Chưa có dữ liệu.</p>'; return; }
+
+  // Gom tất cả người xuất hiện trong bất kỳ CT nào
+  const tatCaNguoi = new Set();
+  Object.values(db).forEach(ct => ct.nguoi.forEach(n => tatCaNguoi.add(n)));
+  const dsNguoi = [...tatCaNguoi];
+
+  // Gom tất cả hoạt động
+  const dsHoatDong = [];
+  Object.values(db).forEach(ct => {
+    ct.hoatDong.forEach(hd => {
+      dsHoatDong.push({ ...hd, ctTen: ct.ten, ctId: ct.id });
+    });
+  });
+
+  if (dsHoatDong.length === 0) { container.innerHTML = '<p style="color:#999;">Chưa có hoạt động Thu/Chi nào.</p>'; return; }
+
+  let html = '<table class="summary-table"><thead><tr>';
+  html += '<th class="stt-col">STT</th><th class="name-col">Công tác</th><th>Ngày</th><th>Nội dung</th><th>Loại</th>';
+  dsNguoi.forEach(n => html += `<th>${displayName(n)}</th>`);
+  html += '<th>Tổng</th></tr></thead><tbody>';
+
+  dsHoatDong.forEach((hd, idx) => {
+    const badge = hd.loai === 'thu' ? '<span class="badge badge-thu">THU</span>' : '<span class="badge badge-chi">CHI</span>';
+    let tong = 0;
+    html += `<tr><td>${idx+1}</td><td class="name-col">${hd.ctTen}</td><td>${hd.ngay}</td><td>${hd.noiDung}</td><td>${badge}</td>`;
+    dsNguoi.forEach(n => {
+      const val = hd.soTien[n] || 0;
+      if (val > 0) tong += val;
+      const cls = val > 0 ? (hd.loai === 'thu' ? 'thu' : 'chi') : '';
+      html += `<td class="${cls}">${val > 0 ? formatMoney(val) : ''}</td>`;
+    });
+    html += `<td style="font-weight:bold;">${formatMoney(tong)}</td></tr>`;
+  });
+
+  // Dòng tổng cuối
+  html += '<tr style="background:#fff3cd; font-weight:bold;"><td colspan="5" style="text-align:right;">TỔNG CỘNG:</td>';
+  dsNguoi.forEach(n => {
+    let tongNguoi = 0;
+    dsHoatDong.forEach(hd => {
+      if (hd.soTien[n]) tongNguoi += hd.soTien[n];
+    });
+    html += `<td>${formatMoney(tongNguoi)}</td>`;
+  });
+  html += '<td></td></tr>';
+  html += '</tbody></table>';
+
+  container.innerHTML = html;
+}
+
+// ========== XUẤT EXCEL ==========
+function xuatExcel() {
+  const tatCaNguoi = new Set();
+  Object.values(db).forEach(ct => ct.nguoi.forEach(n => tatCaNguoi.add(n)));
+  const dsNguoi = [...tatCaNguoi];
+  const dsHoatDong = [];
+  Object.values(db).forEach(ct => {
+    ct.hoatDong.forEach(hd => dsHoatDong.push({ ...hd, ctTen: ct.ten }));
+  });
+
+  const header = ['STT', 'Công tác', 'Ngày', 'Nội dung', 'Loại', ...dsNguoi.map(displayName), 'Tổng'];
+  const rows = [header];
+  dsHoatDong.forEach((hd, idx) => {
+    let tong = 0;
+    const row = [idx+1, hd.ctTen, hd.ngay, hd.noiDung, hd.loai === 'thu' ? 'THU' : 'CHI'];
+    dsNguoi.forEach(n => {
+      const val = hd.soTien[n] || 0;
+      if (val > 0) tong += val;
+      row.push(val || '');
+    });
+    row.push(tong);
+    rows.push(row);
+  });
+
+  // Dòng tổng
+  const tongRow = ['', '', '', '', 'TỔNG CỘNG'];
+  dsNguoi.forEach(n => {
+    let t = 0;
+    dsHoatDong.forEach(hd => { if (hd.soTien[n]) t += hd.soTien[n]; });
+    tongRow.push(t);
+  });
+  tongRow.push('');
+  rows.push(tongRow);
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'ThuChi');
+  XLSX.writeFile(wb, `ThuChiCongTac_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+// ========== GOOGLE SHEET ==========
+async function luuLenSheet() {
+  if (!WEB_APP_URL || WEB_APP_URL.includes("DÁN_URL")) { alert("Chưa cấu hình URL Apps Script!"); return; }
+  document.getElementById('loading').style.display = 'flex';
+  try {
+    const data = JSON.stringify(db);
+    const res = await fetch(`${WEB_APP_URL}?action=save&data=${encodeURIComponent(data)}`);
+    const result = await res.json();
+    if (result.success) alert("✅ Đã lưu lên Google Sheet!");
+    else alert("Lỗi: " + (result.error || "Unknown"));
+  } catch (e) { alert("Lỗi kết nối: " + e.message); }
+  document.getElementById('loading').style.display = 'none';
+}
+
+async function taiTuSheet() {
+  if (!WEB_APP_URL || WEB_APP_URL.includes("DÁN_URL")) { alert("Chưa cấu hình URL Apps Script!"); return; }
+  document.getElementById('loading').style.display = 'flex';
+  try {
+    const res = await fetch(`${WEB_APP_URL}?action=load`);
+    const text = await res.text();
+    if (text && text !== "{}") {
+      db = JSON.parse(text);
+      localStorage.setItem('db_thuchi', JSON.stringify(db));
+      renderDsCongTac(); renderChonCT();
+      alert("✅ Đã tải dữ liệu từ Google Sheet!");
+    } else {
+      alert("Sheet chưa có dữ liệu.");
+    }
+  } catch (e) { alert("Lỗi tải: " + e.message); }
+  document.getElementById('loading').style.display = 'none';
+}
+
+// ========== KHỞI TẠO ==========
+window.onload = function() {
+  renderChipsCT();
+  renderDsCongTac();
+  renderChonCT();
+};
+</script>
+</body>
+</html>
