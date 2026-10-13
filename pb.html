@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biên Bản Công Tác</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.11/docxtemplater.js"></script>
+<style>
+  * { box-sizing: border-box; font-family: Arial, sans-serif; }
+  body { background: #f0f2f5; margin: 0; padding: 10px; }
+  .container { max-width: 100%; background: #fff; border-radius: 10px; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+  h1 { color: #c00; text-align: center; font-size: 20px; margin: 0 0 10px; text-transform: uppercase; }
+  h3 { color: #0056b3; border-bottom: 2px solid #007bff; padding-bottom: 4px; margin: 15px 0 8px; font-size: 15px; }
+
+  .tabs { display: flex; gap: 5px; margin-bottom: 10px; }
+  .tab-btn { flex: 1; padding: 10px; background: #e9ecef; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
+  .tab-btn.active { background: #007bff; color: #fff; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .form-group { margin-bottom: 10px; }
+  label { font-weight: bold; font-size: 12px; display: block; margin-bottom: 3px; color: #c00; }
+  input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+  textarea { resize: vertical; min-height: 80px; }
+  button { background: #28a745; color: #fff; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; margin: 2px 0; }
+  .btn-blue { background: #007bff; } .btn-red { background: #dc3545; } .btn-orange { background: #fd7e14; } .btn-gray { background: #6c757d; }
+  .btn-sm { padding: 5px 10px; font-size: 11px; width: auto; }
+  .btn-block { display: block; width: 100%; }
+
+  .chip-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 5px 0; }
+  .chip { padding: 8px 4px; border-radius: 15px; border: 2px solid #ccc; background: #f4f4f4; color: #666; font-size: 11px; cursor: pointer; text-align: center; font-weight: normal; }
+  .chip.selected { background: #007bff; color: #fff; border-color: #007bff; font-weight: bold; }
+
+  .bb-item { border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 8px; background: #fafafa; }
+  .bb-item h4 { margin: 0 0 5px; color: #0056b3; font-size: 14px; }
+  .bb-item .info { font-size: 12px; color: #666; }
+  .bb-item .actions { margin-top: 5px; }
+
+  #loading { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(255,255,255,0.9); align-items: center; justify-content: center; color: #007bff; font-weight: bold; font-size: 18px; }
+  .toolbar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .toolbar button { flex: 1; min-width: 100px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📋 BIÊN BẢN CÔNG TÁC</h1>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(0)">📝 Nhập biên bản</button>
+    <button class="tab-btn" onclick="switchTab(1)">📚 Danh sách</button>
+  </div>
+
+  <!-- TAB 1: NHẬP BIÊN BẢN -->
+  <div class="tab-content active" id="tab0">
+    <div class="form-group">
+      <label>Chỉ huy trực tiếp:</label>
+      <select id="chiHuy">
+        <option value="Trần Văn Hoàng">Mr Hoàng</option>
+        <option value="Nguyễn Hữu Kính">Mr Kính</option>
+        <option value="Kim Văn Quỳnh">Mr Quỳnh</option>
+        <option value="Hồ Văn Huy">Mr Huy</option>
+        <option value="Hoàng Trần Quản Trọng">Mr Trọng</option>
+        <option value="Ngô Văn Quang">Mr Quang</option>
+        <option value="Võ Ngọc Sơn">Mr Sơn</option>
+        <option value="Lưu Đức Minh">Mr Minh</option>
+        <option value="Võ Văn Sỹ">Mr Sỹ</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Nhân viên đơn vị công tác:</label>
+      <div class="chip-group" id="nvContainer"></div>
+    </div>
+    <div class="form-group">
+      <label>Số GĐKCT:</label>
+      <input type="text" id="stt" placeholder="Số GĐKCT...">
+    </div>
+    <div class="form-group">
+      <label>Nội dung:</label>
+      <textarea id="noiDung" placeholder="Nội dung..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Địa điểm:</label>
+      <input type="text" id="diaDiem" placeholder="Địa điểm..." list="diaDiemSuggestions">
+      <datalist id="diaDiemSuggestions"></datalist>
+    </div>
+    <div class="form-group">
+      <label>Time PATC:</label>
+      <input type="datetime-local" id="startBB1">
+    </div>
+    <div class="form-group">
+      <label>Time Hiện trường:</label>
+      <input type="datetime-local" id="startBB2">
+    </div>
+    <button class="btn-blue btn-block" onclick="xuatFile()">📄 Xuất 2 biên bản</button>
+  </div>
+
+  <!-- TAB 2: DANH SÁCH -->
+  <div class="tab-content" id="tab1">
+    <div class="form-group">
+      <label>Lọc theo tháng:</label>
+      <select id="locThang" onchange="renderDanhSach()">
+        <option value="">-- Tất cả --</option>
+      </select>
+    </div>
+    <div class="toolbar">
+      <button class="btn-gray" onclick="taiTuSheet()">🔄 Tải từ Sheet</button>
+      <button class="btn-orange" onclick="luuLenSheet()">💾 Lưu lên Sheet</button>
+    </div>
+    <div id="danhSachBB"></div>
+  </div>
+</div>
+
+<div id="loading">⏳ Đang xử lý...</div>
+
+<script>
+// ========== CẤU HÌNH ==========
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzxO2dgiHOGiWS880ghwHWimdL7oQ20jhTGAH0mKB-otFcm9J0zsL--_OId8CrqLIXl/exec";
+const ID_TEMPLATE_BB1 = "1Gj1PDFAHWeKG_2PCod4dLKHvXxq5xf6u";
+const ID_TEMPLATE_BB2 = "1AN9tE1UvR1KV3YNcs5P9RFxmcnsxwkBd";
+const DS_NV = ["Nguyễn Hữu Kính", "Hoàng Trần Quản Trọng", "Ngô Văn Quang", "Trần Văn Hoàng", "Kim Văn Quỳnh", "Hồ Văn Huy", "Lê Hữu Anh", "Trần Phúc Linh", "Tạ Quốc Đạt", "Võ Ngọc Sơn", "Nguyễn Xuân Khánh", "Đoàn Hoàng Quang Định", "Võ Văn Sỹ", "Lưu Đức Minh", "Nguyễn Hữu Đạt", "Nguyễn Mạnh Hoà"];
+
+// ========== STATE ==========
+let dbPhobien = JSON.parse(localStorage.getItem('db_phobien') || '{"items":[]}');
+if (!dbPhobien.items) dbPhobien.items = [];
+
+let nguoiTam = [];
+
+// ========== HELPERS ==========
+function getShortName(full) {
+  const p = full.split(' ');
+  let ten = p[p.length - 1];
+  if (ten === "Đạt") {
+    if (full.includes("Tạ")) ten = "Đạt (TQ)";
+    else if (full.includes("Nguyễn Hữu")) ten = "Đạt (NH)";
+  }
+  return ten;
+}
+function displayName(full) { return "Mr." + getShortName(full); }
+function genId() { return 'pb_' + Date.now() + '_' + Math.random().toString(36).substr(2,5); }
+
+function formatDT(s) {
+  let d = new Date(s);
+  let h = ('0' + d.getHours()).slice(-2);
+  let m = ('0' + d.getMinutes()).slice(-2);
+  let day = ('0' + d.getDate()).slice(-2);
+  let month = ('0' + (d.getMonth() + 1)).slice(-2);
+  let year = d.getFullYear();
+  return `${h} giờ ${m} ngày ${day}/${month}/${year}`;
+}
+function formatTime(d) {
+  let h = ('0' + d.getHours()).slice(-2);
+  let m = ('0' + d.getMinutes()).slice(-2);
+  return `${h} giờ ${m}`;
+}
+function formatDate(s) {
+  let d = new Date(s);
+  let day = ('0' + d.getDate()).slice(-2);
+  let month = ('0' + (d.getMonth() + 1)).slice(-2);
+  let year = d.getFullYear();
+  return `ngày ${day} tháng ${month} năm ${year}`;
+}
+
+// ========== TAB ==========
+function switchTab(idx) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+  document.querySelectorAll('.tab-content').forEach((c,i) => c.classList.toggle('active', i===idx));
+  if (idx === 1) {
+    renderLocThang();
+    renderDanhSach();
+  }
+}
+
+// ========== FORM ==========
+function renderChips() {
+  const container = document.getElementById('nvContainer');
+  container.innerHTML = DS_NV.map(nv => {
+    const sel = nguoiTam.includes(nv) ? 'selected' : '';
+    return `<div class="chip ${sel}" onclick="toggleNguoi('${nv.replace(/'/g,"\\'")}')">${displayName(nv)}</div>`;
+  }).join('');
+}
+function toggleNguoi(ten) {
+  if (nguoiTam.includes(ten)) nguoiTam = nguoiTam.filter(n => n !== ten);
+  else nguoiTam.push(ten);
+  renderChips();
+  saveLocal();
+}
+
+function saveLocal() {
+  const data = {
+    chiHuy: document.getElementById('chiHuy').value,
+    nhanVien: [...nguoiTam],
+    stt: document.getElementById('stt').value,
+    noiDung: document.getElementById('noiDung').value,
+    diaDiem: document.getElementById('diaDiem').value,
+    startBB1: document.getElementById('startBB1').value,
+    startBB2: document.getElementById('startBB2').value
+  };
+  localStorage.setItem('bienBanData', JSON.stringify(data));
+}
+
+function restoreLocal() {
+  const saved = localStorage.getItem('bienBanData');
+  if (!saved) return;
+  try {
+    const data = JSON.parse(saved);
+    if (data.chiHuy) document.getElementById('chiHuy').value = data.chiHuy;
+    if (data.stt) document.getElementById('stt').value = data.stt;
+    if (data.noiDung) document.getElementById('noiDung').value = data.noiDung;
+    if (data.diaDiem) document.getElementById('diaDiem').value = data.diaDiem;
+    if (data.startBB1) document.getElementById('startBB1').value = data.startBB1;
+    if (data.startBB2) document.getElementById('startBB2').value = data.startBB2;
+    if (data.nhanVien && Array.isArray(data.nhanVien)) {
+      nguoiTam = [...data.nhanVien];
+      renderChips();
+    }
+  } catch(e) { console.warn(e); }
+}
+
+// Tự động lưu khi thay đổi
+document.addEventListener('DOMContentLoaded', () => {
+  ['chiHuy','stt','noiDung','diaDiem','startBB1','startBB2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', saveLocal);
+    if (el) el.addEventListener('change', saveLocal);
+  });
+  const noiDung = document.getElementById('noiDung');
+  noiDung.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = this.scrollHeight + 'px';
+    updateDiaDiemSuggestions();
+  });
+  document.getElementById('diaDiem').addEventListener('input', updateDiaDiemSuggestions);
+});
+
+function updateDiaDiemSuggestions() {
+  const noiDung = document.getElementById('noiDung').value;
+  const datalist = document.getElementById('diaDiemSuggestions');
+  datalist.innerHTML = '';
+  if (!noiDung.trim()) return;
+  const lines = noiDung.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  const suggestions = new Set();
+  lines.forEach(line => {
+    const match = line.match(/^(?:tại|ở|địa điểm|nơi)\s+(.+)/i);
+    if (match) suggestions.add(match[1].trim());
+    else if (line.includes(',')) suggestions.add(line);
+    else if (line.length > 5 && line.length < 100 && !line.includes(':')) suggestions.add(line);
+  });
+  suggestions.forEach(s => {
+    const option = document.createElement('option');
+    option.value = s;
+    datalist.appendChild(option);
+  });
+}
+
+// ========== XUẤT FILE ==========
+async function xuatFile() {
+  const noiDungRaw = document.getElementById('noiDung').value;
+  const noiDung = noiDungRaw.replace(/\n/g, ' ').replace(/\r/g, '');
+  const start1 = document.getElementById('startBB1').value;
+  const start2 = document.getElementById('startBB2').value;
+  const stt = document.getElementById('stt').value.trim();
+  const chiHuy = document.getElementById('chiHuy').value;
+  const diaDiem = document.getElementById('diaDiem').value.trim();
+
+  if (!noiDung || !start1 || !start2) {
+    alert("Vui lòng điền đủ thông tin!");
+    return;
+  }
+  if (nguoiTam.length === 0) {
+    alert("Chọn ít nhất 1 nhân viên!");
+    return;
+  }
+  if (!stt) {
+    alert("Nhập số GĐKCT!");
+    return;
+  }
+
+  document.getElementById("loading").style.display = "flex";
+
+  let tv = nguoiTam.map((ten, idx) => ({ stt: idx+1, ho_ten: ten, nhiem_vu: noiDung }));
+
+  let data = {
+    stt: stt,
+    nguoi_chu_tri: chiHuy,
+    tong_so_tham_gia: `${tv.length + 1}/${tv.length + 1}`,
+    noi_dung_cong_tac: noiDung,
+    dia_diem_cong_tac: diaDiem,
+    danh_sach_nhan_vien: tv,
+    thoi_gian_bat_dau1: formatDT(start1),
+    thoi_gian_ket_thuc1: formatTime(new Date(new Date(start1).getTime() + 30*60000)),
+    ngay_pho_bien: formatDate(start1),
+    thoi_gian_bat_dau2: formatDT(start2),
+    thoi_gian_ket_thuc2: formatTime(new Date(new Date(start2).getTime() + 10*60000))
+  };
+
+  try {
+    // Xuất BB1
+    const res1 = await fetch(`${WEB_APP_URL}?action=getTemplate&fileId=${ID_TEMPLATE_BB1}`);
+    const result1 = await res1.json();
+    const binary1 = window.atob(result1.base64);
+    const bytes1 = new Uint8Array(binary1.length);
+    for (let i = 0; i < binary1.length; i++) bytes1[i] = binary1.charCodeAt(i);
+    const doc1 = new window.docxtemplater(new PizZip(bytes1.buffer), { paragraphLoop: true, linebreaks: true });
+    doc1.render(data);
+    const blob1 = doc1.getZip().generate({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+    saveAs(blob1, `${stt}. Pho bien truoc cong tac.docx`);
+
+    // Xuất BB2
+    const res2 = await fetch(`${WEB_APP_URL}?action=getTemplate&fileId=${ID_TEMPLATE_BB2}`);
+    const result2 = await res2.json();
+    const binary2 = window.atob(result2.base64);
+    const bytes2 = new Uint8Array(binary2.length);
+    for (let i = 0; i < binary2.length; i++) bytes2[i] = binary2.charCodeAt(i);
+    const doc2 = new window.docxtemplater(new PizZip(bytes2.buffer), { paragraphLoop: true, linebreaks: true });
+    doc2.render(data);
+    const blob2 = doc2.getZip().generate({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+    saveAs(blob2, `${stt}. Pho bien tai hien truong.docx`);
+
+    // Lưu local + Sheet
+    const item = {
+      id: genId(),
+      ngayTao: new Date().toLocaleString('vi-VN'),
+      stt: stt,
+      chiHuy: chiHuy,
+      nhanVien: [...nguoiTam],
+      noiDung: noiDungRaw,
+      diaDiem: diaDiem,
+      timePATC: formatDT(start1),
+      timeHienTruong: formatDT(start2),
+      thoiGianTao: new Date().toISOString()
+    };
+    dbPhobien.items.push(item);
+    localStorage.setItem('db_phobien', JSON.stringify(dbPhobien));
+
+    // Gọi API lưu Sheet
+    await fetch(`${WEB_APP_URL}?action=savePhobien&data=${encodeURIComponent(JSON.stringify(item))}`);
+
+    alert("✅ Đã xuất 2 biên bản và lưu!");
+    document.getElementById("loading").style.display = "none";
+    switchTab(1);
+  } catch (e) {
+    alert("Lỗi: " + e.message);
+    document.getElementById("loading").style.display = "none";
+  }
+}
+
+// ========== DANH SÁCH ==========
+function renderLocThang() {
+  const sel = document.getElementById('locThang');
+  const curVal = sel.value;
+  const dsThang = new Set();
+  dbPhobien.items.forEach(item => {
+    if (item.timePATC) {
+      const m = item.timePATC.match(/ngày (\d{2})\/(\d{2})\/(\d{4})/);
+      if (m) dsThang.add(`${m[3]}-${m[2]}`);
+    }
+  });
+  const arr = [...dsThang].sort().reverse();
+  sel.innerHTML = '<option value="">-- Tất cả --</option>' +
+    arr.map(t => {
+      const [y, m] = t.split('-');
+      return `<option value="${t}">Tháng ${m}/${y}</option>`;
+    }).join('');
+  if (curVal) sel.value = curVal;
+}
+
+function renderDanhSach() {
+  const container = document.getElementById('danhSachBB');
+  const thangLoc = document.getElementById('locThang').value;
+  let list = dbPhobien.items;
+  if (thangLoc) {
+    const [y, m] = thangLoc.split('-');
+    list = list.filter(item => {
+      if (!item.timePATC) return false;
+      const match = item.timePATC.match(/ngày (\d{2})\/(\d{2})\/(\d{4})/);
+      if (!match) return false;
+      return match[2] === m && match[3] === y;
+    });
+  }
+  if (list.length === 0) {
+    container.innerHTML = '<p style="color:#999;">Chưa có biên bản nào.</p>';
+    return;
+  }
+  container.innerHTML = list.map(item => `
+    <div class="bb-item">
+      <h4>📄 Số ${item.stt} - ${item.chiHuy}</h4>
+      <div class="info">👥 ${item.nhanVien.map(displayName).join(', ')}</div>
+      <div class="info">📅 PATC: ${item.timePATC || ''} | Hiện trường: ${item.timeHienTruong || ''}</div>
+      <div class="info">📍 ${item.diaDiem || ''}</div>
+      <div class="actions">
+        <button class="btn-sm btn-blue" onclick="loadVaoForm('${item.id}')">📝 Load vào form</button>
+        <button class="btn-sm btn-red" onclick="xoaItem('${item.id}')">🗑️ Xóa (local)</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadVaoForm(id) {
+  const item = dbPhobien.items.find(x => x.id === id);
+  if (!item) return;
+  document.getElementById('chiHuy').value = item.chiHuy;
+  document.getElementById('stt').value = item.stt;
+  document.getElementById('noiDung').value = item.noiDung;
+  document.getElementById('diaDiem').value = item.diaDiem;
+  // Parse ngày từ chuỗi
+  const parseDT = (str) => {
+    const m = str.match(/(\d{2}) giờ (\d{2}) ngày (\d{2})\/(\d{2})\/(\d{4})/);
+    if (!m) return '';
+    return `${m[5]}-${m[4]}-${m[3]}T${m[1]}:${m[2]}`;
+  };
+  document.getElementById('startBB1').value = parseDT(item.timePATC) || '';
+  document.getElementById('startBB2').value = parseDT(item.timeHienTruong) || '';
+  nguoiTam = [...item.nhanVien];
+  renderChips();
+  saveLocal();
+  switchTab(0);
+  window.scrollTo(0, 0);
+}
+
+function xoaItem(id) {
+  if (!confirm("Xóa biên bản này khỏi danh sách local? (Không xóa trên Google Sheet)")) return;
+  dbPhobien.items = dbPhobien.items.filter(x => x.id !== id);
+  localStorage.setItem('db_phobien', JSON.stringify(dbPhobien));
+  renderLocThang();
+  renderDanhSach();
+}
+
+async function luuLenSheet() {
+  if (dbPhobien.items.length === 0) { alert("Chưa có dữ liệu!"); return; }
+  if (!confirm(`Lưu ${dbPhobien.items.length} biên bản lên Sheet?`)) return;
+  document.getElementById('loading').style.display = 'flex';
+  try {
+    for (const item of dbPhobien.items) {
+      await fetch(`${WEB_APP_URL}?action=savePhobien&data=${encodeURIComponent(JSON.stringify(item))}`);
+    }
+    alert("✅ Đã lưu lên Sheet!");
+  } catch (e) { alert("Lỗi: " + e.message); }
+  document.getElementById('loading').style.display = 'none';
+}
+
+async function taiTuSheet() {
+  document.getElementById('loading').style.display = 'flex';
+  try {
+    const res = await fetch(`${WEB_APP_URL}?action=loadPhobien`);
+    const result = await res.json();
+    if (result.phobien && result.phobien.length > 0) {
+      // Merge: giữ local, thêm những cái chưa có
+      const existingIds = new Set(dbPhobien.items.map(x => x.id));
+      result.phobien.forEach(item => {
+        if (!existingIds.has(item.id)) {
+          dbPhobien.items.push(item);
+        }
+      });
+      localStorage.setItem('db_phobien', JSON.stringify(dbPhobien));
+      renderLocThang();
+      renderDanhSach();
+      alert(`✅ Đã tải ${result.phobien.length} biên bản từ Sheet!`);
+    } else {
+      alert("Sheet chưa có dữ liệu.");
+    }
+  } catch (e) { alert("Lỗi tải: " + e.message); }
+  document.getElementById('loading').style.display = 'none';
+}
+
+// ========== KHỞI TẠO ==========
+window.onload = function() {
+  renderChips();
+  restoreLocal();
+  // Set default time
+  const now = new Date();
+  const defaultDate = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}T${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  if (!document.getElementById('startBB1').value) document.getElementById('startBB1').value = defaultDate;
+  if (!document.getElementById('startBB2').value) document.getElementById('startBB2').value = defaultDate;
+};
+</script>
+</body>
+</html>
